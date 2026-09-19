@@ -1,0 +1,24 @@
+@if (question; as q) {
+<div class="question-display flex w-full justify-center">
+    <div class="rows inline-flex min-w-[7.5rem] flex-col items-stretch gap-1" role="group"
+        aria-label="Arithmetic question">
+        @for (row of q.rows; track $index; let i = $index) {
+        <div
+            class="row grid grid-cols-[1rem_1fr] items-center justify-items-end text-4xl font-bold leading-tight sm:text-5xl">
+            <span class="operator text-center" [class.invisible]="!showMinus(i, row.operator)">
+                {{ showMinus(i, row.operator) ? '-' : '' }}
+            </span>
+            <span class="value min-w-[2ch] text-right">{{ row.value }}</span>
+        </div>
+        }
+
+        <div class="line mt-1 border-t-2 border-slate-900" aria-hidden="true"></div>
+
+        <div class="row answer-row grid grid-cols-[1rem_1fr] items-center justify-items-end text-4xl font-bold leading-tight sm:text-5xl"
+            aria-label="Answer row">
+            <span class="operator invisible text-center"></span>
+            <span class="value min-w-[2ch] text-right tracking-wide">?</span>
+        </div>
+    </div>
+</div>
+}
