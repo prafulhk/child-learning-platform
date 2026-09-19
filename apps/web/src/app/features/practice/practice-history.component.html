@@ -1,0 +1,44 @@
+<section class="mx-auto w-full max-w-md px-4 py-6">
+  <h1 class="text-center text-3xl font-bold text-slate-900">Practice History</h1>
+
+  @if (attempts().length === 0) {
+  <div class="mt-6 rounded-2xl bg-white p-5 text-center shadow-sm ring-1 ring-slate-200">
+    <p class="text-base font-medium text-slate-600">No practice attempts yet.</p>
+  </div>
+  } @else {
+  <div class="mt-6 space-y-3">
+    @for (attempt of attempts(); track attempt.id) {
+    <article class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200" data-testid="history-card"
+      [attr.data-attempt-id]="attempt.id">
+      <p class="text-sm font-medium text-slate-600">Completed</p>
+      <p class="mt-1 text-base font-semibold text-slate-900" data-testid="attempt-completed-at">
+        {{ formatCompletedDateTime(attempt.completedAt) }}
+      </p>
+
+      <div class="mt-4 grid grid-cols-3 gap-2 text-center">
+        <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Accuracy</p>
+          <p class="mt-1 text-lg font-bold text-slate-900" data-testid="attempt-accuracy">
+            {{ attempt.result.accuracyPercentage }}%
+          </p>
+        </div>
+
+        <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Correct</p>
+          <p class="mt-1 text-lg font-bold text-slate-900" data-testid="attempt-correct-total">
+            {{ attempt.result.correctCount }} / {{ attempt.result.totalQuestions }}
+          </p>
+        </div>
+
+        <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Duration</p>
+          <p class="mt-1 text-lg font-bold text-slate-900" data-testid="attempt-duration">
+            {{ formatDuration(attempt.startedAt, attempt.completedAt) }}
+          </p>
+        </div>
+      </div>
+    </article>
+    }
+  </div>
+  }
+</section>
