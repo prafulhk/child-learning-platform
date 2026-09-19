@@ -1,0 +1,127 @@
+<section class="mx-auto w-full max-w-md px-4 py-6">
+  <header>
+    <h1 class="text-center text-3xl font-bold text-slate-900">Practice Attempt</h1>
+  </header>
+
+  <article class="mt-6 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200" data-testid="attempt-summary">
+    <div class="grid grid-cols-2 gap-3 text-sm">
+      <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200 col-span-2">
+        <p class="font-medium text-slate-600">Topic</p>
+        <p class="mt-1 text-base font-semibold text-slate-900" data-testid="attempt-topic">{{ attempt.topicId }}</p>
+      </div>
+
+      <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200 col-span-2">
+        <p class="font-medium text-slate-600">Completed</p>
+        <p class="mt-1 text-base font-semibold text-slate-900" data-testid="attempt-completed-at">
+          {{ formatCompletedDateTime(attempt.completedAt) }}
+        </p>
+      </div>
+
+      <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
+        <p class="font-medium text-slate-600">Total Questions</p>
+        <p class="mt-1 text-lg font-bold text-slate-900" data-testid="attempt-total-questions">
+          {{ attempt.result.totalQuestions }}
+        </p>
+      </div>
+
+      <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
+        <p class="font-medium text-slate-600">Accuracy</p>
+        <p class="mt-1 text-lg font-bold text-slate-900" data-testid="attempt-accuracy">
+          {{ attempt.result.accuracyPercentage }}%
+        </p>
+      </div>
+
+      <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
+        <p class="font-medium text-slate-600">Correct</p>
+        <p class="mt-1 text-lg font-bold text-emerald-700" data-testid="attempt-correct-count">
+          {{ attempt.result.correctCount }}
+        </p>
+      </div>
+
+      <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
+        <p class="font-medium text-slate-600">Incorrect</p>
+        <p class="mt-1 text-lg font-bold text-rose-700" data-testid="attempt-incorrect-count">
+          {{ attempt.result.incorrectCount }}
+        </p>
+      </div>
+
+      <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
+        <p class="font-medium text-slate-600">Unanswered</p>
+        <p class="mt-1 text-lg font-bold text-amber-700" data-testid="attempt-unanswered-count">
+          {{ attempt.result.unansweredCount }}
+        </p>
+      </div>
+
+      <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
+        <p class="font-medium text-slate-600">Duration</p>
+        <p class="mt-1 text-lg font-bold text-slate-900" data-testid="attempt-duration">
+          {{ formatDuration(attempt.startedAt, attempt.completedAt) }}
+        </p>
+      </div>
+    </div>
+  </article>
+
+  <div class="mt-6 space-y-4">
+    @for (presented of attempt.presentedQuestions; track presented.questionId; let index = $index) {
+    <article class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200" data-testid="attempt-question"
+      [attr.data-question-id]="presented.questionId">
+      <div class="flex items-center justify-between gap-2">
+        <h2 class="text-lg font-semibold text-slate-900">Question {{ index + 1 }}</h2>
+        <span class="rounded-full px-3 py-1 text-xs font-semibold"
+          [class.bg-emerald-100]="getQuestionStatus(presented) === 'CORRECT'"
+          [class.text-emerald-800]="getQuestionStatus(presented) === 'CORRECT'"
+          [class.bg-rose-100]="getQuestionStatus(presented) === 'INCORRECT'"
+          [class.text-rose-800]="getQuestionStatus(presented) === 'INCORRECT'"
+          [class.bg-amber-100]="getQuestionStatus(presented) === 'UNANSWERED'"
+          [class.text-amber-800]="getQuestionStatus(presented) === 'UNANSWERED'" data-testid="question-status">
+          {{ getQuestionStatusLabel(presented) }}
+        </span>
+      </div>
+
+      <div class="mt-4 rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
+        <app-question-display [question]="presented.questionSnapshot"></app-question-display>
+      </div>
+
+      <div class="mt-4 space-y-2">
+        @for (option of presented.questionSnapshot.options; track option.id) {
+        <div class="flex items-center justify-between gap-2 rounded-xl border p-3"
+          [class.border-blue-400]="isSelectedOption(presented.questionId, option.id)"
+          [class.bg-blue-50]="isSelectedOption(presented.questionId, option.id)"
+          [class.border-emerald-400]="!isSelectedOption(presented.questionId, option.id) && isCorrectOption(presented, option)"
+          [class.bg-emerald-50]="!isSelectedOption(presented.questionId, option.id) && isCorrectOption(presented, option)"
+          [class.border-slate-200]="!isSelectedOption(presented.questionId, option.id) && !isCorrectOption(presented, option)"
+          data-testid="question-option" [attr.data-option-id]="option.id" [attr.data-option-value]="option.value">
+          <div class="flex items-center gap-2 text-slate-900">
+            <span class="text-base"
+              [attr.aria-label]="isSelectedOption(presented.questionId, option.id) ? 'Selected option' : 'Unselected option'">
+              {{ isSelectedOption(presented.questionId, option.id) ? '●' : '○' }}
+            </span>
+            <span class="text-lg font-semibold">{{ option.value }}</span>
+          </div>
+
+          <div class="flex flex-wrap justify-end gap-1 text-xs font-semibold">
+            @if (isSelectedOption(presented.questionId, option.id)) {
+            <span class="rounded-full bg-blue-100 px-2 py-1 text-blue-800" data-testid="marker-selected">Your
+              answer</span>
+            }
+
+            @if (isCorrectOption(presented, option)) {
+            <span class="rounded-full bg-emerald-100 px-2 py-1 text-emerald-800" data-testid="marker-correct">Correct
+              answer</span>
+            }
+          </div>
+        </div>
+        }
+      </div>
+    </article>
+    }
+  </div>
+
+  <div class="mt-6">
+    <button type="button"
+      class="min-h-11 w-full rounded-xl bg-slate-800 px-4 py-3 text-base font-semibold text-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+      (click)="onBackToHistory()">
+      Back to History
+    </button>
+  </div>
+</section>
