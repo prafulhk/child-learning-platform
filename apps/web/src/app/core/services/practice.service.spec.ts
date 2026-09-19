@@ -161,7 +161,8 @@ describe('PracticeService', () => {
 
     // Move from question 0 -> 1 by updating the actual in-memory service state
     // used by goToPrevious(), not a copied session snapshot.
-    const state = (service as unknown as { activeSession: ActivePracticeSession | null }).activeSession;
+    const state = (service as unknown as { activeSession: ActivePracticeSession | null })
+      .activeSession;
     if (!state) {
       throw new Error('Expected activeSession to be initialized by startPractice');
     }
