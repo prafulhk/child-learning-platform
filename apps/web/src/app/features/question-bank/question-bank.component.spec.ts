@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Question } from '../../core/models/question.model';
+import { LocalStorageService } from '../../core/services/local-storage.service';
 import { QuestionService } from '../../core/services/question.service';
 import { QuestionBankComponent } from './question-bank.component';
 import { QuestionFormComponent } from './question-form.component';
@@ -32,8 +33,10 @@ describe('QuestionBankComponent', () => {
   ];
 
   let mockQuestionService: { getQuestionsByTopic: ReturnType<typeof vi.fn> };
+  let localStorageService: LocalStorageService;
 
   beforeEach(async () => {
+    localStorage.clear();
     mockQuestionService = {
       getQuestionsByTopic: vi.fn().mockReturnValue(seededQuestions),
     };
@@ -42,6 +45,8 @@ describe('QuestionBankComponent', () => {
       imports: [QuestionBankComponent],
       providers: [{ provide: QuestionService, useValue: mockQuestionService }],
     }).compileComponents();
+
+    localStorageService = TestBed.inject(LocalStorageService);
   });
 
   const createFixture = (): ComponentFixture<QuestionBankComponent> => {
@@ -94,6 +99,24 @@ describe('QuestionBankComponent', () => {
     expect(fixture.nativeElement.textContent as string).toContain('Single-Digit Addition');
   });
 
+  it('initial load uses seeded questions when storage is empty', () => {
+    const fixture = createFixture();
+
+    expect(fixture.nativeElement.querySelectorAll('[data-testid="question-card"]').length).toBe(3);
+    expect(mockQuestionService.getQuestionsByTopic).toHaveBeenCalledWith('single-digit-addition');
+  });
+
+  it('initial load uses persisted questions when storage exists', () => {
+    const persistedQuestions = [buildQuestion({ id: 'persisted-1', difficulty: 'HARD' })];
+    localStorageService.saveQuestionBankQuestions('single-digit-addition', persistedQuestions);
+
+    const fixture = createFixture();
+
+    expect(fixture.nativeElement.querySelectorAll('[data-testid="question-card"]').length).toBe(1);
+    expect(fixture.nativeElement.textContent as string).toContain('ID: persisted-1');
+    expect(fixture.nativeElement.textContent as string).toContain('HARD');
+  });
+
   it('renders Add Question button', () => {
     const fixture = createFixture();
 
@@ -141,6 +164,28 @@ describe('QuestionBankComponent', () => {
 
     expect(fixture.nativeElement.querySelector('app-question-form')).toBeFalsy();
     expect(fixture.nativeElement.querySelectorAll('[data-testid="question-card"]').length).toBe(4);
+  });
+
+  it('create question persists the updated list', () => {
+    const fixture = createFixture();
+
+    clickButton(fixture, '+ Add Question');
+    clickButton(fixture, 'Save Question');
+
+    expect(localStorageService.getQuestionBankQuestions('single-digit-addition')).toHaveLength(4);
+  });
+
+  it('created question remains visible after reloading the component', () => {
+    const fixture = createFixture();
+
+    clickButton(fixture, '+ Add Question');
+    clickButton(fixture, 'Save Question');
+
+    const reloadedFixture = createFixture();
+
+    expect(
+      reloadedFixture.nativeElement.querySelectorAll('[data-testid="question-card"]').length,
+    ).toBe(4);
   });
 
   it('newly added question is displayed', () => {
@@ -198,6 +243,120 @@ describe('QuestionBankComponent', () => {
 
     expect(fixture.nativeElement.querySelector('app-question-form')).toBeFalsy();
     expect(fixture.nativeElement.textContent as string).toContain('HARD');
+  });
+
+  it('edit question persists the updated list', () => {
+    const fixture = createFixture();
+    const firstCard = getCardById(fixture, 'q001');
+    const editButton = Array.from(firstCard.querySelectorAll('button')).find(
+      (candidate) => candidate.textContent?.trim() === 'Edit',
+    ) as HTMLButtonElement | undefined;
+
+    if (!editButton) {
+      throw new Error('Expected Edit button to exist');
+    }
+
+    editButton.click();
+    fixture.detectChanges();
+
+    const formDebugElement = fixture.debugElement.query(By.directive(QuestionFormComponent));
+
+    if (!formDebugElement) {
+      throw new Error('Expected QuestionFormComponent to be rendered');
+    }
+
+    const formComponent = formDebugElement.componentInstance as QuestionFormComponent;
+    formComponent.difficulty = 'HARD';
+    formComponent.onSave();
+    fixture.detectChanges();
+
+    expect(
+      localStorageService.getQuestionBankQuestions('single-digit-addition')[0].difficulty,
+    ).toBe('HARD');
+  });
+
+  it('edited question remains changed after reloading the component', () => {
+    const fixture = createFixture();
+    const firstCard = getCardById(fixture, 'q001');
+    const editButton = Array.from(firstCard.querySelectorAll('button')).find(
+      (candidate) => candidate.textContent?.trim() === 'Edit',
+    ) as HTMLButtonElement | undefined;
+
+    if (!editButton) {
+      throw new Error('Expected Edit button to exist');
+    }
+
+    editButton.click();
+    fixture.detectChanges();
+
+    const formDebugElement = fixture.debugElement.query(By.directive(QuestionFormComponent));
+
+    if (!formDebugElement) {
+      throw new Error('Expected QuestionFormComponent to be rendered');
+    }
+
+    const formComponent = formDebugElement.componentInstance as QuestionFormComponent;
+    formComponent.difficulty = 'HARD';
+    formComponent.onSave();
+    fixture.detectChanges();
+
+    const reloadedFixture = createFixture();
+
+    expect(reloadedFixture.nativeElement.textContent as string).toContain('HARD');
+  });
+
+  it('question IDs remain unchanged during persistence', () => {
+    const fixture = createFixture();
+    const firstCard = getCardById(fixture, 'q001');
+    const editButton = Array.from(firstCard.querySelectorAll('button')).find(
+      (candidate) => candidate.textContent?.trim() === 'Edit',
+    ) as HTMLButtonElement | undefined;
+
+    if (!editButton) {
+      throw new Error('Expected Edit button to exist');
+    }
+
+    editButton.click();
+    fixture.detectChanges();
+
+    const formDebugElement = fixture.debugElement.query(By.directive(QuestionFormComponent));
+
+    if (!formDebugElement) {
+      throw new Error('Expected QuestionFormComponent to be rendered');
+    }
+
+    const formComponent = formDebugElement.componentInstance as QuestionFormComponent;
+    formComponent.difficulty = 'HARD';
+    formComponent.onSave();
+    fixture.detectChanges();
+
+    expect(localStorageService.getQuestionBankQuestions('single-digit-addition')[0].id).toBe(
+      'q001',
+    );
+  });
+
+  it('seeded questions are not duplicated', () => {
+    const fixture = createFixture();
+
+    clickButton(fixture, '+ Add Question');
+    clickButton(fixture, 'Save Question');
+
+    const reloadedFixture = createFixture();
+
+    expect(
+      reloadedFixture.nativeElement.querySelectorAll('[data-testid="question-card"]').length,
+    ).toBe(4);
+  });
+
+  it('persisted questions for another topic are not loaded', () => {
+    localStorageService.saveQuestionBankQuestions('single-digit-subtraction', [
+      buildQuestion({ id: 'other-topic-1', topicId: 'single-digit-subtraction' }),
+    ]);
+
+    const fixture = createFixture();
+
+    expect(fixture.nativeElement.querySelectorAll('[data-testid="question-card"]').length).toBe(3);
+    expect(fixture.nativeElement.textContent as string).not.toContain('other-topic-1');
   });
 
   it('original question ID remains unchanged', () => {

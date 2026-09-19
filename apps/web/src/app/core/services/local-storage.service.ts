@@ -37,6 +37,7 @@ export interface PracticeAttempt {
 export class LocalStorageService {
   private readonly activeSessionKey = 'practice.activeSession';
   private readonly attemptsKey = 'practice.completedAttempts';
+  private readonly questionBankKey = 'child-learning.question-bank.v1';
 
   saveActiveSession(session: ActivePracticeSession): void {
     localStorage.setItem(this.activeSessionKey, JSON.stringify(session));
@@ -82,5 +83,42 @@ export class LocalStorageService {
   getCompletedAttemptById(attemptId: string): PracticeAttempt | null {
     const attempts = this.getCompletedAttempts();
     return attempts.find((a) => a.id === attemptId) ?? null;
+  }
+
+  saveQuestionBankQuestions(topicId: string, questions: Question[]): void {
+    const currentQuestionBank = this.getQuestionBankStorage();
+    currentQuestionBank[topicId] = JSON.parse(JSON.stringify(questions)) as Question[];
+    localStorage.setItem(this.questionBankKey, JSON.stringify(currentQuestionBank));
+  }
+
+  getQuestionBankQuestions(topicId: string): Question[] {
+    const currentQuestionBank = this.getQuestionBankStorage();
+    const questions = currentQuestionBank[topicId];
+
+    if (!Array.isArray(questions)) {
+      return [];
+    }
+
+    return JSON.parse(JSON.stringify(questions)) as Question[];
+  }
+
+  private getQuestionBankStorage(): Record<string, Question[]> {
+    const raw = localStorage.getItem(this.questionBankKey);
+
+    if (!raw) {
+      return {};
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as Record<string, Question[]>;
+
+      if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') {
+        return {};
+      }
+
+      return parsed;
+    } catch {
+      return {};
+    }
   }
 }

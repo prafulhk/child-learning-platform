@@ -1,5 +1,6 @@
 import { Component, EventEmitter, OnInit, Output, inject, signal } from '@angular/core';
 import { Question } from '../../core/models/question.model';
+import { LocalStorageService } from '../../core/services/local-storage.service';
 import { QuestionService } from '../../core/services/question.service';
 import { QuestionDisplayComponent } from '../../shared/components/question-display/question-display.component';
 import { QuestionFormComponent } from './question-form.component';
@@ -11,6 +12,7 @@ import { QuestionFormComponent } from './question-form.component';
   templateUrl: './question-bank.component.html',
 })
 export class QuestionBankComponent implements OnInit {
+  private readonly localStorageService = inject(LocalStorageService);
   private readonly questionService = inject(QuestionService);
 
   @Output() backToParentTools = new EventEmitter<void>();
@@ -23,6 +25,13 @@ export class QuestionBankComponent implements OnInit {
   readonly isFormVisible = signal(false);
 
   ngOnInit(): void {
+    const persistedQuestions = this.localStorageService.getQuestionBankQuestions(this.topicId);
+
+    if (persistedQuestions.length > 0) {
+      this.questions.set(persistedQuestions);
+      return;
+    }
+
     this.questions.set(this.questionService.getQuestionsByTopic(this.topicId));
   }
 
@@ -38,16 +47,18 @@ export class QuestionBankComponent implements OnInit {
 
   onSaveQuestion(question: Question): void {
     const editingQuestion = this.activeQuestion();
+    let nextQuestions: Question[];
 
     if (editingQuestion === null) {
-      this.questions.update((currentQuestions) => [question, ...currentQuestions]);
+      nextQuestions = [question, ...this.questions()];
     } else {
-      this.questions.update((currentQuestions) =>
-        currentQuestions.map((currentQuestion) =>
-          currentQuestion.id === editingQuestion.id ? question : currentQuestion,
-        ),
+      nextQuestions = this.questions().map((currentQuestion) =>
+        currentQuestion.id === editingQuestion.id ? question : currentQuestion,
       );
     }
+
+    this.questions.set(nextQuestions);
+    this.localStorageService.saveQuestionBankQuestions(this.topicId, nextQuestions);
 
     this.closeForm();
   }
