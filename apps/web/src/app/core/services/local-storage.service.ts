@@ -1,0 +1,85 @@
+import { Injectable } from '@angular/core';
+import { Question } from '../models/question.model';
+
+export interface PresentedQuestionSnapshot {
+  questionId: string;
+  questionSnapshot: Question;
+}
+
+export interface PracticeResult {
+  totalQuestions: number;
+  correctCount: number;
+  incorrectCount: number;
+  unansweredCount: number;
+  accuracyPercentage: number;
+}
+
+export interface ActivePracticeSession {
+  topicId: string;
+  startedAt: string;
+  currentQuestionIndex: number;
+  presentedQuestions: PresentedQuestionSnapshot[];
+  selectedAnswers: Record<string, string>;
+}
+
+export interface PracticeAttempt {
+  id: string;
+  topicId: string;
+  startedAt: string;
+  completedAt: string;
+  presentedQuestions: PresentedQuestionSnapshot[];
+  selectedAnswers: Record<string, string>;
+  result: PracticeResult;
+}
+
+@Injectable({ providedIn: 'root' })
+export class LocalStorageService {
+  private readonly activeSessionKey = 'practice.activeSession';
+  private readonly attemptsKey = 'practice.completedAttempts';
+
+  saveActiveSession(session: ActivePracticeSession): void {
+    localStorage.setItem(this.activeSessionKey, JSON.stringify(session));
+  }
+
+  getActiveSession(): ActivePracticeSession | null {
+    const raw = localStorage.getItem(this.activeSessionKey);
+    if (!raw) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(raw) as ActivePracticeSession;
+    } catch {
+      return null;
+    }
+  }
+
+  clearActiveSession(): void {
+    localStorage.removeItem(this.activeSessionKey);
+  }
+
+  saveCompletedAttempt(attempt: PracticeAttempt): void {
+    const existing = this.getCompletedAttempts();
+    existing.push(attempt);
+    localStorage.setItem(this.attemptsKey, JSON.stringify(existing));
+  }
+
+  getCompletedAttempts(): PracticeAttempt[] {
+    const raw = localStorage.getItem(this.attemptsKey);
+    if (!raw) {
+      return [];
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as PracticeAttempt[];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  getCompletedAttemptById(attemptId: string): PracticeAttempt | null {
+    const attempts = this.getCompletedAttempts();
+    return attempts.find((a) => a.id === attemptId) ?? null;
+  }
+}
