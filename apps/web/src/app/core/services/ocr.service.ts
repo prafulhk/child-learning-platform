@@ -1,11 +1,19 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { recognize } from 'tesseract.js';
 import { OcrExtractionUpdate } from '../models/ocr.model';
+
+type OcrLoggerMessage = {
+  status?: string;
+  progress?: number;
+};
+
+type TesseractModule = typeof import('tesseract.js');
 
 @Injectable({ providedIn: 'root' })
 export class OcrService {
   readonly supportedImageMimeTypes = ['image/jpeg', 'image/png', 'image/heic'] as const;
+
+  private recognizeModulePromise?: Promise<TesseractModule>;
 
   extractText(file: File): Observable<OcrExtractionUpdate> {
     return new Observable<OcrExtractionUpdate>((subscriber) => {
@@ -23,20 +31,23 @@ export class OcrService {
         isComplete: false,
       });
 
-      void recognize(file, 'eng', {
-        logger: (message) => {
-          if (!message || typeof message.progress !== 'number') {
-            return;
-          }
+      void this.loadTesseract()
+        .then(({ recognize }) =>
+          recognize(file, 'eng', {
+            logger: (message: OcrLoggerMessage) => {
+              if (!message || typeof message.progress !== 'number') {
+                return;
+              }
 
-          subscriber.next({
-            status: message.status ?? 'Reading image...',
-            progress: this.normalizeProgress(message.progress),
-            text: '',
-            isComplete: false,
-          });
-        },
-      })
+              subscriber.next({
+                status: message.status ?? 'Reading image...',
+                progress: this.normalizeProgress(message.progress),
+                text: '',
+                isComplete: false,
+              });
+            },
+          }),
+        )
         .then((result) => {
           subscriber.next({
             status: 'Completed',
@@ -44,12 +55,18 @@ export class OcrService {
             text: result.data.text ?? '',
             isComplete: true,
           });
+
           subscriber.complete();
         })
         .catch(() => {
           subscriber.error(new Error('Unable to read text from this image. Please try again.'));
         });
     });
+  }
+
+  private loadTesseract(): Promise<TesseractModule> {
+    this.recognizeModulePromise ??= import('tesseract.js');
+    return this.recognizeModulePromise;
   }
 
   private validateInputFile(file: File): void {
