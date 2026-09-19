@@ -58,6 +58,8 @@ function fisherYatesOnce<T>(items: T[]): T[] {
   return arr;
 }
 
+const PRACTICE_DURATION_MS = 5 * 60 * 1000;
+
 describe('PracticeService', () => {
   const baseQuestions = QUESTIONS_SEED.slice(0, 12).map(
     (q) => JSON.parse(JSON.stringify(q)) as Question,
@@ -79,12 +81,41 @@ describe('PracticeService', () => {
     service = TestBed.inject(PracticeService);
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('starts with 10 questions and unique question IDs', () => {
     const session = service.startPractice('single-digit-addition');
 
     expect(session.presentedQuestions.length).toBe(10);
     const ids = session.presentedQuestions.map((p) => p.questionId);
     expect(new Set(ids).size).toBe(10);
+  });
+
+  it('session gets an endsAt value and five minute duration', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-19T00:00:00Z'));
+
+    const session = service.startPractice('single-digit-addition');
+
+    expect(session.endsAt).toBe('2026-09-19T00:05:00.000Z');
+    expect(new Date(session.endsAt).getTime() - new Date(session.startedAt).getTime()).toBe(
+      PRACTICE_DURATION_MS,
+    );
+  });
+
+  it('remaining time decreases correctly', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-19T00:00:00Z'));
+
+    const session = service.startPractice('single-digit-addition');
+
+    expect(service.getRemainingSeconds(session)).toBe(300);
+
+    vi.advanceTimersByTime(1000);
+
+    expect(service.getRemainingSeconds(session)).toBe(299);
   });
 
   it('question order is shuffled once and option order is shuffled once', () => {
@@ -156,6 +187,29 @@ describe('PracticeService', () => {
     expect(updated?.selectedAnswers[firstQuestion.questionId]).toBe(selectedOption);
   });
 
+  it('Previous does not reset the timer', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-19T00:00:00Z'));
+
+    const session = service.startPractice('single-digit-addition');
+
+    vi.advanceTimersByTime(1000);
+
+    const firstQuestion = session.presentedQuestions[0];
+    service.recordAnswer(firstQuestion.questionId, firstQuestion.questionSnapshot.correctOptionId);
+
+    const before = service.getRemainingSeconds(service.getSession());
+    const beforeEndsAt = service.getSession()?.endsAt;
+
+    service.goToPrevious();
+
+    const after = service.getRemainingSeconds(service.getSession());
+    const afterEndsAt = service.getSession()?.endsAt;
+
+    expect(after).toBe(before);
+    expect(afterEndsAt).toBe(beforeEndsAt);
+  });
+
   it('goToPrevious returns to previous question', () => {
     const session = service.startPractice('single-digit-addition');
 
@@ -221,6 +275,22 @@ describe('PracticeService', () => {
     expect(persistedAttempts[0].id).toBe(attempt.id);
     expect(persistedAttempts[0].presentedQuestions).toEqual(beforeCompleteSnapshots);
 
+    expect(localStorageService.getActiveSession()).toBeNull();
+    expect(service.getSession()).toBeNull();
+  });
+
+  it('completion before timeout works', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-19T00:00:00Z'));
+
+    const session = service.startPractice('single-digit-addition');
+    const first = session.presentedQuestions[0];
+
+    service.recordAnswer(first.questionId, first.questionSnapshot.correctOptionId);
+
+    const attempt = service.completePractice();
+
+    expect(attempt.presentedQuestions).toHaveLength(10);
     expect(localStorageService.getActiveSession()).toBeNull();
     expect(service.getSession()).toBeNull();
   });

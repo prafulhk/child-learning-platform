@@ -29,6 +29,9 @@ function makeQuestion(id: string): Question {
 }
 
 function makeSession(): ActivePracticeSession {
+  const startedAt = new Date().toISOString();
+  const endsAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+
   const presentedQuestions: PresentedQuestionSnapshot[] = Array.from({ length: 10 }).map(
     (_, idx) => {
       const qid = `q${idx + 1}`;
@@ -42,7 +45,8 @@ function makeSession(): ActivePracticeSession {
 
   return {
     topicId: 'single-digit-addition',
-    startedAt: '2026-09-19T00:00:00Z',
+    startedAt,
+    endsAt,
     currentQuestionIndex: 0,
     presentedQuestions,
     selectedAnswers: {},
@@ -61,6 +65,8 @@ describe('PracticeSessionComponent', () => {
   const practiceServiceMock = {
     startPractice: vi.fn(),
     getSession: vi.fn(),
+    getRemainingSeconds: vi.fn(),
+    isSessionExpired: vi.fn(),
     recordAnswer: vi.fn(),
     goToPrevious: vi.fn(),
     completePractice: vi.fn(),
@@ -73,7 +79,7 @@ describe('PracticeSessionComponent', () => {
       id: 'attempt-1',
       topicId: 'single-digit-addition',
       startedAt: session.startedAt,
-      completedAt: '2026-09-19T00:10:00Z',
+      completedAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
       presentedQuestions: JSON.parse(JSON.stringify(session.presentedQuestions)),
       selectedAnswers: {},
       result: {
@@ -87,7 +93,24 @@ describe('PracticeSessionComponent', () => {
 
     practiceServiceMock.startPractice.mockImplementation(() => JSON.parse(JSON.stringify(session)));
 
-    practiceServiceMock.getSession.mockImplementation(() => JSON.parse(JSON.stringify(session)));
+    practiceServiceMock.getSession
+      .mockImplementationOnce(() => null)
+      .mockImplementation(() => JSON.parse(JSON.stringify(session)));
+
+    practiceServiceMock.getRemainingSeconds.mockImplementation(
+      (currentSession: ActivePracticeSession | null) => {
+        if (!currentSession) {
+          return 0;
+        }
+
+        return Math.max(0, Math.floor((new Date(currentSession.endsAt).getTime() - Date.now()) / 1000));
+      },
+    );
+
+    practiceServiceMock.isSessionExpired.mockImplementation(
+      (currentSession: ActivePracticeSession | null) =>
+        practiceServiceMock.getRemainingSeconds(currentSession) === 0,
+    );
 
     practiceServiceMock.recordAnswer.mockImplementation(
       (questionId: string, selectedOptionId: string) => {
@@ -122,6 +145,7 @@ describe('PracticeSessionComponent', () => {
 
   afterEach(() => {
     vi.clearAllMocks();
+    vi.useRealTimers();
   });
 
   it('component starts a practice session', () => {
@@ -150,6 +174,23 @@ describe('PracticeSessionComponent', () => {
     const options = fixture.nativeElement.querySelectorAll('app-answer-option');
 
     expect(options.length).toBe(4);
+  });
+
+  it('displays the countdown timer', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-19T00:00:00Z'));
+
+    session = makeSession();
+    practiceServiceMock.startPractice.mockImplementation(() => JSON.parse(JSON.stringify(session)));
+    practiceServiceMock.getSession
+      .mockImplementationOnce(() => null)
+      .mockImplementation(() => JSON.parse(JSON.stringify(session)));
+
+    const fixture = TestBed.createComponent(PracticeSessionComponent);
+
+    refreshFixture(fixture);
+
+    expect(fixture.nativeElement.textContent as string).toContain('05:00');
   });
 
   it('selecting an option calls PracticeService.recordAnswer()', () => {
@@ -242,6 +283,25 @@ describe('PracticeSessionComponent', () => {
     refreshFixture(fixture);
 
     expect(fixture.nativeElement.textContent as string).toContain('Question 1 of 10');
+  });
+
+  it('Previous does not reset the timer', () => {
+    const fixture = TestBed.createComponent(PracticeSessionComponent);
+
+    refreshFixture(fixture);
+
+    const component = fixture.componentInstance;
+    const startingTime = component.remainingSeconds;
+    const current = component.currentPresentedQuestion;
+
+    if (!current) {
+      throw new Error('Expected current question to exist');
+    }
+
+    component.onSelectOption(current.questionSnapshot.options[0].id);
+    component.onPrevious();
+
+    expect(component.remainingSeconds).toBe(startingTime);
   });
 
   it('previous question preserves selected answer', () => {
@@ -348,6 +408,59 @@ describe('PracticeSessionComponent', () => {
     expect(practiceServiceMock.completePractice).toHaveBeenCalled();
 
     expect(fixture.nativeElement.textContent as string).toContain('Practice completed.');
+  });
+
+  it('timeout completes the practice', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-19T00:00:00Z'));
+
+    session = makeSession();
+    session.endsAt = new Date(Date.now() + 1000).toISOString();
+
+    practiceServiceMock.startPractice.mockImplementation(() => JSON.parse(JSON.stringify(session)));
+    practiceServiceMock.getSession
+      .mockImplementationOnce(() => null)
+      .mockImplementation(() => JSON.parse(JSON.stringify(session)));
+
+    const fixture = TestBed.createComponent(PracticeSessionComponent);
+
+    refreshFixture(fixture);
+
+    vi.advanceTimersByTime(1000);
+    fixture.detectChanges();
+
+    expect(practiceServiceMock.completePractice).toHaveBeenCalled();
+    expect(fixture.componentInstance.completed).toBe(true);
+    expect(fixture.nativeElement.textContent as string).toContain('Practice completed.');
+  });
+
+  it('expired persisted session is handled correctly', () => {
+    const expiredSession = makeSession();
+    expiredSession.endsAt = new Date(Date.now() - 1000).toISOString();
+
+    practiceServiceMock.getSession.mockReset();
+    practiceServiceMock.getSession.mockImplementation(() => JSON.parse(JSON.stringify(expiredSession)));
+    practiceServiceMock.isSessionExpired.mockImplementation(() => true);
+
+    const fixture = TestBed.createComponent(PracticeSessionComponent);
+
+    refreshFixture(fixture);
+
+    expect(practiceServiceMock.startPractice).not.toHaveBeenCalled();
+    expect(practiceServiceMock.completePractice).toHaveBeenCalled();
+    expect(fixture.componentInstance.completed).toBe(true);
+    expect(fixture.nativeElement.textContent as string).toContain('Practice completed.');
+  });
+
+  it('cleans up the countdown timer when destroyed', () => {
+    const clearIntervalSpy = vi.spyOn(window, 'clearInterval');
+    const fixture = TestBed.createComponent(PracticeSessionComponent);
+
+    refreshFixture(fixture);
+
+    fixture.destroy();
+
+    expect(clearIntervalSpy).toHaveBeenCalled();
   });
 
   it('shows no immediate correctness feedback after answer selection', () => {

@@ -17,6 +17,7 @@ export interface PracticeResult {
 export interface ActivePracticeSession {
   topicId: string;
   startedAt: string;
+  endsAt: string;
   currentQuestionIndex: number;
   presentedQuestions: PresentedQuestionSnapshot[];
   selectedAnswers: Record<string, string>;

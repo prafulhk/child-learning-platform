@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import {
   ActivePracticeSession,
   PracticeAttempt,
@@ -14,12 +14,16 @@ import { QuestionDisplayComponent } from '../../shared/components/question-displ
   imports: [QuestionDisplayComponent, AnswerOptionComponent],
   templateUrl: './practice-session.component.html',
 })
-export class PracticeSessionComponent implements OnInit {
+export class PracticeSessionComponent implements OnInit, OnDestroy {
   readonly topicId = 'single-digit-addition';
+  private readonly countdownTickMs = 1000;
 
   session: ActivePracticeSession | null = null;
   completed = false;
   completedAttempt: PracticeAttempt | null = null;
+  remainingSeconds = 0;
+
+  private countdownTimerId: ReturnType<typeof window.setInterval> | null = null;
 
   constructor(
     private readonly practiceService: PracticeService,
@@ -27,8 +31,29 @@ export class PracticeSessionComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    const existingSession = this.practiceService.getSession();
+
+    if (existingSession) {
+      if (this.practiceService.isSessionExpired(existingSession)) {
+        this.completePractice();
+        return;
+      }
+
+      this.session = existingSession;
+      this.remainingSeconds = this.practiceService.getRemainingSeconds(existingSession);
+      this.startCountdown();
+      this.changeDetectorRef.markForCheck();
+      return;
+    }
+
     this.session = this.practiceService.startPractice(this.topicId);
+    this.remainingSeconds = this.practiceService.getRemainingSeconds(this.session);
+    this.startCountdown();
     this.changeDetectorRef.markForCheck();
+  }
+
+  ngOnDestroy(): void {
+    this.stopCountdown();
   }
 
   get currentQuestionIndex(): number {
@@ -57,7 +82,17 @@ export class PracticeSessionComponent implements OnInit {
     return this.session.selectedAnswers[current.questionId] ?? null;
   }
 
+  get remainingTimeLabel(): string {
+    return this.formatRemainingTime(this.remainingSeconds);
+  }
+
   onSelectOption(selectedOptionId: string): void {
+    if (this.completed || !this.session) {
+      return;
+    }
+
+    this.syncTimerState();
+
     if (this.completed || !this.session) {
       return;
     }
@@ -78,13 +113,15 @@ export class PracticeSessionComponent implements OnInit {
       return;
     }
 
+    this.remainingSeconds = this.practiceService.getRemainingSeconds(this.session);
+
+    if (this.practiceService.isSessionExpired(this.session)) {
+      this.completePractice();
+      return;
+    }
+
     if (isLastQuestion) {
-      this.completedAttempt = this.practiceService.completePractice();
-
-      this.completed = true;
-      this.session = null;
-
-      this.changeDetectorRef.markForCheck();
+      this.completePractice();
       return;
     }
 
@@ -96,10 +133,81 @@ export class PracticeSessionComponent implements OnInit {
       return;
     }
 
+    this.syncTimerState();
+
+    if (this.completed || !this.session) {
+      return;
+    }
+
     this.practiceService.goToPrevious();
 
     this.session = this.practiceService.getSession() ?? this.session;
+    this.remainingSeconds = this.practiceService.getRemainingSeconds(this.session);
 
     this.changeDetectorRef.markForCheck();
+  }
+
+  private startCountdown(): void {
+    this.stopCountdown();
+
+    this.countdownTimerId = window.setInterval(() => {
+      this.syncTimerState();
+    }, this.countdownTickMs);
+  }
+
+  private stopCountdown(): void {
+    if (this.countdownTimerId === null) {
+      return;
+    }
+
+    window.clearInterval(this.countdownTimerId);
+    this.countdownTimerId = null;
+  }
+
+  private syncTimerState(): void {
+    if (!this.session || this.completed) {
+      this.remainingSeconds = 0;
+      return;
+    }
+
+    this.remainingSeconds = this.practiceService.getRemainingSeconds(this.session);
+
+    if (this.remainingSeconds > 0) {
+      this.changeDetectorRef.markForCheck();
+      return;
+    }
+
+    this.completePractice();
+  }
+
+  private completePractice(): void {
+    if (this.completed) {
+      return;
+    }
+
+    this.stopCountdown();
+    this.completedAttempt = this.practiceService.completePractice();
+    this.completed = true;
+    this.session = null;
+    this.remainingSeconds = 0;
+    this.changeDetectorRef.markForCheck();
+  }
+
+  restartPractice(): void {
+    this.stopCountdown();
+    this.completed = false;
+    this.completedAttempt = null;
+    this.session = this.practiceService.startPractice(this.topicId);
+    this.remainingSeconds = this.practiceService.getRemainingSeconds(this.session);
+    this.startCountdown();
+    this.changeDetectorRef.markForCheck();
+  }
+
+  private formatRemainingTime(totalSeconds: number): string {
+    const safeSeconds = Math.max(0, totalSeconds);
+    const minutes = Math.floor(safeSeconds / 60);
+    const seconds = safeSeconds % 60;
+
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   }
 }

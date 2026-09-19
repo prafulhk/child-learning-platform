@@ -18,6 +18,7 @@ describe('LocalStorageService', () => {
     const session: ActivePracticeSession = {
       topicId: 'single-digit-addition',
       startedAt: '2026-09-19T00:00:00Z',
+      endsAt: '2026-09-19T00:05:00Z',
       currentQuestionIndex: 1,
       presentedQuestions: [],
       selectedAnswers: { q001: 'opt_a' },
@@ -33,6 +34,7 @@ describe('LocalStorageService', () => {
     const session: ActivePracticeSession = {
       topicId: 'single-digit-addition',
       startedAt: '2026-09-19T00:00:00Z',
+      endsAt: '2026-09-19T00:05:00Z',
       currentQuestionIndex: 0,
       presentedQuestions: [],
       selectedAnswers: {},

@@ -4,6 +4,12 @@
     </h1>
 
     @if (!completed) {
+    <div class="mt-4 flex justify-center">
+        <div class="rounded-full bg-slate-900 px-4 py-2 text-3xl font-semibold tabular-nums text-white shadow-sm">
+            {{ remainingTimeLabel }}
+        </div>
+    </div>
+
     @if (session) {
     @if (currentPresentedQuestion; as currentQuestion) {
     <p class="mt-4 text-center text-sm font-medium text-slate-600">
@@ -35,14 +41,41 @@
     }
     }
     } @else if (completed) {
-    <div class="mt-6 rounded-2xl bg-green-50 p-5 text-center ring-1 ring-green-200">
-        <p class="text-lg font-semibold text-green-800">
-            Practice completed.
-        </p>
+    @if (completedAttempt; as a) {
+    <section class="mx-auto w-full max-w-md px-4 py-6" aria-labelledby="practice-completed-heading">
+        <header class="text-center">
+            <h2 id="practice-completed-heading" class="text-2xl font-bold text-slate-900">
+                Practice Completed
+            </h2>
+            <p class="mt-4 text-5xl font-extrabold text-blue-700" aria-label="Accuracy percentage">
+                {{ a.result.accuracyPercentage }}%
+            </p>
+        </header>
 
-        <p class="mt-2 text-sm text-green-700">
-            You answered all 10 questions.
-        </p>
-    </div>
+        <div class="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+            <dl class="grid grid-cols-2 gap-y-3 text-base text-slate-800">
+                <dt class="font-medium">Total Questions</dt>
+                <dd class="text-right font-semibold">{{ a.result.totalQuestions }}</dd>
+
+                <dt class="font-medium">Correct</dt>
+                <dd class="text-right font-semibold text-green-700">{{ a.result.correctCount }}</dd>
+
+                <dt class="font-medium">Incorrect</dt>
+                <dd class="text-right font-semibold text-red-700">{{ a.result.incorrectCount }}</dd>
+
+                <dt class="font-medium">Unanswered</dt>
+                <dd class="text-right font-semibold text-amber-700">{{ a.result.unansweredCount }}</dd>
+            </dl>
+        </div>
+
+        <div class="mt-6">
+            <button type="button"
+                class="min-h-11 w-full rounded-xl bg-blue-600 px-4 py-3 text-lg font-semibold text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                (click)="restartPractice()">
+                Practice Again
+            </button>
+        </div>
+    </section>
+    }
     }
 </section>
