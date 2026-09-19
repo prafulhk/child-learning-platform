@@ -1,40 +1,40 @@
 /* You can add global styles to this file, and also import other style files */
 
 .app-page-shell {
-	margin-inline: auto;
-	width: 100%;
-	max-width: 28rem;
-	padding: 1.5rem 1rem;
+  margin-inline: auto;
+  width: 100%;
+  max-width: 28rem;
+  padding: 1.5rem 1rem;
 }
 
 .app-page-shell--standard {
-	max-width: 28rem;
+  max-width: 28rem;
 }
 
 .app-page-shell--wide {
-	max-width: 32rem;
+  max-width: 32rem;
 }
 
 @media (min-width: 768px) {
-	.app-page-shell {
-		padding-inline: 1.5rem;
-	}
+  .app-page-shell {
+    padding-inline: 1.5rem;
+  }
 
-	.app-page-shell--standard {
-		max-width: 44rem;
-	}
+  .app-page-shell--standard {
+    max-width: 44rem;
+  }
 
-	.app-page-shell--wide {
-		max-width: 72rem;
-	}
+  .app-page-shell--wide {
+    max-width: 72rem;
+  }
 }
 
 @media (min-width: 1024px) {
-	.app-page-shell--standard {
-		max-width: 56rem;
-	}
+  .app-page-shell--standard {
+    max-width: 56rem;
+  }
 
-	.app-page-shell--wide {
-		max-width: 88rem;
-	}
+  .app-page-shell--wide {
+    max-width: 88rem;
+  }
 }
