@@ -410,7 +410,7 @@ describe('PracticeSessionComponent', () => {
 
     expect(practiceServiceMock.completePractice).toHaveBeenCalled();
 
-    expect(fixture.nativeElement.textContent as string).toContain('Practice completed.');
+    expect(fixture.nativeElement.textContent as string).toContain('Practice Completed');
   });
 
   it('timeout completes the practice', () => {
@@ -434,7 +434,7 @@ describe('PracticeSessionComponent', () => {
 
     expect(practiceServiceMock.completePractice).toHaveBeenCalled();
     expect(fixture.componentInstance.completed).toBe(true);
-    expect(fixture.nativeElement.textContent as string).toContain('Practice completed.');
+    expect(fixture.nativeElement.textContent as string).toContain('Practice Completed');
   });
 
   it('expired persisted session is handled correctly', () => {
@@ -454,7 +454,7 @@ describe('PracticeSessionComponent', () => {
     expect(practiceServiceMock.startPractice).not.toHaveBeenCalled();
     expect(practiceServiceMock.completePractice).toHaveBeenCalled();
     expect(fixture.componentInstance.completed).toBe(true);
-    expect(fixture.nativeElement.textContent as string).toContain('Practice completed.');
+    expect(fixture.nativeElement.textContent as string).toContain('Practice Completed');
   });
 
   it('cleans up the countdown timer when destroyed', () => {
