@@ -103,7 +103,10 @@ describe('PracticeSessionComponent', () => {
           return 0;
         }
 
-        return Math.max(0, Math.floor((new Date(currentSession.endsAt).getTime() - Date.now()) / 1000));
+        return Math.max(
+          0,
+          Math.floor((new Date(currentSession.endsAt).getTime() - Date.now()) / 1000),
+        );
       },
     );
 
@@ -439,7 +442,9 @@ describe('PracticeSessionComponent', () => {
     expiredSession.endsAt = new Date(Date.now() - 1000).toISOString();
 
     practiceServiceMock.getSession.mockReset();
-    practiceServiceMock.getSession.mockImplementation(() => JSON.parse(JSON.stringify(expiredSession)));
+    practiceServiceMock.getSession.mockImplementation(() =>
+      JSON.parse(JSON.stringify(expiredSession)),
+    );
     practiceServiceMock.isSessionExpired.mockImplementation(() => true);
 
     const fixture = TestBed.createComponent(PracticeSessionComponent);
