@@ -123,6 +123,12 @@ describe('QuestionBankComponent', () => {
     expect(fixture.nativeElement.textContent as string).toContain('+ Add Question');
   });
 
+  it('renders Import Questions button', () => {
+    const fixture = createFixture();
+
+    expect(fixture.nativeElement.textContent as string).toContain('Import Questions');
+  });
+
   it('renders Edit/Delete buttons', () => {
     const fixture = createFixture();
     const firstCard = getCardById(fixture, 'q001');
@@ -144,6 +150,30 @@ describe('QuestionBankComponent', () => {
 
     expect(fixture.nativeElement.querySelector('app-question-form')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('[data-testid="question-card"]')).toBeFalsy();
+  });
+
+  it('Import Questions opens the import placeholder view', () => {
+    const fixture = createFixture();
+
+    clickButton(fixture, 'Import Questions');
+
+    expect(fixture.nativeElement.textContent as string).toContain('Import Questions');
+    expect(fixture.nativeElement.textContent as string).toContain(
+      'Image/PDF import is the next workflow',
+    );
+    expect(fixture.nativeElement.querySelector('[data-testid="question-card"]')).toBeFalsy();
+  });
+
+  it('Back to Question Bank returns from the import view', () => {
+    const fixture = createFixture();
+
+    clickButton(fixture, 'Import Questions');
+    clickButton(fixture, 'Back to Question Bank');
+
+    expect(fixture.nativeElement.querySelector('[data-testid="question-card"]')).toBeTruthy();
+    expect(fixture.nativeElement.textContent as string).not.toContain(
+      'No extraction has been run yet.',
+    );
   });
 
   it('Cancel returns to list', () => {
@@ -348,6 +378,20 @@ describe('QuestionBankComponent', () => {
     ).toBe(4);
   });
 
+  it('newly created question remains after reloading from storage', () => {
+    const fixture = createFixture();
+
+    clickButton(fixture, '+ Add Question');
+    clickButton(fixture, 'Save Question');
+
+    const reloadedFixture = createFixture();
+
+    expect(
+      reloadedFixture.nativeElement.querySelectorAll('[data-testid="question-card"]').length,
+    ).toBe(4);
+    expect(reloadedFixture.nativeElement.textContent as string).toContain('Question 1');
+  });
+
   it('persisted questions for another topic are not loaded', () => {
     localStorageService.saveQuestionBankQuestions('single-digit-subtraction', [
       buildQuestion({ id: 'other-topic-1', topicId: 'single-digit-subtraction' }),
@@ -357,6 +401,36 @@ describe('QuestionBankComponent', () => {
 
     expect(fixture.nativeElement.querySelectorAll('[data-testid="question-card"]').length).toBe(3);
     expect(fixture.nativeElement.textContent as string).not.toContain('other-topic-1');
+  });
+
+  it('edited question remains changed after reloading from storage', () => {
+    const fixture = createFixture();
+    const firstCard = getCardById(fixture, 'q001');
+    const editButton = Array.from(firstCard.querySelectorAll('button')).find(
+      (candidate) => candidate.textContent?.trim() === 'Edit',
+    ) as HTMLButtonElement | undefined;
+
+    if (!editButton) {
+      throw new Error('Expected Edit button to exist');
+    }
+
+    editButton.click();
+    fixture.detectChanges();
+
+    const formDebugElement = fixture.debugElement.query(By.directive(QuestionFormComponent));
+
+    if (!formDebugElement) {
+      throw new Error('Expected QuestionFormComponent to be rendered');
+    }
+
+    const formComponent = formDebugElement.componentInstance as QuestionFormComponent;
+    formComponent.difficulty = 'HARD';
+    formComponent.onSave();
+    fixture.detectChanges();
+
+    const reloadedFixture = createFixture();
+
+    expect(reloadedFixture.nativeElement.textContent as string).toContain('HARD');
   });
 
   it('original question ID remains unchanged', () => {

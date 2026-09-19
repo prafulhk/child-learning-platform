@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { Question } from '../models/question.model';
+import { Question, QuestionSourceMetadata } from '../models/question.model';
 import {
   ActivePracticeSession,
   LocalStorageService,
@@ -253,5 +253,35 @@ describe('LocalStorageService', () => {
     service.saveQuestionBankQuestions('single-digit-addition', [question]);
 
     expect(service.getQuestionBankQuestions('single-digit-addition')[0]).toEqual(question);
+  });
+
+  it('preserves Question source metadata during save and load', () => {
+    const source: QuestionSourceMetadata = {
+      sourceType: 'IMAGE',
+      originalFileName: 'math-sheet.jpg',
+      importedAt: '2026-09-19T04:00:00Z',
+    };
+
+    const question: Question = {
+      id: 'q-source',
+      type: 'SIMPLE_ARITHMETIC',
+      subjectId: 'abacus',
+      topicId: 'single-digit-addition',
+      difficulty: 'EASY',
+      rows: [{ value: 2 }, { value: 3 }],
+      options: [
+        { id: 'opt_a', value: 3 },
+        { id: 'opt_b', value: 4 },
+        { id: 'opt_c', value: 5 },
+        { id: 'opt_d', value: 6 },
+      ],
+      correctOptionId: 'opt_c',
+      source,
+      createdAt: '2026-09-19T04:00:00Z',
+    };
+
+    service.saveQuestionBankQuestions('single-digit-addition', [question]);
+
+    expect(service.getQuestionBankQuestions('single-digit-addition')[0].source).toEqual(source);
   });
 });

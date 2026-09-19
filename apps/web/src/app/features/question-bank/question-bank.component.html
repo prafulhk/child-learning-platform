@@ -7,18 +7,45 @@
         </div>
     </header>
 
-    @if (isFormVisible()) {
+    @if (isImportVisible()) {
+    <div class="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+        <h2 class="text-xl font-semibold text-slate-900">Import Questions</h2>
+        <p class="mt-3 text-sm leading-6 text-slate-600">
+            Image/PDF import is the next workflow. This screen is the foundation for future file upload,
+            OCR, and PDF extraction work.
+        </p>
+
+        <div class="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-700 ring-1 ring-slate-200">
+            No extraction has been run yet.
+        </div>
+
+        <div class="mt-5 flex flex-col gap-3 sm:flex-row">
+            <button type="button"
+                class="min-h-11 flex-1 rounded-xl bg-slate-800 px-4 py-3 text-base font-semibold text-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+                (click)="onBackToQuestionBank()">
+                Back to Question Bank
+            </button>
+        </div>
+    </div>
+    } @else if (isFormVisible()) {
     <div class="mt-6 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
         <app-question-form [question]="activeQuestion()" (save)="onSaveQuestion($event)"
             (cancel)="onCancelQuestionForm()"></app-question-form>
     </div>
     } @else {
     <div class="mt-6 flex justify-start">
-        <button type="button"
-            class="min-h-11 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            (click)="onAddQuestion()">
-            + Add Question
-        </button>
+        <div class="flex flex-wrap gap-3">
+            <button type="button"
+                class="min-h-11 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                (click)="onAddQuestion()">
+                + Add Question
+            </button>
+            <button type="button"
+                class="min-h-11 rounded-xl bg-slate-800 px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+                (click)="onOpenImportQuestions()">
+                Import Questions
+            </button>
+        </div>
     </div>
 
     @if (questions().length === 0) {

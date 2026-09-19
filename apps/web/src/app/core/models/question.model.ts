@@ -32,6 +32,16 @@ export interface QuestionOption {
 }
 
 /**
+ * Metadata describing where a question came from.
+ * Optional so existing manual and seeded questions continue to work unchanged.
+ */
+export interface QuestionSourceMetadata {
+  sourceType: 'MANUAL' | 'IMAGE' | 'PDF';
+  originalFileName?: string;
+  importedAt?: string;
+}
+
+/**
  * A single arithmetic question.
  *
  * CRITICAL MODEL RULES:
@@ -81,6 +91,9 @@ export interface SimpleArithmeticQuestion {
 
   /** Optional explanation shown after submission */
   explanation?: string;
+
+  /** Optional metadata describing how the question entered the bank */
+  source?: QuestionSourceMetadata;
 
   /** ISO 8601 timestamp */
   createdAt: string;

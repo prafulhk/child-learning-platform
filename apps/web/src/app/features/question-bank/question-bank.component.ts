@@ -23,6 +23,7 @@ export class QuestionBankComponent implements OnInit {
   readonly questions = signal<Question[]>([]);
   readonly activeQuestion = signal<Question | null>(null);
   readonly isFormVisible = signal(false);
+  readonly isImportVisible = signal(false);
 
   ngOnInit(): void {
     const persistedQuestions = this.localStorageService.getQuestionBankQuestions(this.topicId);
@@ -37,11 +38,18 @@ export class QuestionBankComponent implements OnInit {
 
   onAddQuestion(): void {
     this.activeQuestion.set(null);
+    this.isImportVisible.set(false);
     this.isFormVisible.set(true);
+  }
+
+  onOpenImportQuestions(): void {
+    this.closeForm();
+    this.isImportVisible.set(true);
   }
 
   onEditQuestion(question: Question): void {
     this.activeQuestion.set(this.cloneQuestion(question));
+    this.isImportVisible.set(false);
     this.isFormVisible.set(true);
   }
 
@@ -67,9 +75,15 @@ export class QuestionBankComponent implements OnInit {
     this.closeForm();
   }
 
+  onBackToQuestionBank(): void {
+    this.isImportVisible.set(false);
+  }
+
   onDeleteQuestion(_: Question): void {}
 
   onBackToParentTools(): void {
+    this.isImportVisible.set(false);
+    this.closeForm();
     this.backToParentTools.emit();
   }
 
