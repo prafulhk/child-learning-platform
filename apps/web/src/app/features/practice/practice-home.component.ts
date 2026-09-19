@@ -7,8 +7,13 @@ import { Component, EventEmitter, Output } from '@angular/core';
 })
 export class PracticeHomeComponent {
   @Output() startPractice = new EventEmitter<void>();
+  @Output() viewHistory = new EventEmitter<void>();
 
   onStartPractice(): void {
     this.startPractice.emit();
+  }
+
+  onViewHistory(): void {
+    this.viewHistory.emit();
   }
 }

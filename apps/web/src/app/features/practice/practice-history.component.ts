@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, inject, signal } from '@angular/core';
 import { LocalStorageService, PracticeAttempt } from '../../core/services/local-storage.service';
 
 @Component({
@@ -8,6 +8,8 @@ import { LocalStorageService, PracticeAttempt } from '../../core/services/local-
 })
 export class PracticeHistoryComponent implements OnInit {
   private readonly localStorageService = inject(LocalStorageService);
+
+  @Output() backToHome = new EventEmitter<void>();
 
   readonly attempts = signal<PracticeAttempt[]>([]);
 
@@ -42,5 +44,9 @@ export class PracticeHistoryComponent implements OnInit {
     const seconds = totalSeconds % 60;
 
     return `${minutes}:${String(seconds).padStart(2, '0')}`;
+  }
+
+  onBackToHome(): void {
+    this.backToHome.emit();
   }
 }

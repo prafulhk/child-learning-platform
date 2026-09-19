@@ -1,5 +1,7 @@
-@if (showPractice) {
+@if (view === 'PRACTICE') {
 <app-practice-session />
+} @else if (view === 'HISTORY') {
+<app-practice-history (backToHome)="onBackToHome()"></app-practice-history>
 } @else {
-<app-practice-home (startPractice)="onStartPractice()"></app-practice-home>
+<app-practice-home (startPractice)="onStartPractice()" (viewHistory)="onViewHistory()"></app-practice-home>
 }

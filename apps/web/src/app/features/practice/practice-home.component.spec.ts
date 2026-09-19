@@ -44,6 +44,15 @@ describe('PracticeHomeComponent', () => {
     expect(button).toBeTruthy();
   });
 
+  it('renders Practice History button', () => {
+    const host = fixture.nativeElement as HTMLElement;
+    const buttons = Array.from(host.querySelectorAll('button')) as HTMLButtonElement[];
+
+    const button = buttons.find((btn) => btn.textContent?.trim() === 'Practice History');
+
+    expect(button).toBeTruthy();
+  });
+
   it('emits start event when Start Practice is clicked', () => {
     const emitSpy = vi.spyOn(component.startPractice, 'emit');
 
@@ -55,6 +64,24 @@ describe('PracticeHomeComponent', () => {
 
     if (!button) {
       throw new Error('Expected Start Practice button to exist');
+    }
+
+    button.click();
+
+    expect(emitSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('emits history event when Practice History is clicked', () => {
+    const emitSpy = vi.spyOn(component.viewHistory, 'emit');
+
+    const host = fixture.nativeElement as HTMLElement;
+    const buttons = Array.from(host.querySelectorAll('button')) as HTMLButtonElement[];
+
+    const button = buttons.find((btn) => btn.textContent?.trim() === 'Practice History') as
+      HTMLButtonElement | undefined;
+
+    if (!button) {
+      throw new Error('Expected Practice History button to exist');
     }
 
     button.click();

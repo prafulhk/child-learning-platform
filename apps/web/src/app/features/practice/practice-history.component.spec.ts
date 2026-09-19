@@ -150,4 +150,32 @@ describe('PracticeHistoryComponent', () => {
     expect(cards.length).toBe(4);
     expect(fixture.nativeElement.textContent as string).not.toContain('No practice attempts yet.');
   });
+
+  it('renders Back to Home button', () => {
+    const fixture = TestBed.createComponent(PracticeHistoryComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent as string).toContain('Back to Home');
+  });
+
+  it('emits backToHome when Back to Home is clicked', () => {
+    const fixture = TestBed.createComponent(PracticeHistoryComponent);
+    const component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const emitSpy = vi.spyOn(component.backToHome, 'emit');
+
+    const buttons = Array.from(
+      fixture.nativeElement.querySelectorAll('button'),
+    ) as HTMLButtonElement[];
+    const backButton = buttons.find((button) => button.textContent?.trim() === 'Back to Home');
+
+    if (!backButton) {
+      throw new Error('Expected Back to Home button to exist');
+    }
+
+    backButton.click();
+
+    expect(emitSpy).toHaveBeenCalledTimes(1);
+  });
 });
