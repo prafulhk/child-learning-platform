@@ -1,0 +1,8 @@
+{
+  "name": "child-learning-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A full-stack learning and progress platform for children, parents, and teachers.",
+  "packageManager": "pnpm@12.4.2",
+  "type": "module"
+}
