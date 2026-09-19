@@ -9,23 +9,84 @@
 
     @if (isImportVisible()) {
     <div class="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-        <h2 class="text-xl font-semibold text-slate-900">Import Questions</h2>
+        @if (isReadyForExtraction()) {
+        <h2 class="text-xl font-semibold text-slate-900">Ready for extraction</h2>
         <p class="mt-3 text-sm leading-6 text-slate-600">
-            Image/PDF import is the next workflow. This screen is the foundation for future file upload,
-            OCR, and PDF extraction work.
+            The selected file is stored only in local component state for now. Extraction has not started yet.
         </p>
 
+        @if (selectedImportFile(); as file) {
         <div class="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-700 ring-1 ring-slate-200">
-            No extraction has been run yet.
+            <p class="font-semibold text-slate-900" data-testid="ready-file-name">{{ file.name }}</p>
+            <p class="mt-1">Type: {{ file.type }}</p>
+            <p class="mt-1">Size: {{ getSelectedImportFileSizeLabel() }}</p>
         </div>
+        }
 
         <div class="mt-5 flex flex-col gap-3 sm:flex-row">
+            <button type="button"
+                class="min-h-11 flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+                (click)="onBackToImportSelection()">
+                Back
+            </button>
             <button type="button"
                 class="min-h-11 flex-1 rounded-xl bg-slate-800 px-4 py-3 text-base font-semibold text-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
                 (click)="onBackToQuestionBank()">
                 Back to Question Bank
             </button>
         </div>
+        } @else {
+        <h2 class="text-xl font-semibold text-slate-900">Import Questions</h2>
+        <p class="mt-3 text-sm leading-6 text-slate-600">
+            Choose an image or PDF from this device to prepare the next extraction step. The file stays only in
+            this screen for now and is not uploaded anywhere.
+        </p>
+
+        <label
+            class="mt-5 flex min-h-11 w-full cursor-pointer items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-center text-base font-semibold text-white focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2">
+            <input type="file" class="sr-only" [accept]="importAcceptedFileTypes" data-testid="import-file-input"
+                (change)="onImportFileSelected($event)">
+            Choose Image or PDF
+        </label>
+
+        <p class="mt-3 text-xs leading-5 text-slate-500">
+            Accepted types: JPEG, PNG, HEIC, PDF. Max size: {{ maxImportFileSizeBytes / 1024 / 1024 }} MB.
+        </p>
+
+        @if (importValidationMessage()) {
+        <div class="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"
+            data-testid="import-validation-message">
+            {{ importValidationMessage() }}
+        </div>
+        }
+
+        @if (selectedImportFile(); as file) {
+        <div class="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-700 ring-1 ring-slate-200"
+            data-testid="selected-import-file">
+            <p class="font-semibold text-slate-900" data-testid="selected-import-file-name">{{ file.name }}</p>
+            <p class="mt-2" data-testid="selected-import-file-type">Type: {{ getSelectedImportFileType() }}</p>
+            <p class="mt-1" data-testid="selected-import-file-size">Size: {{ getSelectedImportFileSizeLabel() }}</p>
+            <button type="button"
+                class="mt-4 min-h-11 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+                (click)="onClearImportFile()">
+                Remove File
+            </button>
+        </div>
+        }
+
+        <div class="mt-5 flex flex-col gap-3 sm:flex-row">
+            <button type="button"
+                class="min-h-11 flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+                (click)="onBackToQuestionBank()">
+                Back to Question Bank
+            </button>
+            <button type="button"
+                class="min-h-11 flex-1 rounded-xl bg-slate-800 px-4 py-3 text-base font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+                data-testid="import-continue-button" [disabled]="!hasValidImportFile()" (click)="onContinueImport()">
+                Continue
+            </button>
+        </div>
+        }
     </div>
     } @else if (isFormVisible()) {
     <div class="mt-6 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">

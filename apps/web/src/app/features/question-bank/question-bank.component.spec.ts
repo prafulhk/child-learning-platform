@@ -7,6 +7,8 @@ import { QuestionBankComponent } from './question-bank.component';
 import { QuestionFormComponent } from './question-form.component';
 
 describe('QuestionBankComponent', () => {
+  const validImportMimeTypes = ['image/jpeg', 'image/png', 'image/heic', 'application/pdf'];
+
   const buildQuestion = (overrides: Partial<Question>): Question => ({
     id: 'q001',
     type: 'SIMPLE_ARITHMETIC',
@@ -90,6 +92,40 @@ describe('QuestionBankComponent', () => {
     input.dispatchEvent(new Event('input', { bubbles: true }));
   };
 
+  const getImportFileInput = (
+    fixture: ComponentFixture<QuestionBankComponent>,
+  ): HTMLInputElement => {
+    const input = fixture.nativeElement.querySelector(
+      '[data-testid="import-file-input"]',
+    ) as HTMLInputElement | null;
+
+    if (!input) {
+      throw new Error('Expected import file input to exist');
+    }
+
+    return input;
+  };
+
+  const selectImportFile = (
+    fixture: ComponentFixture<QuestionBankComponent>,
+    file: File | null,
+  ): void => {
+    const input = getImportFileInput(fixture);
+    const files = file ? [file] : [];
+
+    Object.defineProperty(input, 'files', {
+      configurable: true,
+      value: {
+        0: file,
+        length: files.length,
+        item: (index: number) => files[index] ?? null,
+      },
+    });
+
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+  };
+
   it('renders seeded questions', () => {
     const fixture = createFixture();
 
@@ -159,8 +195,9 @@ describe('QuestionBankComponent', () => {
 
     expect(fixture.nativeElement.textContent as string).toContain('Import Questions');
     expect(fixture.nativeElement.textContent as string).toContain(
-      'Image/PDF import is the next workflow',
+      'Choose an image or PDF from this device',
     );
+    expect(getImportFileInput(fixture).accept.split(',')).toEqual(validImportMimeTypes);
     expect(fixture.nativeElement.querySelector('[data-testid="question-card"]')).toBeFalsy();
   });
 
@@ -171,9 +208,97 @@ describe('QuestionBankComponent', () => {
     clickButton(fixture, 'Back to Question Bank');
 
     expect(fixture.nativeElement.querySelector('[data-testid="question-card"]')).toBeTruthy();
-    expect(fixture.nativeElement.textContent as string).not.toContain(
-      'No extraction has been run yet.',
-    );
+    expect(fixture.nativeElement.textContent as string).not.toContain('Choose Image or PDF');
+  });
+
+  it('valid image selection shows the file name, type, and size', () => {
+    const fixture = createFixture();
+
+    clickButton(fixture, 'Import Questions');
+
+    selectImportFile(fixture, new File(['image-data'], 'worksheet.jpg', { type: 'image/jpeg' }));
+
+    expect(fixture.nativeElement.textContent as string).toContain('worksheet.jpg');
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="selected-import-file-type"]')
+        ?.textContent as string,
+    ).toContain('image/jpeg');
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="selected-import-file-size"]')
+        ?.textContent as string,
+    ).toContain('B');
+  });
+
+  it('valid PDF selection enables Continue', () => {
+    const fixture = createFixture();
+
+    clickButton(fixture, 'Import Questions');
+
+    selectImportFile(fixture, new File(['pdf-data'], 'lesson.pdf', { type: 'application/pdf' }));
+
+    const continueButton = fixture.nativeElement.querySelector(
+      '[data-testid="import-continue-button"]',
+    ) as HTMLButtonElement | null;
+
+    expect(continueButton?.disabled).toBe(false);
+    expect(fixture.nativeElement.textContent as string).toContain('lesson.pdf');
+  });
+
+  it('unsupported file type shows a validation message', () => {
+    const fixture = createFixture();
+
+    clickButton(fixture, 'Import Questions');
+
+    selectImportFile(fixture, new File(['text-data'], 'notes.txt', { type: 'text/plain' }));
+
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="import-validation-message"]')
+        ?.textContent as string,
+    ).toContain('Choose a JPEG, PNG, HEIC, or PDF file.');
+    expect(fixture.nativeElement.querySelector('[data-testid="selected-import-file"]')).toBeFalsy();
+  });
+
+  it('Remove File clears the current selection', () => {
+    const fixture = createFixture();
+
+    clickButton(fixture, 'Import Questions');
+    selectImportFile(fixture, new File(['image-data'], 'worksheet.png', { type: 'image/png' }));
+
+    clickButton(fixture, 'Remove File');
+
+    expect(fixture.nativeElement.querySelector('[data-testid="selected-import-file"]')).toBeFalsy();
+    expect(
+      (
+        fixture.nativeElement.querySelector(
+          '[data-testid="import-continue-button"]',
+        ) as HTMLButtonElement
+      ).disabled,
+    ).toBe(true);
+  });
+
+  it('Continue stays disabled without a valid file', () => {
+    const fixture = createFixture();
+
+    clickButton(fixture, 'Import Questions');
+
+    const continueButton = fixture.nativeElement.querySelector(
+      '[data-testid="import-continue-button"]',
+    ) as HTMLButtonElement | null;
+
+    expect(continueButton?.disabled).toBe(true);
+  });
+
+  it('Continue moves to the extraction placeholder state', () => {
+    const fixture = createFixture();
+
+    clickButton(fixture, 'Import Questions');
+    selectImportFile(fixture, new File(['pdf-data'], 'ready.pdf', { type: 'application/pdf' }));
+
+    clickButton(fixture, 'Continue');
+
+    expect(fixture.nativeElement.textContent as string).toContain('Ready for extraction');
+    expect(fixture.nativeElement.textContent as string).toContain('ready.pdf');
+    expect(fixture.nativeElement.querySelector('[data-testid="ready-file-name"]')).toBeTruthy();
   });
 
   it('Cancel returns to list', () => {

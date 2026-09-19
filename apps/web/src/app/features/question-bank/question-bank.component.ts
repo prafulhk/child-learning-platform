@@ -5,6 +5,8 @@ import { QuestionService } from '../../core/services/question.service';
 import { QuestionDisplayComponent } from '../../shared/components/question-display/question-display.component';
 import { QuestionFormComponent } from './question-form.component';
 
+type ImportWorkflowStep = 'HIDDEN' | 'SELECT_FILE' | 'READY_FOR_EXTRACTION';
+
 @Component({
   selector: 'app-question-bank',
   standalone: true,
@@ -15,6 +17,15 @@ export class QuestionBankComponent implements OnInit {
   private readonly localStorageService = inject(LocalStorageService);
   private readonly questionService = inject(QuestionService);
 
+  readonly importAcceptedMimeTypes = [
+    'image/jpeg',
+    'image/png',
+    'image/heic',
+    'application/pdf',
+  ] as const;
+  readonly importAcceptedFileTypes = this.importAcceptedMimeTypes.join(',');
+  readonly maxImportFileSizeBytes = 10 * 1024 * 1024;
+
   @Output() backToParentTools = new EventEmitter<void>();
 
   readonly subjectLabel = 'Abacus';
@@ -23,7 +34,9 @@ export class QuestionBankComponent implements OnInit {
   readonly questions = signal<Question[]>([]);
   readonly activeQuestion = signal<Question | null>(null);
   readonly isFormVisible = signal(false);
-  readonly isImportVisible = signal(false);
+  readonly importWorkflowStep = signal<ImportWorkflowStep>('HIDDEN');
+  readonly selectedImportFile = signal<File | null>(null);
+  readonly importValidationMessage = signal<string | null>(null);
 
   ngOnInit(): void {
     const persistedQuestions = this.localStorageService.getQuestionBankQuestions(this.topicId);
@@ -38,18 +51,20 @@ export class QuestionBankComponent implements OnInit {
 
   onAddQuestion(): void {
     this.activeQuestion.set(null);
-    this.isImportVisible.set(false);
+    this.resetImportWorkflow();
     this.isFormVisible.set(true);
   }
 
   onOpenImportQuestions(): void {
     this.closeForm();
-    this.isImportVisible.set(true);
+    this.selectedImportFile.set(null);
+    this.importValidationMessage.set(null);
+    this.importWorkflowStep.set('SELECT_FILE');
   }
 
   onEditQuestion(question: Question): void {
     this.activeQuestion.set(this.cloneQuestion(question));
-    this.isImportVisible.set(false);
+    this.resetImportWorkflow();
     this.isFormVisible.set(true);
   }
 
@@ -75,16 +90,89 @@ export class QuestionBankComponent implements OnInit {
     this.closeForm();
   }
 
+  onImportFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.item(0) ?? null;
+
+    if (file === null) {
+      this.selectedImportFile.set(null);
+      this.importValidationMessage.set(null);
+      return;
+    }
+
+    if (
+      !this.importAcceptedMimeTypes.includes(
+        file.type as (typeof this.importAcceptedMimeTypes)[number],
+      )
+    ) {
+      this.selectedImportFile.set(null);
+      this.importValidationMessage.set('Choose a JPEG, PNG, HEIC, or PDF file.');
+      input.value = '';
+      return;
+    }
+
+    if (file.size > this.maxImportFileSizeBytes) {
+      this.selectedImportFile.set(null);
+      this.importValidationMessage.set(
+        `Choose a file smaller than ${this.formatFileSize(this.maxImportFileSizeBytes)}.`,
+      );
+      input.value = '';
+      return;
+    }
+
+    this.selectedImportFile.set(file);
+    this.importValidationMessage.set(null);
+    input.value = '';
+  }
+
+  onClearImportFile(): void {
+    this.selectedImportFile.set(null);
+    this.importValidationMessage.set(null);
+  }
+
+  onContinueImport(): void {
+    if (!this.hasValidImportFile()) {
+      return;
+    }
+
+    this.importWorkflowStep.set('READY_FOR_EXTRACTION');
+  }
+
+  onBackToImportSelection(): void {
+    this.importWorkflowStep.set('SELECT_FILE');
+  }
+
   onBackToQuestionBank(): void {
-    this.isImportVisible.set(false);
+    this.resetImportWorkflow();
   }
 
   onDeleteQuestion(_: Question): void {}
 
   onBackToParentTools(): void {
-    this.isImportVisible.set(false);
+    this.resetImportWorkflow();
     this.closeForm();
     this.backToParentTools.emit();
+  }
+
+  hasValidImportFile(): boolean {
+    return this.selectedImportFile() !== null && this.importValidationMessage() === null;
+  }
+
+  isImportVisible(): boolean {
+    return this.importWorkflowStep() !== 'HIDDEN';
+  }
+
+  isReadyForExtraction(): boolean {
+    return this.importWorkflowStep() === 'READY_FOR_EXTRACTION';
+  }
+
+  getSelectedImportFileType(): string {
+    return this.selectedImportFile()?.type ?? '';
+  }
+
+  getSelectedImportFileSizeLabel(): string {
+    const file = this.selectedImportFile();
+    return file ? this.formatFileSize(file.size) : '';
   }
 
   trackByQuestionId(_: number, question: Question): string {
@@ -94,6 +182,26 @@ export class QuestionBankComponent implements OnInit {
   private closeForm(): void {
     this.activeQuestion.set(null);
     this.isFormVisible.set(false);
+  }
+
+  private resetImportWorkflow(): void {
+    this.importWorkflowStep.set('HIDDEN');
+    this.selectedImportFile.set(null);
+    this.importValidationMessage.set(null);
+  }
+
+  private formatFileSize(sizeInBytes: number): string {
+    if (sizeInBytes < 1024) {
+      return `${sizeInBytes} B`;
+    }
+
+    const sizeInKilobytes = sizeInBytes / 1024;
+
+    if (sizeInKilobytes < 1024) {
+      return `${Math.round(sizeInKilobytes)} KB`;
+    }
+
+    return `${(sizeInKilobytes / 1024).toFixed(1)} MB`;
   }
 
   private cloneQuestion(question: Question): Question {
