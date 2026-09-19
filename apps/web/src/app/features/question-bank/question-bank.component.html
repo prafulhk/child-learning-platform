@@ -10,9 +10,9 @@
     @if (isImportVisible()) {
     <div class="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         @if (isReadyForExtraction()) {
-        <h2 class="text-xl font-semibold text-slate-900">Ready for extraction</h2>
+        <h2 class="text-xl font-semibold text-slate-900">Extracted text</h2>
         <p class="mt-3 text-sm leading-6 text-slate-600">
-            The selected file is stored only in local component state for now. Extraction has not started yet.
+            Review the OCR output below. This text is only in local component state for now.
         </p>
 
         @if (selectedImportFile(); as file) {
@@ -23,11 +23,31 @@
         </div>
         }
 
-        <div class="mt-5 flex flex-col gap-3 sm:flex-row">
+        @if (ocrExtractedText(); as extractedText) {
+        <div class="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-700 ring-1 ring-slate-200"
+            data-testid="ocr-extracted-text-card">
+            <pre class="whitespace-pre-wrap break-words text-sm leading-6 text-slate-800"
+                data-testid="ocr-extracted-text">{{ extractedText }}</pre>
+        </div>
+        }
+
+        @if (ocrErrorMessage()) {
+        <div class="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"
+            data-testid="ocr-error-message">
+            {{ ocrErrorMessage() }}
+        </div>
+        }
+
+        <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <button type="button"
                 class="min-h-11 flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
                 (click)="onBackToImportSelection()">
                 Back
+            </button>
+            <button type="button"
+                class="min-h-11 flex-1 rounded-xl bg-blue-600 px-4 py-3 text-base font-semibold text-white disabled:cursor-not-allowed disabled:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                [disabled]="!canStartOcr()" (click)="onRetryOcr()">
+                Retry OCR
             </button>
             <button type="button"
                 class="min-h-11 flex-1 rounded-xl bg-slate-800 px-4 py-3 text-base font-semibold text-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
@@ -74,6 +94,22 @@
         </div>
         }
 
+        @if (isImportProcessing()) {
+        <div class="mt-4 rounded-xl bg-blue-50 p-4 text-sm text-blue-900 ring-1 ring-blue-200"
+            data-testid="ocr-loading-state">
+            <p class="font-semibold">Reading image...</p>
+            <p class="mt-1" data-testid="ocr-progress-label">{{ importProgressPercent() }}% · {{
+                importProcessingStatus() }}</p>
+        </div>
+        }
+
+        @if (ocrErrorMessage()) {
+        <div class="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"
+            data-testid="ocr-error-message">
+            {{ ocrErrorMessage() }}
+        </div>
+        }
+
         <div class="mt-5 flex flex-col gap-3 sm:flex-row">
             <button type="button"
                 class="min-h-11 flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-base font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
@@ -82,8 +118,8 @@
             </button>
             <button type="button"
                 class="min-h-11 flex-1 rounded-xl bg-slate-800 px-4 py-3 text-base font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
-                data-testid="import-continue-button" [disabled]="!hasValidImportFile()" (click)="onContinueImport()">
-                Continue
+                data-testid="import-continue-button" [disabled]="!canStartOcr()" (click)="onContinueImport()">
+                {{ isImportProcessing() ? 'Reading image...' : 'Continue' }}
             </button>
         </div>
         }

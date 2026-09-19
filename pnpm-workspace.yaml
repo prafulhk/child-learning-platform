@@ -6,3 +6,4 @@ allowBuilds:
   esbuild: true
   lmdb: true
   msgpackr-extract: true
+  tesseract.js: set this to true or false

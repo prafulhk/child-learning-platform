@@ -1,11 +1,13 @@
-import { Component, EventEmitter, OnInit, Output, inject, signal } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output, inject, signal } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { Question } from '../../core/models/question.model';
 import { LocalStorageService } from '../../core/services/local-storage.service';
+import { OcrService } from '../../core/services/ocr.service';
 import { QuestionService } from '../../core/services/question.service';
 import { QuestionDisplayComponent } from '../../shared/components/question-display/question-display.component';
 import { QuestionFormComponent } from './question-form.component';
 
-type ImportWorkflowStep = 'HIDDEN' | 'SELECT_FILE' | 'READY_FOR_EXTRACTION';
+type ImportWorkflowStep = 'HIDDEN' | 'SELECT_FILE' | 'OCR_RESULT';
 
 @Component({
   selector: 'app-question-bank',
@@ -13,9 +15,11 @@ type ImportWorkflowStep = 'HIDDEN' | 'SELECT_FILE' | 'READY_FOR_EXTRACTION';
   imports: [QuestionDisplayComponent, QuestionFormComponent],
   templateUrl: './question-bank.component.html',
 })
-export class QuestionBankComponent implements OnInit {
+export class QuestionBankComponent implements OnInit, OnDestroy {
   private readonly localStorageService = inject(LocalStorageService);
+  private readonly ocrService = inject(OcrService);
   private readonly questionService = inject(QuestionService);
+  private ocrSubscription: Subscription | null = null;
 
   readonly importAcceptedMimeTypes = [
     'image/jpeg',
@@ -37,6 +41,11 @@ export class QuestionBankComponent implements OnInit {
   readonly importWorkflowStep = signal<ImportWorkflowStep>('HIDDEN');
   readonly selectedImportFile = signal<File | null>(null);
   readonly importValidationMessage = signal<string | null>(null);
+  readonly isImportProcessing = signal(false);
+  readonly importProcessingStatus = signal('');
+  readonly importProgressPercent = signal(0);
+  readonly ocrExtractedText = signal<string | null>(null);
+  readonly ocrErrorMessage = signal<string | null>(null);
 
   ngOnInit(): void {
     const persistedQuestions = this.localStorageService.getQuestionBankQuestions(this.topicId);
@@ -49,6 +58,10 @@ export class QuestionBankComponent implements OnInit {
     this.questions.set(this.questionService.getQuestionsByTopic(this.topicId));
   }
 
+  ngOnDestroy(): void {
+    this.ocrSubscription?.unsubscribe();
+  }
+
   onAddQuestion(): void {
     this.activeQuestion.set(null);
     this.resetImportWorkflow();
@@ -59,6 +72,7 @@ export class QuestionBankComponent implements OnInit {
     this.closeForm();
     this.selectedImportFile.set(null);
     this.importValidationMessage.set(null);
+    this.resetImportOcrState();
     this.importWorkflowStep.set('SELECT_FILE');
   }
 
@@ -94,6 +108,8 @@ export class QuestionBankComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.item(0) ?? null;
 
+    this.resetImportOcrState();
+
     if (file === null) {
       this.selectedImportFile.set(null);
       this.importValidationMessage.set(null);
@@ -128,18 +144,31 @@ export class QuestionBankComponent implements OnInit {
   onClearImportFile(): void {
     this.selectedImportFile.set(null);
     this.importValidationMessage.set(null);
+    this.resetImportOcrState();
   }
 
   onContinueImport(): void {
-    if (!this.hasValidImportFile()) {
+    if (!this.canStartOcr()) {
       return;
     }
 
-    this.importWorkflowStep.set('READY_FOR_EXTRACTION');
+    this.startOcrFromSelectedFile();
+  }
+
+  onRetryOcr(): void {
+    if (!this.canStartOcr()) {
+      return;
+    }
+
+    this.startOcrFromSelectedFile();
   }
 
   onBackToImportSelection(): void {
     this.importWorkflowStep.set('SELECT_FILE');
+    this.ocrErrorMessage.set(null);
+    this.ocrExtractedText.set(null);
+    this.importProgressPercent.set(0);
+    this.importProcessingStatus.set('');
   }
 
   onBackToQuestionBank(): void {
@@ -163,7 +192,11 @@ export class QuestionBankComponent implements OnInit {
   }
 
   isReadyForExtraction(): boolean {
-    return this.importWorkflowStep() === 'READY_FOR_EXTRACTION';
+    return this.importWorkflowStep() === 'OCR_RESULT';
+  }
+
+  canStartOcr(): boolean {
+    return this.hasValidImportFile() && !this.isImportProcessing();
   }
 
   getSelectedImportFileType(): string {
@@ -188,6 +221,59 @@ export class QuestionBankComponent implements OnInit {
     this.importWorkflowStep.set('HIDDEN');
     this.selectedImportFile.set(null);
     this.importValidationMessage.set(null);
+    this.resetImportOcrState();
+  }
+
+  private resetImportOcrState(): void {
+    this.ocrSubscription?.unsubscribe();
+    this.ocrSubscription = null;
+    this.isImportProcessing.set(false);
+    this.importProcessingStatus.set('');
+    this.importProgressPercent.set(0);
+    this.ocrExtractedText.set(null);
+    this.ocrErrorMessage.set(null);
+  }
+
+  private startOcrFromSelectedFile(): void {
+    const file = this.selectedImportFile();
+
+    if (!file) {
+      return;
+    }
+
+    this.ocrErrorMessage.set(null);
+    this.ocrExtractedText.set(null);
+    this.isImportProcessing.set(true);
+    this.importProgressPercent.set(0);
+    this.importProcessingStatus.set('Reading image...');
+
+    this.ocrSubscription?.unsubscribe();
+    this.ocrSubscription = this.ocrService.extractText(file).subscribe({
+      next: (update) => {
+        this.importProcessingStatus.set(update.status);
+        this.importProgressPercent.set(Math.round(update.progress * 100));
+
+        if (update.isComplete) {
+          this.ocrExtractedText.set(update.text);
+          this.importWorkflowStep.set('OCR_RESULT');
+        }
+      },
+      error: (error) => {
+        this.ocrErrorMessage.set(this.getReadableErrorMessage(error));
+        this.isImportProcessing.set(false);
+      },
+      complete: () => {
+        this.isImportProcessing.set(false);
+      },
+    });
+  }
+
+  private getReadableErrorMessage(error: unknown): string {
+    if (error instanceof Error && error.message.trim().length > 0) {
+      return error.message;
+    }
+
+    return 'Unable to read text from this image. Please try again.';
   }
 
   private formatFileSize(sizeInBytes: number): string {

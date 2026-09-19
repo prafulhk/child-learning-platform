@@ -1,7 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { Observable, Subject, of, throwError } from 'rxjs';
+import { OcrExtractionUpdate } from '../../core/models/ocr.model';
 import { Question } from '../../core/models/question.model';
 import { LocalStorageService } from '../../core/services/local-storage.service';
+import { OcrService } from '../../core/services/ocr.service';
 import { QuestionService } from '../../core/services/question.service';
 import { QuestionBankComponent } from './question-bank.component';
 import { QuestionFormComponent } from './question-form.component';
@@ -35,6 +38,7 @@ describe('QuestionBankComponent', () => {
   ];
 
   let mockQuestionService: { getQuestionsByTopic: ReturnType<typeof vi.fn> };
+  let mockOcrService: { extractText: ReturnType<typeof vi.fn> };
   let localStorageService: LocalStorageService;
 
   beforeEach(async () => {
@@ -42,10 +46,23 @@ describe('QuestionBankComponent', () => {
     mockQuestionService = {
       getQuestionsByTopic: vi.fn().mockReturnValue(seededQuestions),
     };
+    mockOcrService = {
+      extractText: vi.fn().mockReturnValue(
+        of<OcrExtractionUpdate>({
+          status: 'Completed',
+          progress: 1,
+          text: 'Seeded OCR text',
+          isComplete: true,
+        }),
+      ),
+    };
 
     await TestBed.configureTestingModule({
       imports: [QuestionBankComponent],
-      providers: [{ provide: QuestionService, useValue: mockQuestionService }],
+      providers: [
+        { provide: QuestionService, useValue: mockQuestionService },
+        { provide: OcrService, useValue: mockOcrService },
+      ],
     }).compileComponents();
 
     localStorageService = TestBed.inject(LocalStorageService);
@@ -90,6 +107,20 @@ describe('QuestionBankComponent', () => {
   const setInputValue = (input: HTMLInputElement | HTMLTextAreaElement, value: string): void => {
     input.value = value;
     input.dispatchEvent(new Event('input', { bubbles: true }));
+  };
+
+  const createProgressStream = (): {
+    stream: Observable<OcrExtractionUpdate>;
+    push: (value: OcrExtractionUpdate) => void;
+    complete: () => void;
+  } => {
+    const subject = new Subject<OcrExtractionUpdate>();
+
+    return {
+      stream: subject.asObservable(),
+      push: (value: OcrExtractionUpdate) => subject.next(value),
+      complete: () => subject.complete(),
+    };
   };
 
   const getImportFileInput = (
@@ -244,6 +275,19 @@ describe('QuestionBankComponent', () => {
     expect(fixture.nativeElement.textContent as string).toContain('lesson.pdf');
   });
 
+  it('Continue starts OCR for a selected image file', () => {
+    const fixture = createFixture();
+
+    clickButton(fixture, 'Import Questions');
+    selectImportFile(fixture, new File(['image-data'], 'ocr-image.jpg', { type: 'image/jpeg' }));
+
+    clickButton(fixture, 'Continue');
+
+    expect(mockOcrService.extractText).toHaveBeenCalledTimes(1);
+    expect(fixture.nativeElement.textContent as string).toContain('Extracted text');
+    expect(fixture.nativeElement.textContent as string).toContain('Seeded OCR text');
+  });
+
   it('unsupported file type shows a validation message', () => {
     const fixture = createFixture();
 
@@ -288,17 +332,116 @@ describe('QuestionBankComponent', () => {
     expect(continueButton?.disabled).toBe(true);
   });
 
-  it('Continue moves to the extraction placeholder state', () => {
+  it('Continue with PDF shows OCR message and does not open extracted-text view', () => {
     const fixture = createFixture();
+    mockOcrService.extractText.mockReturnValue(
+      throwError(
+        () => new Error('PDF extraction is not available yet. Please choose an image file.'),
+      ),
+    );
 
     clickButton(fixture, 'Import Questions');
     selectImportFile(fixture, new File(['pdf-data'], 'ready.pdf', { type: 'application/pdf' }));
 
     clickButton(fixture, 'Continue');
 
-    expect(fixture.nativeElement.textContent as string).toContain('Ready for extraction');
-    expect(fixture.nativeElement.textContent as string).toContain('ready.pdf');
-    expect(fixture.nativeElement.querySelector('[data-testid="ready-file-name"]')).toBeTruthy();
+    expect(fixture.nativeElement.textContent as string).toContain(
+      'PDF extraction is not available yet. Please choose an image file.',
+    );
+    expect(fixture.nativeElement.textContent as string).not.toContain('Extracted text');
+  });
+
+  it('shows loading/progress state while OCR is running', () => {
+    const fixture = createFixture();
+    const progressStream = createProgressStream();
+    mockOcrService.extractText.mockReturnValue(progressStream.stream);
+
+    clickButton(fixture, 'Import Questions');
+    selectImportFile(fixture, new File(['image-data'], 'progress.png', { type: 'image/png' }));
+    clickButton(fixture, 'Continue');
+
+    progressStream.push({
+      status: 'recognizing text',
+      progress: 0.6,
+      text: '',
+      isComplete: false,
+    });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent as string).toContain('Reading image...');
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="ocr-progress-label"]')
+        ?.textContent as string,
+    ).toContain('60%');
+  });
+
+  it('shows OCR failure and allows retry with the same selected image', () => {
+    const fixture = createFixture();
+    mockOcrService.extractText.mockReturnValue(
+      throwError(() => new Error('Unable to read text from this image. Please try again.')),
+    );
+
+    clickButton(fixture, 'Import Questions');
+    selectImportFile(fixture, new File(['image-data'], 'retry.png', { type: 'image/png' }));
+    clickButton(fixture, 'Continue');
+
+    expect(fixture.nativeElement.textContent as string).toContain(
+      'Unable to read text from this image. Please try again.',
+    );
+    expect(fixture.nativeElement.textContent as string).toContain('retry.png');
+
+    mockOcrService.extractText.mockReturnValue(
+      of({
+        status: 'Completed',
+        progress: 1,
+        text: 'Retry success',
+        isComplete: true,
+      }),
+    );
+    clickButton(fixture, 'Continue');
+
+    expect(mockOcrService.extractText).toHaveBeenCalledTimes(2);
+    expect(fixture.nativeElement.textContent as string).toContain('Retry success');
+  });
+
+  it('Retry OCR from extracted-text view re-runs OCR', () => {
+    const fixture = createFixture();
+    mockOcrService.extractText.mockReturnValue(
+      of({
+        status: 'Completed',
+        progress: 1,
+        text: 'Initial OCR',
+        isComplete: true,
+      }),
+    );
+
+    clickButton(fixture, 'Import Questions');
+    selectImportFile(fixture, new File(['image-data'], 'retry-view.png', { type: 'image/png' }));
+    clickButton(fixture, 'Continue');
+
+    mockOcrService.extractText.mockReturnValue(
+      of({
+        status: 'Completed',
+        progress: 1,
+        text: 'Updated OCR',
+        isComplete: true,
+      }),
+    );
+    clickButton(fixture, 'Retry OCR');
+
+    expect(mockOcrService.extractText).toHaveBeenCalledTimes(2);
+    expect(fixture.nativeElement.textContent as string).toContain('Updated OCR');
+  });
+
+  it('OCR flow does not save Question Bank questions', () => {
+    const fixture = createFixture();
+    const saveSpy = vi.spyOn(localStorageService, 'saveQuestionBankQuestions');
+
+    clickButton(fixture, 'Import Questions');
+    selectImportFile(fixture, new File(['image-data'], 'nosave.png', { type: 'image/png' }));
+    clickButton(fixture, 'Continue');
+
+    expect(saveSpy).not.toHaveBeenCalled();
   });
 
   it('Cancel returns to list', () => {
