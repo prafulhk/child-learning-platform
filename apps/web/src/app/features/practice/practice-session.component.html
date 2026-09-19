@@ -1,0 +1,48 @@
+<section class="mx-auto w-full max-w-md px-4 py-6">
+    <h1 class="text-center text-2xl font-bold text-slate-900">
+        Single-Digit Addition Practice
+    </h1>
+
+    @if (!completed) {
+    @if (session) {
+    @if (currentPresentedQuestion; as currentQuestion) {
+    <p class="mt-4 text-center text-sm font-medium text-slate-600">
+        Question {{ currentQuestionIndex + 1 }} of {{ totalQuestions }}
+    </p>
+
+    <div class="mt-5 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+        <app-question-display [question]="currentQuestion.questionSnapshot"></app-question-display>
+    </div>
+
+    <div class="mt-5 flex flex-col gap-3" role="radiogroup" aria-label="Answer options">
+        @for (
+        option of currentQuestion.questionSnapshot.options;
+        track option.id
+        ) {
+        <app-answer-option [option]="option"
+            [selected]="session.selectedAnswers[currentQuestion.questionId] === option.id"
+            (optionSelected)="onSelectOption($event)"></app-answer-option>
+        }
+    </div>
+
+    <div class="mt-5">
+        <button type="button"
+            class="min-h-11 w-full rounded-xl border border-slate-300 px-4 py-2 font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+            [disabled]="currentQuestionIndex === 0" (click)="onPrevious()">
+            Previous
+        </button>
+    </div>
+    }
+    }
+    } @else if (completed) {
+    <div class="mt-6 rounded-2xl bg-green-50 p-5 text-center ring-1 ring-green-200">
+        <p class="text-lg font-semibold text-green-800">
+            Practice completed.
+        </p>
+
+        <p class="mt-2 text-sm text-green-700">
+            You answered all 10 questions.
+        </p>
+    </div>
+    }
+</section>
