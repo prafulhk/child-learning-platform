@@ -1,0 +1,40 @@
+<section class="mx-auto w-full max-w-4xl px-4 py-5 sm:px-6 lg:px-8">
+    <div class="mb-5 flex flex-col items-center gap-3 text-center">
+        <h1 class="text-2xl font-bold text-slate-900">
+            Abacus Olympiad Test
+        </h1>
+
+        <div class="rounded-full bg-slate-900 px-5 py-2 text-xl font-bold tabular-nums text-white"
+            aria-label="Time remaining">
+            {{ timeRemainingLabel }}
+        </div>
+
+        <p class="text-sm font-semibold text-slate-600">
+            Question {{ questionNumber }} of {{ totalQuestions }}
+        </p>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+        <app-question-display [question]="question.questionSnapshot" />
+
+        <div class="mt-5 grid gap-3">
+            @for (option of options; track option.id) {
+            <app-answer-option [option]="option" [selected]="option.id === selectedOptionId"
+                (optionSelected)="onOptionSelected($event)" />
+            }
+        </div>
+
+        <div class="mt-6 grid gap-3 sm:grid-cols-2">
+            <button type="button"
+                class="min-h-12 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
+                [disabled]="currentQuestionIndex === 0" (click)="onPrevious()">
+                Previous
+            </button>
+
+            <button type="button" class="min-h-12 rounded-xl bg-slate-800 px-4 py-3 text-sm font-semibold text-white"
+                [attr.aria-pressed]="flagged" (click)="onFlag()">
+                {{ flagged ? 'Unflag' : 'Flag' }}
+            </button>
+        </div>
+    </div>
+</section>

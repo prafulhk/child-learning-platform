@@ -1,21 +1,46 @@
 @if (view === 'PRACTICE') {
 <app-practice-session />
 } @else if (view === 'HISTORY') {
-<app-practice-history (backToHome)="onBackToHome()" (viewAttempt)="onViewAttempt($event)"></app-practice-history>
+<app-practice-history (backToHome)="onBackToHome()" (viewAttempt)="onViewAttempt($event)" />
 } @else if (view === 'DETAIL' && selectedAttempt) {
-<app-practice-attempt-detail [attempt]="selectedAttempt"
-    (backToHistory)="onBackToHistory()"></app-practice-attempt-detail>
+<app-practice-attempt-detail [attempt]="selectedAttempt" (backToHistory)="onBackToHistory()" />
 } @else if (view === 'PARENT_TOOLS') {
-<app-parent-tools (openQuestionBank)="onOpenQuestionBank()" (backToHome)="onBackToHome()"></app-parent-tools>
+<app-parent-tools (openQuestionBank)="onOpenQuestionBank()" (backToHome)="onBackToHome()" />
 } @else if (view === 'QUESTION_BANK') {
-<app-question-bank (backToParentTools)="onBackToParentTools()"></app-question-bank>
-} @else {
-<app-practice-home (startPractice)="onStartPractice()" (viewHistory)="onViewHistory()"></app-practice-home>
+<app-question-bank (backToParentTools)="onBackToParentTools()" />
+} @else if (view === 'ASSESSMENT_SESSION' && activeAssessmentSession && currentAssessmentQuestion) {
+<app-assessment-session [question]="currentAssessmentQuestion"
+    [currentQuestionIndex]="activeAssessmentSession.currentQuestionIndex"
+    [totalQuestions]="activeAssessmentSession.questions.length" [selectedOptionId]="currentAssessmentSelectedOptionId"
+    [flagged]="currentAssessmentFlagged" [timeRemainingLabel]="'15:00'"
+    (optionSelected)="onAssessmentOptionSelected($event)" (previous)="onAssessmentPrevious()"
+    (flag)="onAssessmentFlag()" />
+} @else if (view === 'ASSESSMENT_HOME') {
+<app-assessment-home (startAssessment)="onStartAssessment()" (back)="onBackToHome()" />
+
+@if (assessmentError) {
 <div class="app-page-shell app-page-shell--standard pt-0 pb-6">
+    <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+        {{ assessmentError }}
+    </div>
+</div>
+}
+} @else {
+<app-practice-home (startPractice)="onStartPractice()" (viewHistory)="onViewHistory()" />
+
+<div class="app-page-shell app-page-shell--standard pt-0 pb-3">
     <button type="button"
         class="min-h-11 w-full rounded-xl bg-slate-800 px-4 py-3 text-base font-semibold text-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
         (click)="onOpenParentTools()">
         Parent Tools
+    </button>
+</div>
+
+<div class="app-page-shell app-page-shell--standard pt-0 pb-6">
+    <button type="button"
+        class="min-h-11 w-full rounded-xl bg-blue-600 px-4 py-3 text-base font-semibold text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        (click)="onOpenAssessment()">
+        Olympiad Test
     </button>
 </div>
 }
