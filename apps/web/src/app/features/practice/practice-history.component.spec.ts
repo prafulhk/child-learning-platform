@@ -178,4 +178,28 @@ describe('PracticeHistoryComponent', () => {
 
     expect(emitSpy).toHaveBeenCalledTimes(1);
   });
+
+  it('emits viewAttempt when a history card is clicked', () => {
+    const selectedAttempt = buildAttempt({ id: 'selected-attempt' });
+    mockLocalStorageService.getCompletedAttempts.mockReturnValue([selectedAttempt]);
+
+    const fixture = TestBed.createComponent(PracticeHistoryComponent);
+    const component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const emitSpy = vi.spyOn(component.viewAttempt, 'emit');
+
+    const card = fixture.nativeElement.querySelector(
+      '[data-testid="history-card"]',
+    ) as HTMLButtonElement | null;
+
+    if (!card) {
+      throw new Error('Expected history card to exist');
+    }
+
+    card.click();
+
+    expect(emitSpy).toHaveBeenCalledTimes(1);
+    expect(emitSpy).toHaveBeenCalledWith(selectedAttempt);
+  });
 });

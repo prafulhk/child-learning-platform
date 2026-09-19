@@ -9,6 +9,7 @@ import { LocalStorageService, PracticeAttempt } from '../../core/services/local-
 export class PracticeHistoryComponent implements OnInit {
   private readonly localStorageService = inject(LocalStorageService);
 
+  @Output() viewAttempt = new EventEmitter<PracticeAttempt>();
   @Output() backToHome = new EventEmitter<void>();
 
   readonly attempts = signal<PracticeAttempt[]>([]);
@@ -48,5 +49,9 @@ export class PracticeHistoryComponent implements OnInit {
 
   onBackToHome(): void {
     this.backToHome.emit();
+  }
+
+  onViewAttempt(attempt: PracticeAttempt): void {
+    this.viewAttempt.emit(attempt);
   }
 }

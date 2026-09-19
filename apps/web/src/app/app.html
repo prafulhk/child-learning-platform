@@ -1,7 +1,10 @@
 @if (view === 'PRACTICE') {
 <app-practice-session />
 } @else if (view === 'HISTORY') {
-<app-practice-history (backToHome)="onBackToHome()"></app-practice-history>
+<app-practice-history (backToHome)="onBackToHome()" (viewAttempt)="onViewAttempt($event)"></app-practice-history>
+} @else if (view === 'DETAIL' && selectedAttempt) {
+<app-practice-attempt-detail [attempt]="selectedAttempt"
+    (backToHistory)="onBackToHistory()"></app-practice-attempt-detail>
 } @else {
 <app-practice-home (startPractice)="onStartPractice()" (viewHistory)="onViewHistory()"></app-practice-home>
 }

@@ -1,6 +1,8 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { PracticeAttempt } from './core/services/local-storage.service';
 import { PracticeHistoryComponent } from './features/practice/practice-history.component';
+import { PracticeAttemptDetailComponent } from './features/practice/practice-attempt-detail.component';
 
 import { App } from './app';
 import { PracticeSessionComponent } from './features/practice/practice-session.component';
@@ -20,16 +22,39 @@ class PracticeSessionStubComponent {}
 class PracticeHistoryStubComponent {
   @Output()
   backToHome = new EventEmitter<void>();
+
+  @Output()
+  viewAttempt = new EventEmitter<PracticeAttempt>();
+}
+
+@Component({
+  selector: 'app-practice-attempt-detail',
+  standalone: true,
+  template: '<button type="button" (click)="backToHistory.emit()">Back to History</button>',
+})
+class PracticeAttemptDetailStubComponent {
+  @Input({ required: true }) attempt!: PracticeAttempt;
+
+  @Output()
+  backToHistory = new EventEmitter<void>();
 }
 
 describe('App', () => {
   beforeEach(async () => {
     TestBed.overrideComponent(App, {
       remove: {
-        imports: [PracticeSessionComponent, PracticeHistoryComponent],
+        imports: [
+          PracticeSessionComponent,
+          PracticeHistoryComponent,
+          PracticeAttemptDetailComponent,
+        ],
       },
       add: {
-        imports: [PracticeSessionStubComponent, PracticeHistoryStubComponent],
+        imports: [
+          PracticeSessionStubComponent,
+          PracticeHistoryStubComponent,
+          PracticeAttemptDetailStubComponent,
+        ],
       },
     });
 
@@ -105,6 +130,96 @@ describe('App', () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
     expect(compiled.querySelector('app-practice-history')).toBeTruthy();
+  });
+
+  it('should render the practice attempt detail host after a history item is clicked', () => {
+    const fixture = TestBed.createComponent(App);
+
+    fixture.detectChanges();
+
+    const homeButtons = Array.from(
+      fixture.nativeElement.querySelectorAll('button'),
+    ) as HTMLButtonElement[];
+    const historyButton =
+      homeButtons.find((button) => button.textContent?.trim() === 'Practice History') ?? null;
+
+    if (!historyButton) {
+      throw new Error('Expected Practice History button to be rendered');
+    }
+
+    historyButton.click();
+    fixture.detectChanges();
+
+    const historyComponent = fixture.debugElement.children[0]
+      .componentInstance as PracticeHistoryStubComponent;
+    historyComponent.viewAttempt.emit({
+      id: 'attempt-1',
+      topicId: 'single-digit-addition',
+      startedAt: '2026-09-19T10:00:00Z',
+      completedAt: '2026-09-19T10:01:00Z',
+      presentedQuestions: [],
+      selectedAnswers: {},
+      result: {
+        totalQuestions: 1,
+        correctCount: 1,
+        incorrectCount: 0,
+        unansweredCount: 0,
+        accuracyPercentage: 100,
+      },
+    });
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+
+    expect(compiled.querySelector('app-practice-attempt-detail')).toBeTruthy();
+  });
+
+  it('should return to history after Back to History is clicked from details', () => {
+    const fixture = TestBed.createComponent(App);
+
+    fixture.detectChanges();
+
+    const homeButtons = Array.from(
+      fixture.nativeElement.querySelectorAll('button'),
+    ) as HTMLButtonElement[];
+    const historyButton =
+      homeButtons.find((button) => button.textContent?.trim() === 'Practice History') ?? null;
+
+    if (!historyButton) {
+      throw new Error('Expected Practice History button to be rendered');
+    }
+
+    historyButton.click();
+    fixture.detectChanges();
+
+    const historyComponent = fixture.debugElement.children[0]
+      .componentInstance as PracticeHistoryStubComponent;
+    historyComponent.viewAttempt.emit({
+      id: 'attempt-1',
+      topicId: 'single-digit-addition',
+      startedAt: '2026-09-19T10:00:00Z',
+      completedAt: '2026-09-19T10:01:00Z',
+      presentedQuestions: [],
+      selectedAnswers: {},
+      result: {
+        totalQuestions: 1,
+        correctCount: 1,
+        incorrectCount: 0,
+        unansweredCount: 0,
+        accuracyPercentage: 100,
+      },
+    });
+    fixture.detectChanges();
+
+    const detailComponent = fixture.debugElement.children[0]
+      .componentInstance as PracticeAttemptDetailStubComponent;
+    detailComponent.backToHistory.emit();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+
+    expect(compiled.querySelector('app-practice-history')).toBeTruthy();
+    expect(compiled.querySelector('app-practice-attempt-detail')).toBeFalsy();
   });
 
   it('should return to home after Back to Home is clicked from history', () => {

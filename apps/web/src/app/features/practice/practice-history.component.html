@@ -8,12 +8,15 @@
   } @else {
   <div class="mt-6 space-y-3">
     @for (attempt of attempts(); track attempt.id) {
-    <article class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200" data-testid="history-card"
-      [attr.data-attempt-id]="attempt.id">
-      <p class="text-sm font-medium text-slate-600">Completed</p>
-      <p class="mt-1 text-base font-semibold text-slate-900" data-testid="attempt-completed-at">
-        {{ formatCompletedDateTime(attempt.completedAt) }}
-      </p>
+    <button type="button"
+      class="w-full rounded-2xl bg-white p-4 text-left shadow-sm ring-1 ring-slate-200 transition active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+      data-testid="history-card" [attr.data-attempt-id]="attempt.id" (click)="onViewAttempt(attempt)">
+      <div>
+        <p class="text-sm font-medium text-slate-600">Completed</p>
+        <p class="mt-1 text-base font-semibold text-slate-900" data-testid="attempt-completed-at">
+          {{ formatCompletedDateTime(attempt.completedAt) }}
+        </p>
+      </div>
 
       <div class="mt-4 grid grid-cols-3 gap-2 text-center">
         <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
@@ -37,7 +40,7 @@
           </p>
         </div>
       </div>
-    </article>
+    </button>
     }
   </div>
   }
