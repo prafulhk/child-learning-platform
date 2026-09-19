@@ -5,6 +5,17 @@
 } @else if (view === 'DETAIL' && selectedAttempt) {
 <app-practice-attempt-detail [attempt]="selectedAttempt"
     (backToHistory)="onBackToHistory()"></app-practice-attempt-detail>
+} @else if (view === 'PARENT_TOOLS') {
+<app-parent-tools (openQuestionBank)="onOpenQuestionBank()" (backToHome)="onBackToHome()"></app-parent-tools>
+} @else if (view === 'QUESTION_BANK') {
+<app-question-bank (backToParentTools)="onBackToParentTools()"></app-question-bank>
 } @else {
 <app-practice-home (startPractice)="onStartPractice()" (viewHistory)="onViewHistory()"></app-practice-home>
+<div class="mx-auto w-full max-w-md px-4 pb-6">
+    <button type="button"
+        class="min-h-11 w-full rounded-xl bg-slate-800 px-4 py-3 text-base font-semibold text-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+        (click)="onOpenParentTools()">
+        Parent Tools
+    </button>
+</div>
 }

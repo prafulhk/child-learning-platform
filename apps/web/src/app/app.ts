@@ -4,8 +4,10 @@ import { PracticeAttemptDetailComponent } from './features/practice/practice-att
 import { PracticeHistoryComponent } from './features/practice/practice-history.component';
 import { PracticeHomeComponent } from './features/practice/practice-home.component';
 import { PracticeSessionComponent } from './features/practice/practice-session.component';
+import { ParentToolsComponent } from './features/parent-tools/parent-tools.component';
+import { QuestionBankComponent } from './features/question-bank/question-bank.component';
 
-type AppView = 'HOME' | 'PRACTICE' | 'HISTORY' | 'DETAIL';
+type AppView = 'HOME' | 'PRACTICE' | 'HISTORY' | 'DETAIL' | 'PARENT_TOOLS' | 'QUESTION_BANK';
 
 @Component({
   imports: [
@@ -13,6 +15,8 @@ type AppView = 'HOME' | 'PRACTICE' | 'HISTORY' | 'DETAIL';
     PracticeSessionComponent,
     PracticeHistoryComponent,
     PracticeAttemptDetailComponent,
+    ParentToolsComponent,
+    QuestionBankComponent,
   ],
   selector: 'app-root',
   styleUrl: './app.scss',
@@ -35,6 +39,21 @@ export class App {
   onBackToHome(): void {
     this.selectedAttempt = null;
     this.view = 'HOME';
+  }
+
+  onOpenParentTools(): void {
+    this.selectedAttempt = null;
+    this.view = 'PARENT_TOOLS';
+  }
+
+  onOpenQuestionBank(): void {
+    this.selectedAttempt = null;
+    this.view = 'QUESTION_BANK';
+  }
+
+  onBackToParentTools(): void {
+    this.selectedAttempt = null;
+    this.view = 'PARENT_TOOLS';
   }
 
   onViewAttempt(attempt: PracticeAttempt): void {
