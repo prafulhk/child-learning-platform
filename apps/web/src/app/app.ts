@@ -1,12 +1,10 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component } from '@angular/core';
+import { PracticeSessionComponent } from './features/practice/practice-session.component';
 
 @Component({
-  imports: [RouterOutlet],
+  imports: [PracticeSessionComponent],
   selector: 'app-root',
   styleUrl: './app.scss',
   templateUrl: './app.html',
 })
-export class App {
-  protected readonly title = signal('web');
-}
+export class App {}
