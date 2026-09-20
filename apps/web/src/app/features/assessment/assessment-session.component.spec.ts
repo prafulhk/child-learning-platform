@@ -102,11 +102,14 @@ describe('AssessmentSessionComponent', () => {
     expect(emitSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('does not render a Next button', () => {
+  it('renders a Next button when not on the last question', () => {
     const buttons = Array.from(
       fixture.nativeElement.querySelectorAll('button'),
     ) as HTMLButtonElement[];
 
-    expect(buttons.some((button) => button.textContent?.trim() === 'Next')).toBe(false);
+    const nextButton = buttons.find((button) => button.textContent?.trim() === 'Next');
+
+    expect(nextButton).toBeDefined();
+    expect(nextButton?.disabled).toBe(false);
   });
 });

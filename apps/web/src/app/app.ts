@@ -66,7 +66,7 @@ export class App implements OnDestroy {
 
   private assessmentCountdownTimerId: ReturnType<typeof window.setInterval> | null = null;
 
-  private readonly assessmentCountdownTickMs = 1000;
+  private readonly assessmentCountdownTickMs = 250;
 
   private readonly assessmentService = inject(AssessmentService);
 
@@ -74,8 +74,10 @@ export class App implements OnDestroy {
 
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly localStorageService = inject(LocalStorageService);
+
   completedAssessmentAttempt: AssessmentAttempt | null = null;
-  private assessmentExpiryTimerId: ReturnType<typeof window.setTimeout> | null = null;
+
+  private assessmentCompletionLocked = false;
 
   readonly olympiadDefinition: AssessmentDefinition = {
     id: 'olympiad-test',
@@ -108,6 +110,8 @@ export class App implements OnDestroy {
 
     this.selectedAttempt = null;
     this.activeAssessmentSession = null;
+    this.completedAssessmentAttempt = null;
+    this.assessmentCompletionLocked = false;
     this.assessmentRemainingSeconds = 0;
     this.assessmentError = '';
     this.view = 'HOME';
@@ -139,6 +143,8 @@ export class App implements OnDestroy {
 
     this.selectedAttempt = null;
     this.activeAssessmentSession = null;
+    this.completedAssessmentAttempt = null;
+    this.assessmentCompletionLocked = false;
     this.assessmentRemainingSeconds = 0;
     this.assessmentError = '';
     this.view = 'ASSESSMENT_HOME';
@@ -148,6 +154,8 @@ export class App implements OnDestroy {
     this.stopAssessmentCountdown();
 
     this.activeAssessmentSession = null;
+    this.completedAssessmentAttempt = null;
+    this.assessmentCompletionLocked = false;
     this.assessmentRemainingSeconds = 0;
     this.assessmentError = '';
 
@@ -161,10 +169,7 @@ export class App implements OnDestroy {
         questionPool,
       );
 
-      this.assessmentRemainingSeconds = this.getAssessmentRemainingSeconds();
-
       this.view = 'ASSESSMENT_SESSION';
-
       this.startAssessmentCountdown();
     } catch (error) {
       this.assessmentError =
@@ -177,9 +182,11 @@ export class App implements OnDestroy {
   }
 
   onAssessmentOptionSelected(optionId: string): void {
+    this.syncAssessmentTimer();
+
     const session = this.activeAssessmentSession;
 
-    if (!session || this.assessmentRemainingSeconds === 0) {
+    if (!session || this.view !== 'ASSESSMENT_SESSION' || this.assessmentRemainingSeconds === 0) {
       return;
     }
 
@@ -200,9 +207,11 @@ export class App implements OnDestroy {
   }
 
   onAssessmentPrevious(): void {
+    this.syncAssessmentTimer();
+
     const session = this.activeAssessmentSession;
 
-    if (!session || this.assessmentRemainingSeconds === 0) {
+    if (!session || this.view !== 'ASSESSMENT_SESSION' || this.assessmentRemainingSeconds === 0) {
       return;
     }
 
@@ -212,9 +221,11 @@ export class App implements OnDestroy {
   }
 
   onAssessmentFlag(): void {
+    this.syncAssessmentTimer();
+
     const session = this.activeAssessmentSession;
 
-    if (!session || this.assessmentRemainingSeconds === 0) {
+    if (!session || this.view !== 'ASSESSMENT_SESSION' || this.assessmentRemainingSeconds === 0) {
       return;
     }
 
@@ -289,26 +300,9 @@ export class App implements OnDestroy {
 
     this.syncAssessmentTimer();
 
-    const session = this.activeAssessmentSession;
-
-    if (!session) {
+    if (!this.activeAssessmentSession || this.view !== 'ASSESSMENT_SESSION') {
       return;
     }
-
-    const remainingMilliseconds = new Date(session.endsAt).getTime() - Date.now();
-
-    this.assessmentExpiryTimerId = window.setTimeout(
-      () => {
-        if (this.activeAssessmentSession && this.view === 'ASSESSMENT_SESSION') {
-          this.assessmentRemainingSeconds = 0;
-          this.completeAssessment();
-          this.view = 'ASSESSMENT_RESULT';
-
-          this.changeDetectorRef.detectChanges();
-        }
-      },
-      Math.max(0, remainingMilliseconds) + 100,
-    );
 
     this.assessmentCountdownTimerId = window.setInterval(() => {
       this.syncAssessmentTimer();
@@ -316,13 +310,24 @@ export class App implements OnDestroy {
   }
 
   private stopAssessmentCountdown(): void {
-    if (this.assessmentExpiryTimerId !== null) {
-      window.clearTimeout(this.assessmentExpiryTimerId);
-      this.assessmentExpiryTimerId = null;
+    if (this.assessmentCountdownTimerId !== null) {
+      window.clearInterval(this.assessmentCountdownTimerId);
+      this.assessmentCountdownTimerId = null;
+    }
+  }
+
+  private resumeAssessmentCountdown(): void {
+    if (!this.activeAssessmentSession || this.view !== 'ASSESSMENT_SESSION') {
+      return;
     }
 
-    window.clearInterval(this.assessmentCountdownTimerId);
-    this.assessmentCountdownTimerId = null;
+    this.syncAssessmentTimer();
+
+    if (!this.activeAssessmentSession || this.view !== 'ASSESSMENT_SESSION') {
+      return;
+    }
+
+    this.startAssessmentCountdown();
   }
 
   private syncAssessmentTimer(): void {
@@ -330,34 +335,41 @@ export class App implements OnDestroy {
 
     if (!session || this.view !== 'ASSESSMENT_SESSION') {
       this.assessmentRemainingSeconds = 0;
+      this.stopAssessmentCountdown();
       return;
     }
 
-    this.assessmentRemainingSeconds = this.getAssessmentRemainingSeconds();
+    const remainingMilliseconds = this.getAssessmentRemainingMilliseconds(session);
+    const nextRemainingSeconds =
+      remainingMilliseconds > 0 ? Math.ceil(remainingMilliseconds / 1000) : 0;
+    const remainingSecondsChanged = nextRemainingSeconds !== this.assessmentRemainingSeconds;
 
-    if (this.assessmentRemainingSeconds <= 1) {
-      this.assessmentRemainingSeconds = 0;
+    this.assessmentRemainingSeconds = nextRemainingSeconds;
 
-      this.completeAssessment();
-      this.view = 'ASSESSMENT_RESULT';
-
-      this.changeDetectorRef.detectChanges();
+    if (remainingMilliseconds <= 0) {
+      this.finishAssessmentSession();
       return;
     }
 
-    this.changeDetectorRef.markForCheck();
+    if (remainingSecondsChanged) {
+      this.changeDetectorRef.markForCheck();
+    }
   }
 
-  private getAssessmentRemainingSeconds(): number {
-    const session = this.activeAssessmentSession;
-
+  private getAssessmentRemainingMilliseconds(
+    session: ActiveAssessmentSession | null = this.activeAssessmentSession,
+  ): number {
     if (!session) {
       return 0;
     }
 
-    const remainingMilliseconds = new Date(session.endsAt).getTime() - Date.now();
+    const endsAtMilliseconds = new Date(session.endsAt).getTime();
 
-    return Math.max(0, Math.ceil(remainingMilliseconds / 1000));
+    if (Number.isNaN(endsAtMilliseconds)) {
+      return 0;
+    }
+
+    return Math.max(0, endsAtMilliseconds - Date.now());
   }
 
   private formatRemainingTime(totalSeconds: number): string {
@@ -368,13 +380,46 @@ export class App implements OnDestroy {
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   }
 
-  private completeAssessment(): void {
-    const session = this.activeAssessmentSession;
-
-    if (!session) {
+  private finishAssessmentSession(): void {
+    if (!this.completeAssessment()) {
       return;
     }
 
+    this.view = 'ASSESSMENT_RESULT';
+    this.changeDetectorRef.detectChanges();
+  }
+
+  private completeAssessment(): boolean {
+    if (this.assessmentCompletionLocked) {
+      return false;
+    }
+
+    const session = this.activeAssessmentSession;
+
+    if (!session) {
+      return false;
+    }
+
+    this.assessmentCompletionLocked = true;
+
+    try {
+      const attempt = this.buildAssessmentAttempt(session);
+
+      this.completedAssessmentAttempt = attempt;
+      this.localStorageService.saveCompletedAssessmentAttempt(attempt);
+
+      this.activeAssessmentSession = null;
+      this.assessmentRemainingSeconds = 0;
+      this.stopAssessmentCountdown();
+
+      return true;
+    } catch (error) {
+      this.assessmentCompletionLocked = false;
+      throw error;
+    }
+  }
+
+  private buildAssessmentAttempt(session: ActiveAssessmentSession): AssessmentAttempt {
     let correctCount = 0;
     let incorrectCount = 0;
     let unansweredCount = 0;
@@ -392,18 +437,17 @@ export class App implements OnDestroy {
     }
 
     const totalQuestions = session.questions.length;
-
     const accuracyPercentage =
       totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
 
-    const attempt: AssessmentAttempt = {
+    return {
       id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
       assessmentId: session.assessmentId,
       startedAt: session.startedAt,
       completedAt: new Date().toISOString(),
-      questions: session.questions,
-      selectedAnswers: session.selectedAnswers,
-      flaggedQuestionIds: session.flaggedQuestionIds,
+      questions: this.cloneAssessmentQuestions(session.questions),
+      selectedAnswers: { ...session.selectedAnswers },
+      flaggedQuestionIds: [...session.flaggedQuestionIds],
       result: {
         totalQuestions,
         correctCount,
@@ -412,22 +456,43 @@ export class App implements OnDestroy {
         accuracyPercentage,
       },
     };
-    this.completedAssessmentAttempt = attempt;
+  }
 
-    this.localStorageService.saveCompletedAssessmentAttempt(attempt);
-
-    this.stopAssessmentCountdown();
+  private cloneAssessmentQuestions(
+    questions: AssessmentQuestionSnapshot[],
+  ): AssessmentQuestionSnapshot[] {
+    return questions.map((question) => ({
+      ...question,
+      questionSnapshot: {
+        ...question.questionSnapshot,
+        rows: question.questionSnapshot.rows.map((row) => ({
+          ...row,
+        })),
+        options: question.questionSnapshot.options.map((option) => ({
+          ...option,
+        })),
+      },
+    }));
   }
 
   onSubmitAssessment(): void {
-    this.completeAssessment();
-    this.view = 'ASSESSMENT_RESULT';
+    this.syncAssessmentTimer();
+
+    if (this.view === 'ASSESSMENT_RESULT') {
+      return;
+    }
+
+    if (this.completeAssessment()) {
+      this.view = 'ASSESSMENT_RESULT';
+    }
   }
 
   onAssessmentNext(): void {
+    this.syncAssessmentTimer();
+
     const session = this.activeAssessmentSession;
 
-    if (!session) {
+    if (!session || this.view !== 'ASSESSMENT_SESSION' || this.assessmentRemainingSeconds === 0) {
       return;
     }
 
@@ -438,8 +503,21 @@ export class App implements OnDestroy {
 
   @HostListener('document:visibilitychange')
   onVisibilityChange(): void {
-    if (document.visibilityState === 'visible') {
-      this.syncAssessmentTimer();
+    if (document.visibilityState === 'hidden') {
+      this.stopAssessmentCountdown();
+      return;
     }
+
+    this.resumeAssessmentCountdown();
+  }
+
+  @HostListener('window:focus')
+  onWindowFocus(): void {
+    this.resumeAssessmentCountdown();
+  }
+
+  @HostListener('window:pageshow')
+  onPageShow(): void {
+    this.resumeAssessmentCountdown();
   }
 }

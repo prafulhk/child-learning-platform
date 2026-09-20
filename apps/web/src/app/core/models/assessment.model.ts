@@ -44,6 +44,6 @@ export interface AssessmentAttempt {
 }
 export const OLYMPIAD_ASSESSMENT_CONFIG: AssessmentConfig = {
   questionCount: 100,
-  durationSeconds: 1 * 10,
+  durationSeconds: 15 * 60,
   selectionMode: 'RANDOM',
 };
