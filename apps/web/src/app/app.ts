@@ -1,8 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnDestroy, HostListener } from '@angular/core';
 
 import {
   OLYMPIAD_ASSESSMENT_CONFIG,
   type ActiveAssessmentSession,
+  type AssessmentAttempt,
   type AssessmentDefinition,
   type AssessmentQuestionSnapshot,
 } from './core/models/assessment.model';
@@ -22,6 +23,8 @@ import { PracticeSessionComponent } from './features/practice/practice-session.c
 
 import { ParentToolsComponent } from './features/parent-tools/parent-tools.component';
 import { QuestionBankComponent } from './features/question-bank/question-bank.component';
+import { LocalStorageService } from './core/services/local-storage.service';
+import { PracticeResultComponent } from './features/practice/practice-result.component';
 
 type AppView =
   | 'HOME'
@@ -31,7 +34,8 @@ type AppView =
   | 'PARENT_TOOLS'
   | 'QUESTION_BANK'
   | 'ASSESSMENT_HOME'
-  | 'ASSESSMENT_SESSION';
+  | 'ASSESSMENT_SESSION'
+  | 'ASSESSMENT_RESULT';
 
 @Component({
   imports: [
@@ -43,12 +47,13 @@ type AppView =
     PracticeAttemptDetailComponent,
     ParentToolsComponent,
     QuestionBankComponent,
+    PracticeResultComponent,
   ],
   selector: 'app-root',
   styleUrl: './app.scss',
   templateUrl: './app.html',
 })
-export class App {
+export class App implements OnDestroy {
   view: AppView = 'HOME';
 
   selectedAttempt: PracticeAttempt | null = null;
@@ -57,9 +62,20 @@ export class App {
 
   assessmentError = '';
 
+  assessmentRemainingSeconds = 0;
+
+  private assessmentCountdownTimerId: ReturnType<typeof window.setInterval> | null = null;
+
+  private readonly assessmentCountdownTickMs = 1000;
+
   private readonly assessmentService = inject(AssessmentService);
 
   private readonly questionService = inject(QuestionService);
+
+  private readonly changeDetectorRef = inject(ChangeDetectorRef);
+  private readonly localStorageService = inject(LocalStorageService);
+  completedAssessmentAttempt: AssessmentAttempt | null = null;
+  private assessmentExpiryTimerId: ReturnType<typeof window.setTimeout> | null = null;
 
   readonly olympiadDefinition: AssessmentDefinition = {
     id: 'olympiad-test',
@@ -69,47 +85,70 @@ export class App {
     config: OLYMPIAD_ASSESSMENT_CONFIG,
   };
 
+  ngOnDestroy(): void {
+    this.stopAssessmentCountdown();
+  }
+
   onStartPractice(): void {
+    this.stopAssessmentCountdown();
+
     this.selectedAttempt = null;
     this.view = 'PRACTICE';
   }
 
   onViewHistory(): void {
+    this.stopAssessmentCountdown();
+
     this.selectedAttempt = null;
     this.view = 'HISTORY';
   }
 
   onBackToHome(): void {
+    this.stopAssessmentCountdown();
+
     this.selectedAttempt = null;
     this.activeAssessmentSession = null;
+    this.assessmentRemainingSeconds = 0;
     this.assessmentError = '';
     this.view = 'HOME';
   }
 
   onOpenParentTools(): void {
+    this.stopAssessmentCountdown();
+
     this.selectedAttempt = null;
     this.view = 'PARENT_TOOLS';
   }
 
   onOpenQuestionBank(): void {
+    this.stopAssessmentCountdown();
+
     this.selectedAttempt = null;
     this.view = 'QUESTION_BANK';
   }
 
   onBackToParentTools(): void {
+    this.stopAssessmentCountdown();
+
     this.selectedAttempt = null;
     this.view = 'PARENT_TOOLS';
   }
 
   onOpenAssessment(): void {
+    this.stopAssessmentCountdown();
+
     this.selectedAttempt = null;
     this.activeAssessmentSession = null;
+    this.assessmentRemainingSeconds = 0;
     this.assessmentError = '';
     this.view = 'ASSESSMENT_HOME';
   }
 
   onStartAssessment(): void {
+    this.stopAssessmentCountdown();
+
     this.activeAssessmentSession = null;
+    this.assessmentRemainingSeconds = 0;
     this.assessmentError = '';
 
     try {
@@ -122,7 +161,11 @@ export class App {
         questionPool,
       );
 
+      this.assessmentRemainingSeconds = this.getAssessmentRemainingSeconds();
+
       this.view = 'ASSESSMENT_SESSION';
+
+      this.startAssessmentCountdown();
     } catch (error) {
       this.assessmentError =
         error instanceof Error
@@ -136,7 +179,7 @@ export class App {
   onAssessmentOptionSelected(optionId: string): void {
     const session = this.activeAssessmentSession;
 
-    if (!session) {
+    if (!session || this.assessmentRemainingSeconds === 0) {
       return;
     }
 
@@ -159,7 +202,7 @@ export class App {
   onAssessmentPrevious(): void {
     const session = this.activeAssessmentSession;
 
-    if (!session) {
+    if (!session || this.assessmentRemainingSeconds === 0) {
       return;
     }
 
@@ -171,7 +214,7 @@ export class App {
   onAssessmentFlag(): void {
     const session = this.activeAssessmentSession;
 
-    if (!session) {
+    if (!session || this.assessmentRemainingSeconds === 0) {
       return;
     }
 
@@ -224,12 +267,179 @@ export class App {
     return session.flaggedQuestionIds.includes(question.questionId);
   }
 
+  get assessmentRemainingTimeLabel(): string {
+    return this.formatRemainingTime(this.assessmentRemainingSeconds);
+  }
+
   onViewAttempt(attempt: PracticeAttempt): void {
+    this.stopAssessmentCountdown();
+
     this.selectedAttempt = attempt;
     this.view = 'DETAIL';
   }
 
   onBackToHistory(): void {
+    this.stopAssessmentCountdown();
+
     this.view = 'HISTORY';
+  }
+
+  private startAssessmentCountdown(): void {
+    this.stopAssessmentCountdown();
+
+    this.syncAssessmentTimer();
+
+    const session = this.activeAssessmentSession;
+
+    if (!session) {
+      return;
+    }
+
+    const remainingMilliseconds = new Date(session.endsAt).getTime() - Date.now();
+
+    this.assessmentExpiryTimerId = window.setTimeout(
+      () => {
+        if (this.activeAssessmentSession && this.view === 'ASSESSMENT_SESSION') {
+          this.assessmentRemainingSeconds = 0;
+          this.completeAssessment();
+          this.view = 'ASSESSMENT_RESULT';
+
+          this.changeDetectorRef.detectChanges();
+        }
+      },
+      Math.max(0, remainingMilliseconds) + 100,
+    );
+
+    this.assessmentCountdownTimerId = window.setInterval(() => {
+      this.syncAssessmentTimer();
+    }, this.assessmentCountdownTickMs);
+  }
+
+  private stopAssessmentCountdown(): void {
+    if (this.assessmentExpiryTimerId !== null) {
+      window.clearTimeout(this.assessmentExpiryTimerId);
+      this.assessmentExpiryTimerId = null;
+    }
+
+    window.clearInterval(this.assessmentCountdownTimerId);
+    this.assessmentCountdownTimerId = null;
+  }
+
+  private syncAssessmentTimer(): void {
+    const session = this.activeAssessmentSession;
+
+    if (!session || this.view !== 'ASSESSMENT_SESSION') {
+      this.assessmentRemainingSeconds = 0;
+      return;
+    }
+
+    this.assessmentRemainingSeconds = this.getAssessmentRemainingSeconds();
+
+    if (this.assessmentRemainingSeconds <= 1) {
+      this.assessmentRemainingSeconds = 0;
+
+      this.completeAssessment();
+      this.view = 'ASSESSMENT_RESULT';
+
+      this.changeDetectorRef.detectChanges();
+      return;
+    }
+
+    this.changeDetectorRef.markForCheck();
+  }
+
+  private getAssessmentRemainingSeconds(): number {
+    const session = this.activeAssessmentSession;
+
+    if (!session) {
+      return 0;
+    }
+
+    const remainingMilliseconds = new Date(session.endsAt).getTime() - Date.now();
+
+    return Math.max(0, Math.ceil(remainingMilliseconds / 1000));
+  }
+
+  private formatRemainingTime(totalSeconds: number): string {
+    const safeSeconds = Math.max(0, totalSeconds);
+    const minutes = Math.floor(safeSeconds / 60);
+    const seconds = safeSeconds % 60;
+
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+
+  private completeAssessment(): void {
+    const session = this.activeAssessmentSession;
+
+    if (!session) {
+      return;
+    }
+
+    let correctCount = 0;
+    let incorrectCount = 0;
+    let unansweredCount = 0;
+
+    for (const question of session.questions) {
+      const selectedOptionId = session.selectedAnswers[question.questionId];
+
+      if (!selectedOptionId) {
+        unansweredCount += 1;
+      } else if (selectedOptionId === question.questionSnapshot.correctOptionId) {
+        correctCount += 1;
+      } else {
+        incorrectCount += 1;
+      }
+    }
+
+    const totalQuestions = session.questions.length;
+
+    const accuracyPercentage =
+      totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+
+    const attempt: AssessmentAttempt = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      assessmentId: session.assessmentId,
+      startedAt: session.startedAt,
+      completedAt: new Date().toISOString(),
+      questions: session.questions,
+      selectedAnswers: session.selectedAnswers,
+      flaggedQuestionIds: session.flaggedQuestionIds,
+      result: {
+        totalQuestions,
+        correctCount,
+        incorrectCount,
+        unansweredCount,
+        accuracyPercentage,
+      },
+    };
+    this.completedAssessmentAttempt = attempt;
+
+    this.localStorageService.saveCompletedAssessmentAttempt(attempt);
+
+    this.stopAssessmentCountdown();
+  }
+
+  onSubmitAssessment(): void {
+    this.completeAssessment();
+    this.view = 'ASSESSMENT_RESULT';
+  }
+
+  onAssessmentNext(): void {
+    const session = this.activeAssessmentSession;
+
+    if (!session) {
+      return;
+    }
+
+    if (session.currentQuestionIndex < session.questions.length - 1) {
+      session.currentQuestionIndex += 1;
+    }
+  }
+
+  @HostListener('document:visibilitychange')
+  onVisibilityChange(): void {
+    if (document.visibilityState === 'visible') {
+      this.syncAssessmentTimer();
+    }
   }
 }

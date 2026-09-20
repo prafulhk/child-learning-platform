@@ -1,13 +1,10 @@
 import type { SimpleArithmeticQuestion } from './question.model';
-
 export type AssessmentSelectionMode = 'RANDOM' | 'FIXED';
-
 export interface AssessmentConfig {
   questionCount: number;
   durationSeconds: number;
   selectionMode: AssessmentSelectionMode;
 }
-
 export interface AssessmentDefinition {
   id: string;
   title: string;
@@ -16,12 +13,10 @@ export interface AssessmentDefinition {
   config: AssessmentConfig;
   questionIds?: string[];
 }
-
 export interface AssessmentQuestionSnapshot {
   questionId: string;
   questionSnapshot: SimpleArithmeticQuestion;
 }
-
 export interface ActiveAssessmentSession {
   assessmentId: string;
   startedAt: string;
@@ -31,7 +26,6 @@ export interface ActiveAssessmentSession {
   selectedAnswers: Record<string, string>;
   flaggedQuestionIds: string[];
 }
-
 export interface AssessmentAttempt {
   id: string;
   assessmentId: string;
@@ -48,9 +42,8 @@ export interface AssessmentAttempt {
     accuracyPercentage: number;
   };
 }
-
 export const OLYMPIAD_ASSESSMENT_CONFIG: AssessmentConfig = {
   questionCount: 100,
-  durationSeconds: 15 * 60,
+  durationSeconds: 1 * 10,
   selectionMode: 'RANDOM',
 };

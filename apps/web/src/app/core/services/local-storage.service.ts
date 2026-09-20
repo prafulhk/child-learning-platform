@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Question } from '../models/question.model';
+import type { AssessmentAttempt } from '../models/assessment.model';
 
 export interface PresentedQuestionSnapshot {
   questionId: string;
@@ -38,6 +39,7 @@ export class LocalStorageService {
   private readonly activeSessionKey = 'practice.activeSession';
   private readonly attemptsKey = 'practice.completedAttempts';
   private readonly questionBankKey = 'child-learning.question-bank.v1';
+  private readonly assessmentAttemptsKey = 'assessment.completedAttempts';
 
   saveActiveSession(session: ActivePracticeSession): void {
     localStorage.setItem(this.activeSessionKey, JSON.stringify(session));
@@ -83,6 +85,30 @@ export class LocalStorageService {
   getCompletedAttemptById(attemptId: string): PracticeAttempt | null {
     const attempts = this.getCompletedAttempts();
     return attempts.find((a) => a.id === attemptId) ?? null;
+  }
+
+  saveCompletedAssessmentAttempt(attempt: AssessmentAttempt): void {
+    const existing = this.getCompletedAssessmentAttempts();
+
+    existing.push(attempt);
+
+    localStorage.setItem(this.assessmentAttemptsKey, JSON.stringify(existing));
+  }
+
+  getCompletedAssessmentAttempts(): AssessmentAttempt[] {
+    const raw = localStorage.getItem(this.assessmentAttemptsKey);
+
+    if (!raw) {
+      return [];
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as AssessmentAttempt[];
+
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
   }
 
   saveQuestionBankQuestions(topicId: string, questions: Question[]): void {

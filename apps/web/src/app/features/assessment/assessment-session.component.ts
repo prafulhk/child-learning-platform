@@ -41,6 +41,12 @@ export class AssessmentSessionComponent {
   @Output()
   readonly flag = new EventEmitter<void>();
 
+  @Output()
+  readonly submitAssessment = new EventEmitter<void>();
+
+  @Output()
+  readonly next = new EventEmitter<void>();
+
   get questionNumber(): number {
     return this.currentQuestionIndex + 1;
   }
@@ -59,5 +65,13 @@ export class AssessmentSessionComponent {
 
   onFlag(): void {
     this.flag.emit();
+  }
+
+  onSubmitAssessment(): void {
+    this.submitAssessment.emit();
+  }
+
+  onNext(): void {
+    this.next.emit();
   }
 }

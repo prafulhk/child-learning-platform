@@ -1,7 +1,9 @@
 @if (attempt; as a) {
 <section class="app-page-shell app-page-shell--standard" aria-labelledby="practice-completed-heading">
     <header class="text-center">
-        <h2 id="practice-completed-heading" class="text-2xl font-bold text-slate-900">Practice Completed</h2>
+        <h2 id="practice-completed-heading" class="text-2xl font-bold text-slate-900">
+            {{ title }}
+        </h2>
         <p class="mt-4 text-5xl font-extrabold text-blue-700" aria-label="Accuracy percentage">
             {{ a.result.accuracyPercentage }}%
         </p>
@@ -27,7 +29,7 @@
         <button type="button"
             class="min-h-11 w-full rounded-xl bg-blue-600 px-4 py-3 text-lg font-semibold text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             (click)="onRestart()">
-            Practice Again
+            {{ actionLabel }}
         </button>
     </div>
 </section>

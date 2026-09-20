@@ -12,12 +12,16 @@
 <app-assessment-session [question]="currentAssessmentQuestion"
     [currentQuestionIndex]="activeAssessmentSession.currentQuestionIndex"
     [totalQuestions]="activeAssessmentSession.questions.length" [selectedOptionId]="currentAssessmentSelectedOptionId"
-    [flagged]="currentAssessmentFlagged" [timeRemainingLabel]="'15:00'"
+    [flagged]="currentAssessmentFlagged" [timeRemainingLabel]="assessmentRemainingTimeLabel"
     (optionSelected)="onAssessmentOptionSelected($event)" (previous)="onAssessmentPrevious()"
-    (flag)="onAssessmentFlag()" />
-} @else if (view === 'ASSESSMENT_HOME') {
+    (next)="onAssessmentNext()" (flag)="onAssessmentFlag()" (submitAssessment)="onSubmitAssessment()" />
+}
+@else if (view === 'ASSESSMENT_RESULT' && completedAssessmentAttempt) {
+<app-practice-result [attempt]="completedAssessmentAttempt" title="Olympiad Assessment Completed"
+    actionLabel="Back to Assessments" (restart)="onOpenAssessment()" />
+}
+@else if (view === 'ASSESSMENT_HOME') {
 <app-assessment-home (startAssessment)="onStartAssessment()" (back)="onBackToHome()" />
-
 @if (assessmentError) {
 <div class="app-page-shell app-page-shell--standard pt-0 pb-6">
     <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">

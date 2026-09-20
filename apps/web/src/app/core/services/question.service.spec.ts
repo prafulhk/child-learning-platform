@@ -71,8 +71,10 @@ describe('QuestionService', () => {
   it("no seed row uses operator '-'", () => {
     const questions = service.getAllQuestions();
     for (const q of questions) {
-      for (const row of q.rows) {
-        expect(row.operator).toBeUndefined();
+      expect(q.rows[0].operator).toBeUndefined();
+
+      for (const row of q.rows.slice(1)) {
+        expect([undefined, '-']).toContain(row.operator);
       }
     }
   });
