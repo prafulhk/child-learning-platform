@@ -12,16 +12,29 @@
     <div class="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <dl class="grid grid-cols-2 gap-y-3 text-base text-slate-800">
             <dt class="font-medium">Total Questions</dt>
-            <dd class="text-right font-semibold">{{ a.result.totalQuestions }}</dd>
+            <dd class="text-right font-semibold">
+                {{ a.result.totalQuestions }}
+            </dd>
+
+            <dt class="font-medium">Attempted Questions</dt>
+            <dd class="text-right font-semibold">
+                {{ a.result.correctCount + a.result.incorrectCount }}
+            </dd>
 
             <dt class="font-medium">Correct</dt>
-            <dd class="text-right font-semibold text-green-700">{{ a.result.correctCount }}</dd>
+            <dd class="text-right font-semibold text-green-700">
+                {{ a.result.correctCount }}
+            </dd>
 
             <dt class="font-medium">Incorrect</dt>
-            <dd class="text-right font-semibold text-red-700">{{ a.result.incorrectCount }}</dd>
+            <dd class="text-right font-semibold text-red-700">
+                {{ a.result.incorrectCount }}
+            </dd>
 
             <dt class="font-medium">Unanswered</dt>
-            <dd class="text-right font-semibold text-amber-700">{{ a.result.unansweredCount }}</dd>
+            <dd class="text-right font-semibold text-amber-700">
+                {{ a.result.unansweredCount }}
+            </dd>
         </dl>
     </div>
 
