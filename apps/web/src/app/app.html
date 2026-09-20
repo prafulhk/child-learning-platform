@@ -1,7 +1,8 @@
 @if (view === 'PRACTICE') {
 <app-practice-session />
 } @else if (view === 'HISTORY') {
-<app-practice-history (backToHome)="onBackToHome()" (viewAttempt)="onViewAttempt($event)" />
+<!-- <app-practice-history (backToHome)="onBackToHome()" (viewAttempt)="onViewAttempt($event)" /> -->
+<app-learning-history />
 } @else if (view === 'DETAIL' && selectedAttempt) {
 <app-practice-attempt-detail [attempt]="selectedAttempt" (backToHistory)="onBackToHistory()" />
 } @else if (view === 'PARENT_TOOLS') {

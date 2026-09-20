@@ -25,6 +25,7 @@ import { ParentToolsComponent } from './features/parent-tools/parent-tools.compo
 import { QuestionBankComponent } from './features/question-bank/question-bank.component';
 import { LocalStorageService } from './core/services/local-storage.service';
 import { PracticeResultComponent } from './features/practice/practice-result.component';
+import { LearningHistoryComponent } from './features/history/learning-history.component';
 
 type AppView =
   | 'HOME'
@@ -48,6 +49,7 @@ type AppView =
     ParentToolsComponent,
     QuestionBankComponent,
     PracticeResultComponent,
+    LearningHistoryComponent,
   ],
   selector: 'app-root',
   styleUrl: './app.scss',
