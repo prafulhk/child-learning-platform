@@ -78,6 +78,7 @@ export class App implements OnDestroy {
   completedAssessmentAttempt: AssessmentAttempt | null = null;
 
   private assessmentCompletionLocked = false;
+  private assessmentAnswerTransitioning = false;
 
   readonly olympiadDefinition: AssessmentDefinition = {
     id: 'olympiad-test',
@@ -186,7 +187,12 @@ export class App implements OnDestroy {
 
     const session = this.activeAssessmentSession;
 
-    if (!session || this.view !== 'ASSESSMENT_SESSION' || this.assessmentRemainingSeconds === 0) {
+    if (
+      !session ||
+      this.view !== 'ASSESSMENT_SESSION' ||
+      this.assessmentRemainingSeconds === 0 ||
+      this.assessmentAnswerTransitioning
+    ) {
       return;
     }
 
@@ -196,14 +202,30 @@ export class App implements OnDestroy {
       return;
     }
 
+    // Save selected answer
     session.selectedAnswers = {
       ...session.selectedAnswers,
       [currentQuestion.questionId]: optionId,
     };
 
-    if (session.currentQuestionIndex < session.questions.length - 1) {
-      session.currentQuestionIndex += 1;
-    }
+    // Show selected option before moving forward
+    this.assessmentAnswerTransitioning = true;
+
+    setTimeout(() => {
+      this.assessmentAnswerTransitioning = false;
+
+      if (
+        !this.activeAssessmentSession ||
+        this.view !== 'ASSESSMENT_SESSION' ||
+        this.assessmentRemainingSeconds === 0
+      ) {
+        return;
+      }
+
+      if (session.currentQuestionIndex < session.questions.length - 1) {
+        session.currentQuestionIndex += 1;
+      }
+    }, 0);
   }
 
   onAssessmentPrevious(): void {

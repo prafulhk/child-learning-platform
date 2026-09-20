@@ -18,6 +18,16 @@ describe('AnswerOptionComponent', () => {
     expect(valueEl.textContent?.trim()).toBe('7');
   });
 
+  it('keeps the neutral border when the option is not selected', () => {
+    const fixture = TestBed.createComponent(AnswerOptionComponent);
+    fixture.componentInstance.option = { id: 'opt_c', value: 9 };
+    fixture.detectChanges();
+
+    const button: HTMLButtonElement = fixture.nativeElement.querySelector('button');
+    expect(button.classList.contains('selected')).toBe(false);
+    expect(button.style.borderColor).toBe('rgb(203, 213, 225)');
+  });
+
   it('emits selected option id on click', () => {
     const fixture = TestBed.createComponent(AnswerOptionComponent);
     fixture.componentInstance.option = { id: 'opt_b', value: 8 };
