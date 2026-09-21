@@ -7,8 +7,7 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-
-import { AuthService } from '../../../core/services/auth';
+import { AuthService } from '../../../core/services/auth.service';
 
 const passwordsMatchValidator: ValidatorFn = (
   control: AbstractControl,
