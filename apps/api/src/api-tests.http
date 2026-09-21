@@ -8,3 +8,12 @@ Content-Type: application/json
   "password": "Test@12345",
   "confirmPassword": "Test@123451"
 }
+
+### Login parent
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "hridhaan1@test.com",
+  "password": "Pradhaani@1"
+}
