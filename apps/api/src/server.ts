@@ -1,8 +1,16 @@
 import { app } from "./app.js";
 import { config } from "./config/index.js";
+import { connectDatabase } from "./config/database.js";
 
-const PORT = config.PORT;
+async function startServer(): Promise<void> {
+  await connectDatabase();
 
-app.listen(PORT, () => {
-  console.log(`API server running on http://localhost:${PORT}`);
+  app.listen(config.PORT, () => {
+    console.log(`API server running on http://localhost:${config.PORT}`);
+  });
+}
+
+startServer().catch((error) => {
+  console.error("Failed to start server:", error);
+  process.exit(1);
 });

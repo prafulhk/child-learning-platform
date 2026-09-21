@@ -21,6 +21,8 @@ export const EnvSchema = z.object({
       },
     )
     .transform((val) => val ?? 3000),
+
+  MONGODB_URI: z.string().min(1, "MONGODB_URI is required"),
 });
 
 export type Config = z.infer<typeof EnvSchema>;

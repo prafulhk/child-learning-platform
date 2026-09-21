@@ -1,0 +1,10 @@
+### Parent Registration
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test Parent",
+  "email": "praful-test@example.com",
+  "password": "Test@12345",
+  "confirmPassword": "Test@123451"
+}
