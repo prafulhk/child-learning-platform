@@ -24,8 +24,9 @@ describe('AnswerOptionComponent', () => {
     fixture.detectChanges();
 
     const button: HTMLButtonElement = fixture.nativeElement.querySelector('button');
-    expect(button.classList.contains('selected')).toBe(false);
-    expect(button.style.borderColor).toBe('rgb(203, 213, 225)');
+    expect(button.classList.contains('border-slate-300')).toBe(true);
+    expect(button.classList.contains('border-blue-600')).toBe(false);
+    expect(button.getAttribute('aria-checked')).toBe('false');
   });
 
   it('emits selected option id on click', () => {
@@ -48,7 +49,8 @@ describe('AnswerOptionComponent', () => {
     fixture.detectChanges();
 
     const button: HTMLButtonElement = fixture.nativeElement.querySelector('button');
-    expect(button.classList.contains('selected')).toBe(true);
+    expect(button.classList.contains('border-blue-600')).toBe(true);
+    expect(button.classList.contains('bg-blue-50')).toBe(true);
     expect(button.getAttribute('aria-checked')).toBe('true');
   });
 });

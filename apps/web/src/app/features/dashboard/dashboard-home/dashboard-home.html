@@ -1,0 +1,243 @@
+<div class="min-h-full bg-slate-50 px-4 py-6 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-screen-2xl space-y-6">
+
+        <!-- Welcome Header -->
+        <section
+            class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-700 px-6 py-8 text-white shadow-lg shadow-indigo-200 sm:px-8">
+            <div class="relative z-10 max-w-xl">
+                <p class="mb-2 text-sm font-medium text-indigo-100">
+                    ✨ Your learning space
+                </p>
+
+                <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">
+                    Welcome to LearnNest
+                </h1>
+
+                <p class="mt-3 max-w-md text-sm leading-6 text-indigo-100 sm:text-base">
+                    Help your child learn, practice, and grow every day.
+                </p>
+            </div>
+
+            <!-- Decorative shapes -->
+            <div class="absolute -right-12 -top-16 h-56 w-56 rounded-full bg-white/10"></div>
+
+            <div class="absolute -bottom-24 right-16 h-48 w-48 rounded-full bg-white/5"></div>
+
+            <div class="absolute right-8 top-8 hidden text-7xl opacity-20 sm:block">
+                ✦
+            </div>
+        </section>
+
+        <!-- Overview -->
+        <section class="grid grid-cols-2 gap-4 sm:grid-cols-3">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-lg">
+                    📚
+                </div>
+
+                <p class="text-xs font-medium text-slate-500">Learning</p>
+                <p class="mt-1 text-xl font-bold text-slate-900">Practice</p>
+                <p class="mt-1 text-xs text-slate-400">Build daily skills</p>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-lg">
+                    🎯
+                </div>
+
+                <p class="text-xs font-medium text-slate-500">Goal</p>
+                <p class="mt-1 text-xl font-bold text-slate-900">Improve</p>
+                <p class="mt-1 text-xs text-slate-400">One step at a time</p>
+            </div>
+
+            <div class="col-span-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:col-span-1">
+                <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-lg">
+                    🏆
+                </div>
+
+                <p class="text-xs font-medium text-slate-500">Progress</p>
+                <p class="mt-1 text-xl font-bold text-slate-900">Keep Going</p>
+                <p class="mt-1 text-xs text-slate-400">Celebrate every effort</p>
+            </div>
+        </section>
+
+        <!-- Learning Activities -->
+        <section>
+            <div class="mb-4 flex items-end justify-between gap-4">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-indigo-600">
+                        Learning center
+                    </p>
+
+                    <h2 class="mt-1 text-xl font-bold tracking-tight text-slate-900">
+                        Explore activities
+                    </h2>
+
+                    <p class="mt-1 text-sm text-slate-500">
+                        Choose an activity to begin.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2">
+
+                <!-- Practice Card -->
+                <button type="button"
+                    class="group rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-indigo-500/10"
+                    (click)="startPractice.emit()">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-2xl">
+                            ✏️
+                        </div>
+
+                        <span class="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600">
+                            Practice
+                        </span>
+                    </div>
+
+                    <h3 class="mt-5 text-lg font-bold text-slate-900">
+                        Daily Practice
+                    </h3>
+
+                    <p class="mt-2 text-sm leading-6 text-slate-500">
+                        Improve calculation skills with interactive practice questions.
+                    </p>
+
+                    <div class="mt-5 flex items-center justify-between">
+                        <span class="text-sm font-semibold text-indigo-600">
+                            Start learning
+                        </span>
+
+                        <span class="text-lg text-indigo-600 transition group-hover:translate-x-1">
+                            →
+                        </span>
+                    </div>
+                </button>
+
+                <!-- Olympiad Card -->
+                <button type="button"
+                    class="group rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-violet-500/10"
+                    (click)="openAssessment.emit()">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-50 text-2xl">
+                            🏆
+                        </div>
+
+                        <span class="rounded-full bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-600">
+                            Assessment
+                        </span>
+                    </div>
+
+                    <h3 class="mt-5 text-lg font-bold text-slate-900">
+                        Olympiad Test
+                    </h3>
+
+                    <p class="mt-2 text-sm leading-6 text-slate-500">
+                        Test your skills with timed assessment questions.
+                    </p>
+
+                    <div class="mt-5 flex items-center justify-between">
+                        <span class="text-sm font-semibold text-violet-600">
+                            Take assessment
+                        </span>
+
+                        <span class="text-lg text-violet-600 transition group-hover:translate-x-1">
+                            →
+                        </span>
+                    </div>
+                </button>
+
+            </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section>
+            <h2 class="mb-4 text-xl font-bold tracking-tight text-slate-900">
+                Quick actions
+            </h2>
+
+            <div class="grid gap-3 sm:grid-cols-2">
+
+                <button type="button"
+                    class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-slate-300 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-slate-500/10"
+                    (click)="viewHistory.emit()">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xl">
+                        📊
+                    </div>
+
+                    <div class="min-w-0 flex-1">
+                        <h3 class="font-semibold text-slate-900">
+                            Learning History
+                        </h3>
+
+                        <p class="mt-1 text-xs text-slate-500">
+                            Review previous practice and results.
+                        </p>
+                    </div>
+
+                    <span class="text-slate-400">→</span>
+                </button>
+
+                <button type="button"
+                    class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-slate-300 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-slate-500/10"
+                    (click)="openParentTools.emit()">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xl">
+                        👨‍👩‍👧
+                    </div>
+
+                    <div class="min-w-0 flex-1">
+                        <h3 class="font-semibold text-slate-900">
+                            Parent Tools
+                        </h3>
+
+                        <p class="mt-1 text-xs text-slate-500">
+                            Manage questions and learning activities.
+                        </p>
+                    </div>
+
+                    <span class="text-slate-400">→</span>
+                </button>
+
+                <button type="button"
+                    class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-slate-300 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-slate-500/10 sm:col-span-2"
+                    (click)="openRegistration.emit()">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-xl">
+                        👤
+                    </div>
+
+                    <div class="min-w-0 flex-1">
+                        <h3 class="font-semibold text-slate-900">
+                            Create Parent Account
+                        </h3>
+
+                        <p class="mt-1 text-xs text-slate-500">
+                            Register a parent account for secure access.
+                        </p>
+                    </div>
+
+                    <span class="text-indigo-500">→</span>
+                </button>
+
+            </div>
+        </section>
+
+        <!-- Footer Tip -->
+        <section class="rounded-2xl border border-indigo-100 bg-indigo-50 px-5 py-4">
+            <div class="flex items-start gap-3">
+                <span class="text-xl">💡</span>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-indigo-900">
+                        Learning tip
+                    </h3>
+
+                    <p class="mt-1 text-sm leading-6 text-indigo-700">
+                        Consistent short practice sessions can help children build
+                        confidence and improve their skills.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</div>

@@ -1,7 +1,6 @@
 @if (view === 'PRACTICE') {
 <app-practice-session />
 } @else if (view === 'HISTORY') {
-<!-- <app-practice-history (backToHome)="onBackToHome()" (viewAttempt)="onViewAttempt($event)" /> -->
 <app-learning-history />
 } @else if (view === 'DETAIL' && selectedAttempt) {
 <app-practice-attempt-detail [attempt]="selectedAttempt" (backToHistory)="onBackToHistory()" />
@@ -30,22 +29,12 @@
     </div>
 </div>
 }
-} @else {
-<app-practice-home (startPractice)="onStartPractice()" (viewHistory)="onViewHistory()" />
-
-<div class="app-page-shell app-page-shell--standard pt-0 pb-3">
-    <button type="button"
-        class="min-h-11 w-full rounded-xl bg-slate-800 px-4 py-3 text-base font-semibold text-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
-        (click)="onOpenParentTools()">
-        Parent Tools
-    </button>
-</div>
-
-<div class="app-page-shell app-page-shell--standard pt-0 pb-6">
-    <button type="button"
-        class="min-h-11 w-full rounded-xl bg-blue-600 px-4 py-3 text-base font-semibold text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-        (click)="onOpenAssessment()">
-        Olympiad Test
-    </button>
-</div>
+}
+@else if (view === 'REGISTER') {
+<app-parent-registration />
+}
+@else {
+<app-dashboard-home (startPractice)="onDashboardStartPractice()" (viewHistory)="onDashboardViewHistory()"
+    (openParentTools)="onDashboardOpenParentTools()" (openAssessment)="onDashboardOpenAssessment()"
+    (openRegistration)="onDashboardOpenRegistration()" />
 }

@@ -17,8 +17,6 @@ import { AssessmentHomeComponent } from './features/assessment/assessment-home.c
 import { AssessmentSessionComponent } from './features/assessment/assessment-session.component';
 
 import { PracticeAttemptDetailComponent } from './features/practice/practice-attempt-detail.component';
-import { PracticeHistoryComponent } from './features/practice/practice-history.component';
-import { PracticeHomeComponent } from './features/practice/practice-home.component';
 import { PracticeSessionComponent } from './features/practice/practice-session.component';
 
 import { ParentToolsComponent } from './features/parent-tools/parent-tools.component';
@@ -26,6 +24,8 @@ import { QuestionBankComponent } from './features/question-bank/question-bank.co
 import { LocalStorageService } from './core/services/local-storage.service';
 import { PracticeResultComponent } from './features/practice/practice-result.component';
 import { LearningHistoryComponent } from './features/history/learning-history.component';
+import { ParentRegistration } from './features/auth/parent-registration/parent-registration';
+import { DashboardHome } from './features/dashboard/dashboard-home/dashboard-home';
 
 type AppView =
   | 'HOME'
@@ -36,20 +36,21 @@ type AppView =
   | 'QUESTION_BANK'
   | 'ASSESSMENT_HOME'
   | 'ASSESSMENT_SESSION'
-  | 'ASSESSMENT_RESULT';
+  | 'ASSESSMENT_RESULT'
+  | 'REGISTER';
 
 @Component({
   imports: [
     AssessmentHomeComponent,
     AssessmentSessionComponent,
-    PracticeHomeComponent,
     PracticeSessionComponent,
-    PracticeHistoryComponent,
     PracticeAttemptDetailComponent,
     ParentToolsComponent,
     QuestionBankComponent,
     PracticeResultComponent,
     LearningHistoryComponent,
+    ParentRegistration,
+    DashboardHome,
   ],
   selector: 'app-root',
   styleUrl: './app.scss',
@@ -118,6 +119,11 @@ export class App implements OnDestroy {
     this.assessmentRemainingSeconds = 0;
     this.assessmentError = '';
     this.view = 'HOME';
+  }
+
+  onOpenRegistration(): void {
+    this.stopAssessmentCountdown();
+    this.view = 'REGISTER';
   }
 
   onOpenParentTools(): void {
@@ -543,5 +549,25 @@ export class App implements OnDestroy {
   @HostListener('window:pageshow')
   onPageShow(): void {
     this.resumeAssessmentCountdown();
+  }
+
+  onDashboardStartPractice(): void {
+    this.onStartPractice();
+  }
+
+  onDashboardViewHistory(): void {
+    this.onViewHistory();
+  }
+
+  onDashboardOpenParentTools(): void {
+    this.onOpenParentTools();
+  }
+
+  onDashboardOpenAssessment(): void {
+    this.onOpenAssessment();
+  }
+
+  onDashboardOpenRegistration(): void {
+    this.onOpenRegistration();
   }
 }
