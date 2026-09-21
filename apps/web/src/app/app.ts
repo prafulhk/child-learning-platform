@@ -26,9 +26,12 @@ import { PracticeResultComponent } from './features/practice/practice-result.com
 import { LearningHistoryComponent } from './features/history/learning-history.component';
 import { ParentRegistration } from './features/auth/parent-registration/parent-registration';
 import { DashboardHome } from './features/dashboard/dashboard-home/dashboard-home';
+import { Login } from './features/auth/login/login';
+import { LoginResponse } from './core/services/auth.service';
 
 type AppView =
   | 'HOME'
+  | 'LOGIN'
   | 'PRACTICE'
   | 'HISTORY'
   | 'DETAIL'
@@ -51,6 +54,7 @@ type AppView =
     LearningHistoryComponent,
     ParentRegistration,
     DashboardHome,
+    Login,
   ],
   selector: 'app-root',
   styleUrl: './app.scss',
@@ -90,6 +94,16 @@ export class App implements OnDestroy {
     topicId: 'single-digit-addition',
     config: OLYMPIAD_ASSESSMENT_CONFIG,
   };
+
+  onOpenLogin(): void {
+    this.stopAssessmentCountdown();
+    this.view = 'LOGIN';
+  }
+
+  onLoginSuccess(response: LoginResponse): void {
+    this.stopAssessmentCountdown();
+    this.view = 'HOME';
+  }
 
   ngOnDestroy(): void {
     this.stopAssessmentCountdown();

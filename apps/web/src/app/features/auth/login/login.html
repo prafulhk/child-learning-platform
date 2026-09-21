@@ -1,0 +1,165 @@
+<div class="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
+    <div class="mx-auto grid min-h-[calc(100vh-4rem)] max-w-6xl items-center gap-10 lg:grid-cols-2">
+
+        <!-- Brand section -->
+        <section class="hidden lg:block">
+            <div class="max-w-md">
+                <div class="mb-8 flex items-center gap-3">
+                    <div
+                        class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-xl font-bold text-white shadow-lg shadow-blue-200">
+                        CL
+                    </div>
+                    <div>
+                        <p class="text-lg font-bold text-slate-900">Child Learning</p>
+                        <p class="text-sm text-slate-500">Learn • Practice • Grow</p>
+                    </div>
+                </div>
+
+                <span class="inline-flex rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700">
+                    Welcome back
+                </span>
+
+                <h1 class="mt-5 text-4xl font-bold leading-tight tracking-tight text-slate-900">
+                    Every small step creates a brighter future.
+                </h1>
+
+                <p class="mt-5 text-base leading-7 text-slate-600">
+                    Continue your child's learning journey with practice,
+                    assessments, and meaningful progress tracking.
+                </p>
+
+                <div class="mt-8 space-y-4">
+                    @for (feature of [
+                    'Track daily learning progress',
+                    'Practice with engaging activities',
+                    'Understand your child’s improvement'
+                    ]; track feature) {
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-sm text-emerald-700">
+                            ✓
+                        </div>
+                        <span class="text-sm font-medium text-slate-700">
+                            {{ feature }}
+                        </span>
+                    </div>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <!-- Login card -->
+        <section class="w-full">
+            <div
+                class="mx-auto max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/60 sm:p-8">
+
+                <!-- Mobile brand -->
+                <div class="mb-8 text-center lg:hidden">
+                    <div
+                        class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-xl font-bold text-white">
+                        CL
+                    </div>
+                    <p class="font-bold text-slate-900">Child Learning</p>
+                    <p class="text-sm text-slate-500">Learn • Practice • Grow</p>
+                </div>
+
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold tracking-tight text-slate-900">
+                        Sign in to your account
+                    </h2>
+                    <p class="mt-2 text-sm text-slate-500">
+                        Welcome back! Enter your details to continue.
+                    </p>
+                </div>
+
+                @if (errorMessage()) {
+                <div class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                    role="alert">
+                    {{ errorMessage() }}
+                </div>
+                }
+
+                <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-5">
+                    <!-- Email -->
+                    <div>
+                        <label for="email" class="mb-2 block text-sm font-semibold text-slate-700">
+                            Email address
+                        </label>
+
+                        <input id="email" type="email" formControlName="email" autocomplete="email"
+                            placeholder="you@example.com"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                            [class.border-red-500]="loginForm.controls.email.touched && loginForm.controls.email.invalid"
+                            [attr.aria-invalid]="loginForm.controls.email.invalid" />
+
+                        @if (loginForm.controls.email.touched && loginForm.controls.email.errors) {
+                        <p class="mt-2 text-xs font-medium text-red-600">
+                            @if (loginForm.controls.email.errors['required']) {
+                            Email address is required.
+                            } @else if (loginForm.controls.email.errors['email']) {
+                            Enter a valid email address.
+                            }
+                        </p>
+                        }
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <div class="mb-2 flex items-center justify-between">
+                            <label for="password" class="block text-sm font-semibold text-slate-700">
+                                Password
+                            </label>
+
+                            <button type="button"
+                                class="text-xs font-semibold text-blue-600 transition hover:text-blue-800"
+                                (click)="showPassword = !showPassword">
+                                {{ showPassword ? 'Hide password' : 'Show password' }}
+                            </button>
+                        </div>
+
+                        <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password"
+                            autocomplete="current-password" placeholder="Enter your password"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                            [class.border-red-500]="loginForm.controls.password.touched && loginForm.controls.password.invalid"
+                            [attr.aria-invalid]="loginForm.controls.password.invalid" />
+
+                        @if (loginForm.controls.password.touched && loginForm.controls.password.hasError('required')) {
+                        <p class="mt-2 text-xs font-medium text-red-600">
+                            Password is required.
+                        </p>
+                        }
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit" [disabled]="isLoading()"
+                        class="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-200 disabled:cursor-not-allowed disabled:opacity-60">
+                        @if (isLoading()) {
+                        <span
+                            class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                        Signing in...
+                        } @else {
+                        Sign in
+                        }
+                    </button>
+                </form>
+
+                <div class="my-6 flex items-center gap-3">
+                    <div class="h-px flex-1 bg-slate-200"></div>
+                    <span class="text-xs text-slate-400">SECURE ACCESS</span>
+                    <div class="h-px flex-1 bg-slate-200"></div>
+                </div>
+
+                <p class="text-center text-sm text-slate-500">
+                    New to Child Learning?
+                    <a href="#" class="font-semibold text-blue-600 transition hover:text-blue-800">
+                        Create an account
+                    </a>
+                </p>
+            </div>
+
+            <p class="mt-5 text-center text-xs text-slate-400">
+                Your learning journey, in one place.
+            </p>
+        </section>
+    </div>
+</div>

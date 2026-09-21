@@ -218,6 +218,26 @@
                     <span class="text-indigo-500">→</span>
                 </button>
 
+                <button type="button"
+                    class="flex items-center gap-4 rounded-2xl border border-indigo-200 bg-indigo-50 p-4 text-left shadow-sm transition hover:border-indigo-300 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-indigo-500/10 sm:col-span-2"
+                    (click)="openLogin.emit()">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-xl">
+                        🔐
+                    </div>
+
+                    <div class="min-w-0 flex-1">
+                        <h3 class="font-semibold text-slate-900">
+                            Parent Login
+                        </h3>
+
+                        <p class="mt-1 text-xs text-slate-600">
+                            Sign in to access your child's learning dashboard.
+                        </p>
+                    </div>
+
+                    <span class="text-indigo-500">→</span>
+                </button>
+
             </div>
         </section>
 

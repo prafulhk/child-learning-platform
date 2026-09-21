@@ -30,11 +30,14 @@
 </div>
 }
 }
+@else if (view === 'LOGIN') {
+<app-login (loginSuccess)="onLoginSuccess($event)" />
+}
 @else if (view === 'REGISTER') {
 <app-parent-registration />
 }
 @else {
 <app-dashboard-home (startPractice)="onDashboardStartPractice()" (viewHistory)="onDashboardViewHistory()"
     (openParentTools)="onDashboardOpenParentTools()" (openAssessment)="onDashboardOpenAssessment()"
-    (openRegistration)="onDashboardOpenRegistration()" />
+    (openRegistration)="onDashboardOpenRegistration()" (openLogin)="onOpenLogin()" />
 }

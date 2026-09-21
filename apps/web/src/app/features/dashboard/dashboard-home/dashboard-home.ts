@@ -12,4 +12,5 @@ export class DashboardHome {
   readonly openParentTools = output<void>();
   readonly openAssessment = output<void>();
   readonly openRegistration = output<void>();
+  readonly openLogin = output<void>();
 }
