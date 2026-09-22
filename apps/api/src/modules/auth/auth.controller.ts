@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 
 import { RegisterSchema } from "./schemas/register.schema.js";
 import { loginSchema } from "./schemas/login.schema.js";
-import { registerParent, loginUser } from "./auth.service.js";
+import { registerParent, loginUser, getUserById } from "./auth.service.js";
 import { z } from "zod";
 
 export async function registerController(
@@ -81,6 +81,20 @@ export async function loginController(
 
     res.status(500).json({
       message: "Unable to login",
+    });
+  }
+}
+
+export async function meController(req: Request, res: Response): Promise<void> {
+  try {
+    const user = await getUserById(res.locals.auth.userId);
+
+    res.status(200).json({
+      user,
+    });
+  } catch {
+    res.status(404).json({
+      message: "User not found",
     });
   }
 }

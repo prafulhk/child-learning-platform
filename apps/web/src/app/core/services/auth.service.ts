@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment.development';
-import { Observable, tap } from 'rxjs';
+import { catchError, EMPTY, Observable, tap } from 'rxjs';
 
 export interface RegisterRequest {
   name: string;
@@ -82,5 +82,28 @@ export class AuthService {
 
   setRegistrationMessage(message: string): void {
     this.registrationMessage.set(message);
+  }
+
+  getCurrentUser(): Observable<{ user: AuthUser }> {
+    return this.http.get<{ user: AuthUser }>(`${this.apiUrl}/me`);
+  }
+
+  restoreSession(): Observable<unknown> {
+    const token = sessionStorage.getItem('auth_token');
+
+    if (!token) {
+      return EMPTY;
+    }
+
+    return this.getCurrentUser().pipe(
+      tap((response) => {
+        this.currentUser.set(response.user);
+        sessionStorage.setItem('auth_user', JSON.stringify(response.user));
+      }),
+      catchError(() => {
+        this.logout();
+        return EMPTY;
+      }),
+    );
   }
 }

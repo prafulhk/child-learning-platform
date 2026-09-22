@@ -24,3 +24,7 @@ GET http://localhost:3000/api/auth/protected-test
 ### Protected endpoint - with token
 GET http://localhost:3000/api/auth/protected-test
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YWIxZDI0ZGYwZGEzYzg5NDdhMjk3YWUiLCJyb2xlIjoiUEFSRU5UIiwiaWF0IjoxNzkwMDUwNjI0LCJleHAiOjE3OTAxMzcwMjR9.avmVR9Mldcbn0Nw9sOG_TqQEyvnL4Vu2zvL5u81xUB0
+
+### Get current user
+GET http://localhost:3000/api/auth/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YWIxZDI0ZGYwZGEzYzg5NDdhMjk3YWUiLCJyb2xlIjoiUEFSRU5UIiwiaWF0IjoxNzkwMDUwNjI0LCJleHAiOjE3OTAxMzcwMjR9.avmVR9Mldcbn0Nw9sOG_TqQEyvnL4Vu2zvL5u81xUB0

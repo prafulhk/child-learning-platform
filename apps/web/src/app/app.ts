@@ -87,6 +87,19 @@ export class App implements OnDestroy {
     config: OLYMPIAD_ASSESSMENT_CONFIG,
   };
 
+  constructor() {
+    this.authService.restoreSession().subscribe({
+      next: () => {
+        this.view = 'HOME';
+      },
+      complete: () => {
+        if (!this.authService.currentUser()) {
+          this.view = 'LOGIN';
+        }
+      },
+    });
+  }
+
   onOpenLogin(): void {
     this.stopAssessmentCountdown();
     this.view = 'LOGIN';
@@ -141,10 +154,6 @@ export class App implements OnDestroy {
   }
 
   onOpenParentTools(): void {
-    if (!this.authService.currentUser()) {
-      this.onOpenLogin();
-      return;
-    }
     this.stopAssessmentCountdown();
 
     this.selectedAttempt = null;
