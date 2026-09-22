@@ -72,6 +72,13 @@
                     </p>
                 </div>
 
+                @if (registrationMessage()) {
+                <div class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
+                    role="status">
+                    {{ registrationMessage() }}
+                </div>
+                }
+
                 @if (errorMessage()) {
                 <div class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
                     role="alert">
@@ -151,7 +158,8 @@
 
                 <p class="text-center text-sm text-slate-500">
                     New to Child Learning?
-                    <a href="#" class="font-semibold text-blue-600 transition hover:text-blue-800">
+                    <a href="#" class="font-semibold text-blue-600 transition hover:text-blue-800"
+                        (click)="registerRequested.emit()">
                         Create an account
                     </a>
                 </p>

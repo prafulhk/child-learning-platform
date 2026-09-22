@@ -27,7 +27,7 @@ import { LearningHistoryComponent } from './features/history/learning-history.co
 import { ParentRegistration } from './features/auth/parent-registration/parent-registration';
 import { DashboardHome } from './features/dashboard/dashboard-home/dashboard-home';
 import { Login } from './features/auth/login/login';
-import { LoginResponse } from './core/services/auth.service';
+import { AuthService, LoginResponse } from './core/services/auth.service';
 
 type AppView =
   | 'HOME'
@@ -61,26 +61,18 @@ type AppView =
   templateUrl: './app.html',
 })
 export class App implements OnDestroy {
-  view: AppView = 'HOME';
-
   selectedAttempt: PracticeAttempt | null = null;
-
   activeAssessmentSession: ActiveAssessmentSession | null = null;
-
   assessmentError = '';
-
   assessmentRemainingSeconds = 0;
-
   private assessmentCountdownTimerId: ReturnType<typeof window.setInterval> | null = null;
-
   private readonly assessmentCountdownTickMs = 250;
-
   private readonly assessmentService = inject(AssessmentService);
-
   private readonly questionService = inject(QuestionService);
-
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly localStorageService = inject(LocalStorageService);
+  private readonly authService = inject(AuthService);
+  view: AppView = this.authService.currentUser() ? 'HOME' : 'LOGIN';
 
   completedAssessmentAttempt: AssessmentAttempt | null = null;
 
@@ -110,13 +102,21 @@ export class App implements OnDestroy {
   }
 
   onStartPractice(): void {
+    if (!this.authService.currentUser()) {
+      this.onOpenLogin();
+      return;
+    }
     this.stopAssessmentCountdown();
-
     this.selectedAttempt = null;
     this.view = 'PRACTICE';
   }
 
   onViewHistory(): void {
+    if (!this.authService.currentUser()) {
+      this.onOpenLogin();
+      return;
+    }
+
     this.stopAssessmentCountdown();
 
     this.selectedAttempt = null;
@@ -141,6 +141,10 @@ export class App implements OnDestroy {
   }
 
   onOpenParentTools(): void {
+    if (!this.authService.currentUser()) {
+      this.onOpenLogin();
+      return;
+    }
     this.stopAssessmentCountdown();
 
     this.selectedAttempt = null;
@@ -162,6 +166,10 @@ export class App implements OnDestroy {
   }
 
   onOpenAssessment(): void {
+    if (!this.authService.currentUser()) {
+      this.onOpenLogin();
+      return;
+    }
     this.stopAssessmentCountdown();
 
     this.selectedAttempt = null;
@@ -583,5 +591,11 @@ export class App implements OnDestroy {
 
   onDashboardOpenRegistration(): void {
     this.onOpenRegistration();
+  }
+
+  onLogout(): void {
+    this.authService.logout();
+    this.stopAssessmentCountdown();
+    this.view = 'LOGIN';
   }
 }

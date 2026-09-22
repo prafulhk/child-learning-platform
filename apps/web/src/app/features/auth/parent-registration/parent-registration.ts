@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, output, signal } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -31,6 +31,8 @@ const passwordsMatchValidator: ValidatorFn = (
 export class ParentRegistration {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  readonly loginRequested = output<void>();
+  readonly registrationCompleted = output<string>();
 
   readonly registrationForm = this.fb.nonNullable.group(
     {
@@ -44,8 +46,8 @@ export class ParentRegistration {
     },
   );
 
-  isLoading = false;
-  errorMessage = '';
+  isLoading = signal(false);
+  errorMessage = signal('');
   successMessage = '';
 
   onSubmit(): void {
@@ -54,19 +56,21 @@ export class ParentRegistration {
       return;
     }
 
-    this.isLoading = true;
-    this.errorMessage = '';
+    this.isLoading.set(true);
+    this.errorMessage.set('');
     this.successMessage = '';
 
     this.authService.register(this.registrationForm.getRawValue()).subscribe({
       next: (response) => {
-        this.isLoading = false;
-        this.successMessage = response.message;
+        this.isLoading.set(false);
         this.registrationForm.reset();
+        this.authService.setRegistrationMessage(response.message);
+        this.registrationCompleted.emit(response.message);
+        this.loginRequested.emit();
       },
       error: (error) => {
-        this.isLoading = false;
-        this.errorMessage = error?.error?.message ?? 'Unable to create account';
+        this.isLoading.set(false);
+        this.errorMessage.set(error?.error?.message ?? 'Unable to create account');
       },
     });
   }

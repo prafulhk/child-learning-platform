@@ -31,13 +31,13 @@
 }
 }
 @else if (view === 'LOGIN') {
-<app-login (loginSuccess)="onLoginSuccess($event)" />
+<app-login (loginSuccess)="onLoginSuccess($event)" (registerRequested)="onOpenRegistration()" />
 }
 @else if (view === 'REGISTER') {
-<app-parent-registration />
+<app-parent-registration (loginRequested)="onOpenLogin()" />
 }
 @else {
 <app-dashboard-home (startPractice)="onDashboardStartPractice()" (viewHistory)="onDashboardViewHistory()"
     (openParentTools)="onDashboardOpenParentTools()" (openAssessment)="onDashboardOpenAssessment()"
-    (openRegistration)="onDashboardOpenRegistration()" (openLogin)="onOpenLogin()" />
+    (openRegistration)="onDashboardOpenRegistration()" (openLogin)="onOpenLogin()" (logout)="onLogout()" />
 }

@@ -1,263 +1,491 @@
-<div class="min-h-full bg-slate-50 px-4 py-6 sm:px-6 lg:px-8">
-    <div class="mx-auto max-w-screen-2xl space-y-6">
+<div class="min-h-full bg-slate-50 px-4 py-5 sm:px-6 lg:px-8">
 
-        <!-- Welcome Header -->
+    <!-- ==================== HEADER ==================== -->
+    <header
+        class="mb-6 rounded-2xl bg-gradient-to-r from-indigo-700 via-blue-700 to-indigo-600 px-4 py-4 text-white shadow-lg shadow-indigo-200/40 sm:px-6">
+
+        <div class="flex flex-wrap items-center justify-between gap-4">
+
+            <!-- Brand -->
+            <div class="flex items-center gap-3">
+                <span class="text-2xl" aria-hidden="true">🎓</span>
+
+                <div>
+                    <h2 class="text-lg font-extrabold tracking-tight">
+                        LearnNest
+                    </h2>
+
+                    <p class="text-[10px] text-indigo-100">
+                        Small Steps. Big Futures.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav aria-label="Main navigation"
+                class="order-3 flex w-full items-center justify-center gap-1 rounded-xl bg-white/10 p-1 sm:order-none sm:w-auto">
+
+                <!-- Home -->
+                <button type="button" aria-current="page"
+                    class="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-indigo-700 shadow-sm sm:px-4 sm:text-sm">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" class="h-4 w-4" aria-hidden="true">
+
+                        <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
+                        <path d="M9 21v-8h6v8" />
+                    </svg>
+
+                    Home
+                </button>
+
+                <!-- History -->
+                <button type="button"
+                    class="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-white transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/60 sm:text-sm"
+                    (click)="viewHistory.emit()">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" class="h-4 w-4" aria-hidden="true">
+
+                        <path d="M3 3v18h18" />
+                        <path d="m7 16 4-5 4 3 5-7" />
+                    </svg>
+
+                    History
+                </button>
+
+                <!-- Parent Tools -->
+                <button type="button"
+                    class="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-white transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/60 sm:text-sm"
+                    (click)="openParentTools.emit()">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" class="h-4 w-4" aria-hidden="true">
+
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+
+                    Parent Tools
+                </button>
+
+            </nav>
+
+            <!-- Profile -->
+            <!-- Profile -->
+            <div
+                class="flex w-full items-center justify-center gap-3 rounded-xl bg-white/10 px-3 py-2 sm:w-auto sm:justify-start">
+
+                <div
+                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white font-bold text-indigo-700">
+
+                    @if (currentUser(); as user) {
+                    {{ user.name.charAt(0).toUpperCase() }}
+                    } @else {
+                    P
+                    }
+
+                </div>
+
+                <div class="min-w-0">
+
+                    @if (currentUser(); as user) {
+                    <p class="truncate text-sm font-semibold">
+                        {{ user.name }}
+                    </p>
+                    } @else {
+                    <p class="text-sm font-semibold">
+                        Praful
+                    </p>
+                    }
+
+                    <p class="text-[10px] text-indigo-100">
+                        Parent Account
+                    </p>
+
+                </div>
+
+                @if (currentUser()) {
+
+                <!-- Logout -->
+                <button type="button" title="Logout" aria-label="Logout"
+                    class="rounded-lg px-2 py-1 text-lg text-white transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/60"
+                    (click)="logout.emit()">
+
+                    ↪
+                </button>
+
+                } @else {
+
+                <!-- Login -->
+                <button type="button"
+                    class="rounded-lg bg-white px-3 py-2 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-white/60"
+                    (click)="openLogin.emit()">
+
+                    Login
+                </button>
+
+                }
+
+            </div>
+
+        </div>
+    </header>
+
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="mx-auto max-w-screen-2xl space-y-7">
+
+        <!-- Welcome Hero -->
         <section
-            class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-700 px-6 py-8 text-white shadow-lg shadow-indigo-200 sm:px-8">
-            <div class="relative z-10 max-w-xl">
-                <p class="mb-2 text-sm font-medium text-indigo-100">
+            class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-blue-600 to-indigo-700 px-6 py-8 text-white shadow-lg shadow-indigo-200 sm:px-8 sm:py-10">
+
+            <div class="relative z-10 max-w-2xl">
+
+                <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-indigo-100 sm:text-sm">
                     ✨ Your learning space
                 </p>
 
-                <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">
+                <h1 class="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+
+                    @if (currentUser(); as user) {
+                    Welcome back, {{ user.name }}! 👋
+                    } @else {
                     Welcome to LearnNest
+                    }
+
                 </h1>
 
-                <p class="mt-3 max-w-md text-sm leading-6 text-indigo-100 sm:text-base">
+                <p class="mt-3 max-w-xl text-sm leading-6 text-indigo-100 sm:text-base">
                     Help your child learn, practice, and grow every day.
                 </p>
+
+                <div class="mt-6 flex flex-wrap gap-2">
+
+                    <span class="rounded-full bg-white/15 px-3 py-2 text-xs font-medium backdrop-blur-sm">
+                        🌱 Practice regularly
+                    </span>
+
+                    <span class="rounded-full bg-white/15 px-3 py-2 text-xs font-medium backdrop-blur-sm">
+                        ⚡ Track progress
+                    </span>
+
+                    <span class="rounded-full bg-white/15 px-3 py-2 text-xs font-medium backdrop-blur-sm">
+                        ⭐ Build confidence
+                    </span>
+
+                </div>
+
             </div>
 
-            <!-- Decorative shapes -->
-            <div class="absolute -right-12 -top-16 h-56 w-56 rounded-full bg-white/10"></div>
+            <!-- Decorative Shapes -->
+            <div class="absolute -right-12 -top-16 h-56 w-56 rounded-full bg-white/10" aria-hidden="true">
+            </div>
 
-            <div class="absolute -bottom-24 right-16 h-48 w-48 rounded-full bg-white/5"></div>
+            <div class="absolute -bottom-24 right-16 h-48 w-48 rounded-full bg-white/5" aria-hidden="true">
+            </div>
 
-            <div class="absolute right-8 top-8 hidden text-7xl opacity-20 sm:block">
+            <div class="absolute right-8 top-8 hidden text-7xl opacity-20 sm:block" aria-hidden="true">
+
                 ✦
             </div>
+
         </section>
 
-        <!-- Overview -->
-        <section class="grid grid-cols-2 gap-4 sm:grid-cols-3">
-            <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-lg">
-                    📚
-                </div>
 
-                <p class="text-xs font-medium text-slate-500">Learning</p>
-                <p class="mt-1 text-xl font-bold text-slate-900">Practice</p>
-                <p class="mt-1 text-xs text-slate-400">Build daily skills</p>
-            </div>
+        <!-- ==================== LEARNING OVERVIEW ==================== -->
+        <section class="space-y-4" aria-labelledby="learning-overview-heading">
 
-            <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-lg">
-                    🎯
-                </div>
+            <div class="flex flex-wrap items-end justify-between gap-3">
 
-                <p class="text-xs font-medium text-slate-500">Goal</p>
-                <p class="mt-1 text-xl font-bold text-slate-900">Improve</p>
-                <p class="mt-1 text-xs text-slate-400">One step at a time</p>
-            </div>
-
-            <div class="col-span-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:col-span-1">
-                <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-lg">
-                    🏆
-                </div>
-
-                <p class="text-xs font-medium text-slate-500">Progress</p>
-                <p class="mt-1 text-xl font-bold text-slate-900">Keep Going</p>
-                <p class="mt-1 text-xs text-slate-400">Celebrate every effort</p>
-            </div>
-        </section>
-
-        <!-- Learning Activities -->
-        <section>
-            <div class="mb-4 flex items-end justify-between gap-4">
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wider text-indigo-600">
-                        Learning center
+                        Your child's learning journey
                     </p>
 
-                    <h2 class="mt-1 text-xl font-bold tracking-tight text-slate-900">
-                        Explore activities
+                    <h2 id="learning-overview-heading"
+                        class="mt-1 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+
+                        Learning overview
                     </h2>
-
-                    <p class="mt-1 text-sm text-slate-500">
-                        Choose an activity to begin.
-                    </p>
                 </div>
-            </div>
 
-            <div class="grid gap-4 md:grid-cols-2">
-
-                <!-- Practice Card -->
                 <button type="button"
-                    class="group rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-indigo-500/10"
-                    (click)="startPractice.emit()">
-                    <div class="flex items-start justify-between gap-4">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-2xl">
-                            ✏️
-                        </div>
+                    class="cursor-pointer text-sm font-semibold text-indigo-600 transition hover:text-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    (click)="viewHistory.emit()">
 
-                        <span class="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600">
-                            Practice
-                        </span>
-                    </div>
-
-                    <h3 class="mt-5 text-lg font-bold text-slate-900">
-                        Daily Practice
-                    </h3>
-
-                    <p class="mt-2 text-sm leading-6 text-slate-500">
-                        Improve calculation skills with interactive practice questions.
-                    </p>
-
-                    <div class="mt-5 flex items-center justify-between">
-                        <span class="text-sm font-semibold text-indigo-600">
-                            Start learning
-                        </span>
-
-                        <span class="text-lg text-indigo-600 transition group-hover:translate-x-1">
-                            →
-                        </span>
-                    </div>
+                    View history →
                 </button>
 
-                <!-- Olympiad Card -->
+            </div>
+
+
+            <!-- Clickable Overview Cards -->
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+
+                <!-- Daily Practice -->
                 <button type="button"
-                    class="group rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-violet-500/10"
+                    class="group cursor-pointer rounded-2xl border border-indigo-200 bg-white p-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-indigo-400 hover:bg-indigo-50/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20"
+                    (click)="startPractice.emit()">
+
+                    <div class="flex items-center justify-between">
+
+                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-100 text-xl"
+                            aria-hidden="true">
+
+                            📚
+                        </div>
+
+                        <span
+                            class="text-xl text-indigo-400 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-indigo-600"
+                            aria-hidden="true">
+
+                            ↗
+                        </span>
+
+                    </div>
+
+                    <p class="mt-5 text-sm font-bold text-slate-900">
+                        Daily Practice
+                    </p>
+
+                    <p class="mt-1 text-xs leading-5 text-slate-500">
+                        Build calculation skills with regular practice.
+                    </p>
+
+                    <div class="mt-5 flex items-center justify-between border-t border-indigo-100 pt-3">
+
+                        <span class="text-xs font-semibold text-indigo-600">
+                            Start Practice
+                        </span>
+
+                        <span
+                            class="text-base text-indigo-500 transition-transform duration-200 group-hover:translate-x-1"
+                            aria-hidden="true">
+
+                            →
+                        </span>
+
+                    </div>
+
+                </button>
+
+
+                <!-- Assessments -->
+                <button type="button"
+                    class="group cursor-pointer rounded-2xl border border-orange-200 bg-white p-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-orange-400 hover:bg-orange-50/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-orange-500/20"
                     (click)="openAssessment.emit()">
-                    <div class="flex items-start justify-between gap-4">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-50 text-2xl">
+
+                    <div class="flex items-center justify-between">
+
+                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-100 text-xl"
+                            aria-hidden="true">
+
                             🏆
                         </div>
 
-                        <span class="rounded-full bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-600">
-                            Assessment
+                        <span
+                            class="text-xl text-orange-400 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-orange-600"
+                            aria-hidden="true">
+
+                            ↗
                         </span>
+
                     </div>
 
-                    <h3 class="mt-5 text-lg font-bold text-slate-900">
-                        Olympiad Test
-                    </h3>
-
-                    <p class="mt-2 text-sm leading-6 text-slate-500">
-                        Test your skills with timed assessment questions.
+                    <p class="mt-5 text-sm font-bold text-slate-900">
+                        Assessments
                     </p>
 
-                    <div class="mt-5 flex items-center justify-between">
-                        <span class="text-sm font-semibold text-violet-600">
-                            Take assessment
+                    <p class="mt-1 text-xs leading-5 text-slate-500">
+                        Challenge your child and review performance.
+                    </p>
+
+                    <div class="mt-5 flex items-center justify-between border-t border-orange-100 pt-3">
+
+                        <span class="text-xs font-semibold text-orange-600">
+                            Take Assessment
                         </span>
 
-                        <span class="text-lg text-violet-600 transition group-hover:translate-x-1">
+                        <span
+                            class="text-base text-orange-500 transition-transform duration-200 group-hover:translate-x-1"
+                            aria-hidden="true">
+
                             →
                         </span>
+
                     </div>
+
+                </button>
+
+
+                <!-- Learning History -->
+                <button type="button"
+                    class="group cursor-pointer rounded-2xl border border-emerald-200 bg-white p-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-emerald-400 hover:bg-emerald-50/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-emerald-500/20"
+                    (click)="viewHistory.emit()">
+
+                    <div class="flex items-center justify-between">
+
+                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-xl"
+                            aria-hidden="true">
+
+                            📊
+                        </div>
+
+                        <span
+                            class="text-xl text-emerald-400 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-emerald-600"
+                            aria-hidden="true">
+
+                            ↗
+                        </span>
+
+                    </div>
+
+                    <p class="mt-5 text-sm font-bold text-slate-900">
+                        Learning History
+                    </p>
+
+                    <p class="mt-1 text-xs leading-5 text-slate-500">
+                        Review completed sessions and results.
+                    </p>
+
+                    <div class="mt-5 flex items-center justify-between border-t border-emerald-100 pt-3">
+
+                        <span class="text-xs font-semibold text-emerald-600">
+                            View History
+                        </span>
+
+                        <span
+                            class="text-base text-emerald-500 transition-transform duration-200 group-hover:translate-x-1"
+                            aria-hidden="true">
+
+                            →
+                        </span>
+
+                    </div>
+
                 </button>
 
             </div>
+
         </section>
 
-        <!-- Quick Actions -->
-        <section>
-            <h2 class="mb-4 text-xl font-bold tracking-tight text-slate-900">
-                Quick actions
-            </h2>
 
-            <div class="grid gap-3 sm:grid-cols-2">
+        <!-- ==================== PARENT TOOLS ==================== -->
+        <section class="space-y-4" aria-labelledby="parent-tools-heading">
 
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-indigo-600">
+                    Manage your learning
+                </p>
+
+                <h2 id="parent-tools-heading" class="mt-1 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+
+                    Parent tools
+                </h2>
+            </div>
+
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+                <!-- Parent Tools -->
                 <button type="button"
-                    class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-slate-300 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-slate-500/10"
-                    (click)="viewHistory.emit()">
-                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xl">
-                        📊
-                    </div>
-
-                    <div class="min-w-0 flex-1">
-                        <h3 class="font-semibold text-slate-900">
-                            Learning History
-                        </h3>
-
-                        <p class="mt-1 text-xs text-slate-500">
-                            Review previous practice and results.
-                        </p>
-                    </div>
-
-                    <span class="text-slate-400">→</span>
-                </button>
-
-                <button type="button"
-                    class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-slate-300 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-slate-500/10"
+                    class="group flex cursor-pointer items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-indigo-500/10"
                     (click)="openParentTools.emit()">
-                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xl">
+
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-xl"
+                        aria-hidden="true">
+
                         👨‍👩‍👧
                     </div>
 
                     <div class="min-w-0 flex-1">
-                        <h3 class="font-semibold text-slate-900">
+
+                        <h3 class="font-bold text-slate-900">
                             Parent Tools
                         </h3>
 
-                        <p class="mt-1 text-xs text-slate-500">
+                        <p class="mt-1 text-xs leading-5 text-slate-500">
                             Manage questions and learning activities.
                         </p>
+
+                        <p class="mt-3 text-xs font-semibold text-indigo-600">
+                            Manage activities →
+                        </p>
+
                     </div>
 
-                    <span class="text-slate-400">→</span>
                 </button>
 
+
+                <!-- Create Parent Account -->
+                @if (!currentUser()) {
+
                 <button type="button"
-                    class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-slate-300 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-slate-500/10 sm:col-span-2"
+                    class="group flex cursor-pointer items-center gap-4 rounded-2xl border border-violet-100 bg-violet-50 p-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-violet-500/10"
                     (click)="openRegistration.emit()">
-                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-xl">
+
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-xl"
+                        aria-hidden="true">
+
                         👤
                     </div>
 
                     <div class="min-w-0 flex-1">
-                        <h3 class="font-semibold text-slate-900">
+
+                        <h3 class="font-bold text-violet-900">
                             Create Parent Account
                         </h3>
 
-                        <p class="mt-1 text-xs text-slate-500">
-                            Register a parent account for secure access.
+                        <p class="mt-1 text-xs leading-5 text-violet-700">
+                            Register a parent account.
                         </p>
+
+                        <p class="mt-3 text-xs font-semibold text-violet-600">
+                            Register now →
+                        </p>
+
                     </div>
 
-                    <span class="text-indigo-500">→</span>
                 </button>
 
-                <button type="button"
-                    class="flex items-center gap-4 rounded-2xl border border-indigo-200 bg-indigo-50 p-4 text-left shadow-sm transition hover:border-indigo-300 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-indigo-500/10 sm:col-span-2"
-                    (click)="openLogin.emit()">
-                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-xl">
-                        🔐
-                    </div>
-
-                    <div class="min-w-0 flex-1">
-                        <h3 class="font-semibold text-slate-900">
-                            Parent Login
-                        </h3>
-
-                        <p class="mt-1 text-xs text-slate-600">
-                            Sign in to access your child's learning dashboard.
-                        </p>
-                    </div>
-
-                    <span class="text-indigo-500">→</span>
-                </button>
+                }
 
             </div>
+
         </section>
 
-        <!-- Footer Tip -->
-        <section class="rounded-2xl border border-indigo-100 bg-indigo-50 px-5 py-4">
+
+        <!-- ==================== LEARNING TIP ==================== -->
+        <section
+            class="rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 to-green-50 px-5 py-5 sm:px-6"
+            aria-label="Learning tip">
+
             <div class="flex items-start gap-3">
-                <span class="text-xl">💡</span>
+
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-xl shadow-sm"
+                    aria-hidden="true">
+
+                    💡
+                </div>
 
                 <div>
-                    <h3 class="text-sm font-semibold text-indigo-900">
-                        Learning tip
+
+                    <h3 class="text-sm font-bold text-emerald-900">
+                        Today's Learning Tip
                     </h3>
 
-                    <p class="mt-1 text-sm leading-6 text-indigo-700">
-                        Consistent short practice sessions can help children build
-                        confidence and improve their skills.
+                    <p class="mt-1 text-sm leading-6 text-emerald-700">
+                        Consistent short practice sessions can help children build confidence and improve their skills.
                     </p>
+
                 </div>
+
             </div>
+
         </section>
 
-    </div>
+    </main>
+
 </div>

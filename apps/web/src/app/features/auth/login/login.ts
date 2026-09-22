@@ -12,7 +12,9 @@ import { finalize } from 'rxjs';
 export class Login {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  readonly registerRequested = output<void>();
   readonly loginSuccess = output<LoginResponse>();
+  readonly registrationMessage = this.authService.registrationMessage;
 
   readonly loginForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
