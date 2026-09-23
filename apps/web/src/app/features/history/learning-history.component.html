@@ -1,87 +1,338 @@
-<section class="app-page-shell app-page-shell--standard" aria-labelledby="history-heading">
-    <header class="mb-6">
-        <h2 id="history-heading" class="text-2xl font-bold text-slate-900">
-            Learning History
-        </h2>
+<section class="min-h-dvh bg-slate-50 px-4 py-6 sm:px-6 lg:px-8" aria-labelledby="history-heading">
 
-        <p class="mt-2 text-sm text-slate-600">
-            View your practice and Olympiad activities.
-        </p>
-    </header>
+    <div class="mx-auto w-full max-w-6xl">
 
-    @if (historyItems.length === 0) {
-    <div class="rounded-xl border border-slate-200 bg-white p-6 text-center text-slate-600">
-        No learning history available yet.
-    </div>
-    } @else {
-    <div class="space-y-4">
-        @for (item of historyItems; track item.id) {
-        <article class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <div class="flex items-start justify-between gap-3">
+        <!-- HEADER -->
+        <header
+            class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-700 via-indigo-600 to-blue-600 px-5 py-7 text-white shadow-lg sm:px-8 sm:py-9">
+
+            <div class="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-white/10"></div>
+
+            <div class="pointer-events-none absolute -bottom-24 -left-16 h-48 w-48 rounded-full bg-white/10"></div>
+
+            <div class="relative flex items-center justify-between gap-4">
+
                 <div>
-                    <h3 class="font-semibold text-slate-900">
-                        {{ item.title }}
-                    </h3>
+                    <p class="text-xs font-bold uppercase tracking-widest text-indigo-200">
+                        LearnNest
+                    </p>
 
-                    <p class="mt-1 text-sm text-slate-500">
-                        {{ item.type }}
+                    <h1 id="history-heading" class="mt-2 text-2xl font-extrabold sm:text-3xl">
+                        Learning History 📚
+                    </h1>
+
+                    <p class="mt-2 text-sm text-indigo-100 sm:text-base">
+                        Every attempt is a step toward growth!
                     </p>
                 </div>
 
-                <span class="rounded-full px-3 py-1 text-sm font-semibold" [class]="
-                item.type === 'Olympiad'
-                  ? 'bg-purple-100 text-purple-700'
-                  : 'bg-blue-100 text-blue-700'
-              ">
-                    {{ item.type }}
-                </span>
+                <div class="hidden text-6xl sm:block" aria-hidden="true">
+                    🏆
+                </div>
+
             </div>
 
-            <div class="mt-4 grid grid-cols-2 gap-4 text-sm">
-                <div>
-                    <p class="text-slate-500">Completed</p>
-                    <p class="mt-1 font-medium text-slate-800">
-                        {{ item.completedAt | date: 'dd MMM yyyy, hh:mm a' }}
-                    </p>
+        </header>
+
+
+        <!-- SUMMARY CARDS -->
+        <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+
+            <!-- TOTAL ATTEMPTS -->
+            <div class="rounded-2xl border border-indigo-100 bg-white p-5 shadow-sm">
+
+                <div class="flex items-center justify-between">
+
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        Total Attempts
+                    </span>
+
+                    <span class="rounded-xl bg-indigo-50 p-2 text-xl" aria-hidden="true">
+                        📊
+                    </span>
+
                 </div>
 
-                <div>
-                    <p class="text-slate-500">Accuracy</p>
-                    <p class="mt-1 text-lg font-bold text-blue-700">
-                        {{ item.accuracyPercentage }}%
-                    </p>
-                </div>
+                <p class="mt-3 text-3xl font-extrabold text-indigo-700">
+                    {{ totalAttempts }}
+                </p>
 
-                <div>
-                    <p class="text-slate-500">Total Questions</p>
-                    <p class="mt-1 font-semibold text-slate-800">
-                        {{ item.totalQuestions }}
-                    </p>
-                </div>
+                <p class="mt-1 text-sm text-slate-500">
+                    Activities completed
+                </p>
 
-                <div>
-                    <p class="text-slate-500">Attempted</p>
-                    <p class="mt-1 font-semibold text-slate-800">
-                        {{ item.correctCount + item.incorrectCount }}
-                    </p>
-                </div>
-
-                <div>
-                    <p class="text-slate-500">Correct</p>
-                    <p class="mt-1 font-semibold text-green-700">
-                        {{ item.correctCount }}
-                    </p>
-                </div>
-
-                <div>
-                    <p class="text-slate-500">Incorrect</p>
-                    <p class="mt-1 font-semibold text-red-700">
-                        {{ item.incorrectCount }}
-                    </p>
-                </div>
             </div>
-        </article>
+
+
+            <!-- AVERAGE ACCURACY -->
+            <div class="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
+
+                <div class="flex items-center justify-between">
+
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        Average Accuracy
+                    </span>
+
+                    <span class="rounded-xl bg-emerald-50 p-2 text-xl" aria-hidden="true">
+                        🎯
+                    </span>
+
+                </div>
+
+                <p class="mt-3 text-3xl font-extrabold text-emerald-600">
+                    {{ averageAccuracy }}%
+                </p>
+
+                <p class="mt-1 text-sm text-slate-500">
+                    Across all attempts
+                </p>
+
+            </div>
+
+
+            <!-- MOTIVATION -->
+            <div class="rounded-2xl border border-blue-100 bg-white p-5 shadow-sm sm:col-span-2 lg:col-span-1">
+
+                <div class="flex items-center justify-between">
+
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        Keep Growing
+                    </span>
+
+                    <span class="rounded-xl bg-blue-50 p-2 text-xl" aria-hidden="true">
+                        🚀
+                    </span>
+
+                </div>
+
+                <p class="mt-3 text-lg font-extrabold text-blue-700">
+                    Small steps!
+                </p>
+
+                <p class="mt-1 text-sm text-slate-500">
+                    Practice, learn, and improve.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- FILTER TABS -->
+        <div class="mt-7 flex flex-wrap items-center gap-2">
+
+            <button type="button" class="rounded-full px-5 py-2.5 text-sm font-bold transition" [class]="selectedFilter === 'All'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-100'" (click)="setFilter('All')">
+
+                All ({{ totalAttempts }})
+
+            </button>
+
+            <button type="button" class="rounded-full px-5 py-2.5 text-sm font-bold transition" [class]="selectedFilter === 'Practice'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-100'"
+                (click)="setFilter('Practice')">
+
+                Practice ({{ practiceCount }})
+
+            </button>
+
+            <button type="button" class="rounded-full px-5 py-2.5 text-sm font-bold transition" [class]="selectedFilter === 'Olympiad'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-100'"
+                (click)="setFilter('Olympiad')">
+
+                Olympiad ({{ olympiadCount }})
+
+            </button>
+
+        </div>
+
+
+        <!-- HISTORY LIST -->
+        @if (filteredHistoryItems.length === 0) {
+
+        <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+
+            <div class="text-4xl" aria-hidden="true">📚</div>
+
+            <h2 class="mt-3 text-lg font-bold text-slate-900">
+                No activities found
+            </h2>
+
+            <p class="mt-2 text-sm text-slate-500">
+                Start practicing to build your learning history.
+            </p>
+
+        </div>
+
+        } @else {
+
+        <div class="mt-6 space-y-4">
+
+            @for (item of filteredHistoryItems; track item.id) {
+
+            <article
+                class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md">
+
+                <div class="p-5 sm:p-6">
+
+                    <!-- CARD HEADER -->
+                    <div class="flex items-start justify-between gap-3">
+
+                        <div class="flex min-w-0 items-start gap-3">
+
+                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-2xl"
+                                aria-hidden="true">
+
+                                {{ item.type === 'Olympiad' ? '🏆' : '🧮' }}
+
+                            </div>
+
+                            <div class="min-w-0">
+
+                                <h2 class="text-base font-extrabold text-slate-900 sm:text-lg">
+                                    {{ item.title }}
+                                </h2>
+
+                                <p class="mt-1 text-xs font-medium text-slate-500">
+                                    {{ item.type }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <span class="shrink-0 rounded-full px-3 py-1 text-xs font-bold" [class]="item.type === 'Olympiad'
+                                ? 'bg-purple-100 text-purple-700'
+                                : 'bg-blue-100 text-blue-700'">
+
+                            {{ item.type }}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- SCORE AND DATE -->
+                    <div class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-[auto_1fr] sm:items-center">
+
+                        <!-- ACCURACY -->
+                        <div class="flex items-center gap-4">
+
+                            <div class="relative flex h-24 w-24 shrink-0 items-center justify-center rounded-full"
+                                [style.background]="
+                                    'conic-gradient(#6366f1 ' + item.accuracyPercentage + '%, #e2e8f0 0)'
+                                ">
+
+                                <div
+                                    class="flex h-[76px] w-[76px] flex-col items-center justify-center rounded-full bg-white">
+
+                                    <span class="text-xl font-extrabold text-indigo-700">
+                                        {{ item.accuracyPercentage }}%
+                                    </span>
+
+                                    <span class="text-[10px] font-semibold text-slate-400">
+                                        Accuracy
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                            <div>
+
+                                <p class="text-xs font-medium text-slate-500">
+                                    Completed
+                                </p>
+
+                                <p class="mt-1 text-sm font-semibold text-slate-800">
+                                    {{ item.completedAt | date: 'dd MMM yyyy' }}
+                                </p>
+
+                                <p class="mt-1 text-xs text-slate-500">
+                                    {{ item.completedAt | date: 'hh:mm a' }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- STATS -->
+                        <div class="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
+
+                            <div>
+                                <p class="text-xs text-slate-500">
+                                    Total
+                                </p>
+
+                                <p class="mt-1 text-lg font-bold text-slate-900">
+                                    {{ item.totalQuestions }}
+                                </p>
+                            </div>
+
+                            <div>
+                                <p class="text-xs text-slate-500">
+                                    Attempted
+                                </p>
+
+                                <p class="mt-1 text-lg font-bold text-slate-900">
+                                    {{ item.correctCount + item.incorrectCount }}
+                                </p>
+                            </div>
+
+                            <div>
+                                <p class="text-xs text-slate-500">
+                                    Correct
+                                </p>
+
+                                <p class="mt-1 text-lg font-bold text-emerald-600">
+                                    {{ item.correctCount }}
+                                </p>
+                            </div>
+
+                            <div>
+                                <p class="text-xs text-slate-500">
+                                    Incorrect
+                                </p>
+
+                                <p class="mt-1 text-lg font-bold text-red-600">
+                                    {{ item.incorrectCount }}
+                                </p>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- CARD FOOTER -->
+                <div class="flex items-center justify-between border-t border-slate-100 bg-slate-50 px-5 py-3 sm:px-6">
+
+                    <span class="text-xs font-medium text-slate-500">
+                        {{ item.unansweredCount }} unanswered
+                    </span>
+
+                    <span class="text-xs font-bold text-indigo-600">
+                        {{ item.accuracyPercentage >= 80
+                        ? 'Great work! 🌟'
+                        : 'Keep practicing! 💪' }}
+
+                    </span>
+
+                </div>
+
+            </article>
+
+            }
+
+        </div>
+
         }
+
     </div>
-    }
+
 </section>

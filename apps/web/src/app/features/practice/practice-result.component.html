@@ -1,4 +1,5 @@
 @if (attempt; as a) {
+
 <section class="min-h-dvh bg-slate-50 px-4 py-6 sm:px-6 lg:px-8" aria-labelledby="practice-completed-heading">
 
     <div class="mx-auto w-full max-w-4xl">
@@ -7,9 +8,12 @@
         <header
             class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-700 via-indigo-600 to-blue-600 px-5 py-8 text-center text-white shadow-xl sm:px-10 sm:py-10">
 
-            <!-- Decorative background -->
-            <div class="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-white/10"></div>
-            <div class="pointer-events-none absolute -bottom-24 -left-16 h-48 w-48 rounded-full bg-white/10"></div>
+            <!-- Decorative Background -->
+            <div class="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-white/10">
+            </div>
+
+            <div class="pointer-events-none absolute -bottom-24 -left-16 h-48 w-48 rounded-full bg-white/10">
+            </div>
 
             <div class="relative">
 
@@ -26,23 +30,207 @@
                 </h2>
 
                 <div class="mt-5">
+
                     <p class="text-6xl font-extrabold tracking-tight sm:text-7xl" aria-label="Accuracy percentage">
+
                         {{ a.result.accuracyPercentage }}%
+
                     </p>
 
                     <p class="mt-2 text-sm font-medium text-indigo-100">
                         Overall Accuracy
                     </p>
+
                 </div>
 
             </div>
+
         </header>
+
+
+        <!-- ACHIEVEMENT JOURNEY -->
+        @if (achievementLevel > 0) {
+
+        <section class="relative mt-6 overflow-hidden rounded-3xl p-6 text-center shadow-sm animate-achievement-enter"
+            [class.bg-gradient-to-br]="true" [class.from-amber-50]="achievementLevel === 60"
+            [class.to-yellow-100]="achievementLevel === 60" [class.from-blue-50]="achievementLevel === 70"
+            [class.to-indigo-100]="achievementLevel === 70" [class.from-purple-50]="achievementLevel === 80"
+            [class.to-violet-100]="achievementLevel === 80" [class.from-indigo-950]="achievementLevel === 90"
+            [class.to-purple-950]="achievementLevel === 90" [class.from-yellow-950]="achievementLevel === 100"
+            [class.to-amber-700]="achievementLevel === 100" role="status" aria-live="polite">
+
+            <!-- Decorative Particles -->
+            <div class="pointer-events-none absolute left-6 top-5 animate-achievement-sparkle text-xl opacity-70"
+                aria-hidden="true">
+                ✦
+            </div>
+
+            <div class="pointer-events-none absolute right-8 top-10 animate-achievement-sparkle text-lg opacity-70"
+                aria-hidden="true">
+                ✧
+            </div>
+
+            <div class="pointer-events-none absolute bottom-6 left-1/4 animate-achievement-sparkle text-sm opacity-60"
+                aria-hidden="true">
+                ✦
+            </div>
+
+
+            <!-- ACHIEVEMENT SCENE -->
+            <div class="relative flex min-h-36 items-center justify-center">
+
+                <!-- LEVEL 60: ABACUS AWAKENING -->
+                @if (achievementLevel === 60) {
+
+                <div class="relative animate-sprout-grow text-7xl" aria-label="Growing abacus achievement">
+                    🧮
+
+                    <span class="absolute -bottom-5 left-1/2 -translate-x-1/2 animate-sprout-bounce text-3xl">
+                        🌱
+                    </span>
+                </div>
+
+                }
+
+                <!-- LEVEL 70: NUMBER ROCKET -->
+                @if (achievementLevel === 70) {
+
+                <div class="relative animate-rocket-float text-7xl" aria-label="Number rocket achievement">
+
+                    🚀
+
+                    <span class="absolute -bottom-4 left-1/2 -translate-x-1/2 animate-rocket-fire text-2xl">
+                        🔥
+                    </span>
+
+                </div>
+
+                <span class="absolute animate-number-orbit text-xl font-extrabold text-indigo-500">
+                    1
+                </span>
+
+                <span class="absolute animate-number-orbit-reverse text-xl font-extrabold text-blue-500">
+                    2
+                </span>
+
+                <span class="absolute animate-number-orbit-slow text-xl font-extrabold text-purple-500">
+                    3
+                </span>
+
+                }
+
+                <!-- LEVEL 80: MATH MAGIC PORTAL -->
+                @if (achievementLevel === 80) {
+
+                <div class="relative flex h-32 w-32 items-center justify-center">
+
+                    <div class="absolute inset-0 rounded-full border-4 border-violet-300 animate-portal-spin">
+                    </div>
+
+                    <div class="absolute inset-3 rounded-full border-4 border-purple-400 animate-portal-pulse">
+                    </div>
+
+                    <div class="relative z-10 animate-portal-object text-6xl">
+                        🏆
+                    </div>
+
+                </div>
+
+                }
+
+                <!-- LEVEL 90: GALAXY OF GENIUS -->
+                @if (achievementLevel === 90) {
+
+                <div class="relative flex h-36 w-36 items-center justify-center">
+
+                    <div class="absolute inset-0 rounded-full border border-indigo-300/60 animate-galaxy-orbit">
+                    </div>
+
+                    <div class="absolute inset-4 rounded-full border border-purple-300/60 animate-galaxy-orbit-reverse">
+                    </div>
+
+                    <div class="absolute inset-8 rounded-full bg-indigo-400/20 blur-xl animate-galaxy-glow">
+                    </div>
+
+                    <div class="relative z-10 animate-galaxy-object text-7xl">
+                        🌌
+                    </div>
+
+                    <span class="absolute left-0 top-4 animate-achievement-sparkle text-yellow-200">
+                        ✦
+                    </span>
+
+                    <span class="absolute right-0 top-8 animate-achievement-sparkle text-yellow-200">
+                        ✧
+                    </span>
+
+                    <span class="absolute bottom-3 left-6 animate-achievement-sparkle text-yellow-200">
+                        ✦
+                    </span>
+
+                </div>
+
+                }
+
+                <!-- LEVEL 100: ULTIMATE CHAMPION -->
+                @if (achievementLevel === 100) {
+
+                <div class="relative flex h-36 w-36 items-center justify-center">
+
+                    <div class="absolute inset-0 rounded-full border-4 border-yellow-300/70 animate-champion-rays">
+                    </div>
+
+                    <div class="absolute inset-4 rounded-full border-2 border-yellow-200/70 animate-champion-ring">
+                    </div>
+
+                    <div class="relative z-10 animate-crown-bounce text-7xl">
+                        👑
+                    </div>
+
+                    <span class="absolute left-0 top-2 animate-achievement-sparkle text-2xl text-yellow-200">
+                        ✦
+                    </span>
+
+                    <span class="absolute right-0 top-5 animate-achievement-sparkle text-2xl text-yellow-200">
+                        ✦
+                    </span>
+
+                    <span class="absolute bottom-2 right-4 animate-achievement-sparkle text-xl text-yellow-200">
+                        ✧
+                    </span>
+
+                </div>
+
+                }
+
+            </div>
+
+
+            <!-- ACHIEVEMENT TEXT -->
+            <h3 class="relative z-10 mt-4 text-xl font-extrabold" [class.text-indigo-900]="achievementLevel <= 80"
+                [class.text-white]="achievementLevel >= 90">
+
+                {{ achievementTitle }}
+
+            </h3>
+
+            <p class="relative z-10 mt-2 text-sm" [class.text-indigo-700]="achievementLevel <= 80"
+                [class.text-yellow-100]="achievementLevel >= 90">
+
+                {{ achievementMessage }}
+
+            </p>
+
+        </section>
+
+        }
 
 
         <!-- PERFORMANCE SUMMARY -->
         <div class="mt-6">
 
             <div class="mb-4">
+
                 <p class="text-xs font-bold uppercase tracking-widest text-indigo-600">
                     Performance Overview
                 </p>
@@ -50,6 +238,7 @@
                 <h3 class="mt-1 text-xl font-bold text-slate-900">
                     Your Learning Summary
                 </h3>
+
             </div>
 
 
@@ -60,10 +249,15 @@
                 <div class="rounded-2xl border border-blue-100 bg-blue-50 p-4 shadow-sm">
 
                     <div class="flex items-center justify-between">
-                        <span class="text-xl" aria-hidden="true">📋</span>
+
+                        <span class="text-xl" aria-hidden="true">
+                            📋
+                        </span>
+
                         <span class="text-xs font-semibold text-blue-500">
                             Total
                         </span>
+
                     </div>
 
                     <p class="mt-3 text-3xl font-extrabold text-blue-700">
@@ -81,10 +275,15 @@
                 <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 shadow-sm">
 
                     <div class="flex items-center justify-between">
-                        <span class="text-xl" aria-hidden="true">✅</span>
+
+                        <span class="text-xl" aria-hidden="true">
+                            ✅
+                        </span>
+
                         <span class="text-xs font-semibold text-emerald-600">
                             Correct
                         </span>
+
                     </div>
 
                     <p class="mt-3 text-3xl font-extrabold text-emerald-700">
@@ -102,10 +301,15 @@
                 <div class="rounded-2xl border border-red-100 bg-red-50 p-4 shadow-sm">
 
                     <div class="flex items-center justify-between">
-                        <span class="text-xl" aria-hidden="true">❌</span>
+
+                        <span class="text-xl" aria-hidden="true">
+                            ❌
+                        </span>
+
                         <span class="text-xs font-semibold text-red-600">
                             Incorrect
                         </span>
+
                     </div>
 
                     <p class="mt-3 text-3xl font-extrabold text-red-700">
@@ -123,10 +327,15 @@
                 <div class="rounded-2xl border border-amber-100 bg-amber-50 p-4 shadow-sm">
 
                     <div class="flex items-center justify-between">
-                        <span class="text-xl" aria-hidden="true">⏳</span>
+
+                        <span class="text-xl" aria-hidden="true">
+                            ⏳
+                        </span>
+
                         <span class="text-xs font-semibold text-amber-600">
                             Skipped
                         </span>
+
                     </div>
 
                     <p class="mt-3 text-3xl font-extrabold text-amber-700">
@@ -165,17 +374,19 @@
                 aria-label="Answer breakdown showing correct, incorrect, and unanswered questions">
 
                 @if (a.result.totalQuestions > 0) {
-                <div class="h-full bg-emerald-500"
+
+                <div class="h-full bg-emerald-500 transition-all duration-700"
                     [style.width.%]="a.result.correctCount / a.result.totalQuestions * 100">
                 </div>
 
-                <div class="h-full bg-red-500"
+                <div class="h-full bg-red-500 transition-all duration-700"
                     [style.width.%]="a.result.incorrectCount / a.result.totalQuestions * 100">
                 </div>
 
-                <div class="h-full bg-amber-400"
+                <div class="h-full bg-amber-400 transition-all duration-700"
                     [style.width.%]="a.result.unansweredCount / a.result.totalQuestions * 100">
                 </div>
+
                 }
 
             </div>
@@ -185,27 +396,50 @@
             <div class="mt-5 grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
 
                 <div class="flex items-center gap-2">
-                    <span class="h-3 w-3 rounded-full bg-emerald-500"></span>
-                    <span class="text-slate-600">Correct</span>
+
+                    <span class="h-3 w-3 rounded-full bg-emerald-500">
+                    </span>
+
+                    <span class="text-slate-600">
+                        Correct
+                    </span>
+
                     <span class="ml-auto font-bold text-slate-900">
                         {{ a.result.correctCount }}
                     </span>
+
                 </div>
 
+
                 <div class="flex items-center gap-2">
-                    <span class="h-3 w-3 rounded-full bg-red-500"></span>
-                    <span class="text-slate-600">Incorrect</span>
+
+                    <span class="h-3 w-3 rounded-full bg-red-500">
+                    </span>
+
+                    <span class="text-slate-600">
+                        Incorrect
+                    </span>
+
                     <span class="ml-auto font-bold text-slate-900">
                         {{ a.result.incorrectCount }}
                     </span>
+
                 </div>
 
+
                 <div class="flex items-center gap-2">
-                    <span class="h-3 w-3 rounded-full bg-amber-400"></span>
-                    <span class="text-slate-600">Unanswered</span>
+
+                    <span class="h-3 w-3 rounded-full bg-amber-400">
+                    </span>
+
+                    <span class="text-slate-600">
+                        Unanswered
+                    </span>
+
                     <span class="ml-auto font-bold text-slate-900">
                         {{ a.result.unansweredCount }}
                     </span>
+
                 </div>
 
             </div>
@@ -218,9 +452,12 @@
 
             <div class="flex items-start gap-3">
 
-                <span class="text-2xl" aria-hidden="true">🌟</span>
+                <span class="text-2xl" aria-hidden="true">
+                    🌟
+                </span>
 
                 <div>
+
                     <h3 class="font-bold text-indigo-900">
                         Keep Learning, Keep Growing!
                     </h3>
@@ -229,6 +466,7 @@
                         Every question is a chance to learn something new.
                         Keep practising and build your confidence.
                     </p>
+
                 </div>
 
             </div>
@@ -241,11 +479,14 @@
 
             <button type="button"
                 class="min-h-12 w-full rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 px-5 py-3 text-base font-bold text-white shadow-md transition hover:from-indigo-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                (click)="actionType === 'backToHome' ? onBackToHome() : onRestart()">
+                (click)="onAction()">
 
                 {{ actionLabel }}
 
-                <span class="ml-2" aria-hidden="true">→</span>
+                <span class="ml-2" aria-hidden="true">
+                    →
+                </span>
+
             </button>
 
         </div>
@@ -253,4 +494,5 @@
     </div>
 
 </section>
+
 }

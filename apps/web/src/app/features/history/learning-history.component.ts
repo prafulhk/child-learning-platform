@@ -78,4 +78,40 @@ export class LearningHistoryComponent {
       accuracyPercentage: attempt.result.accuracyPercentage,
     };
   }
+
+  selectedFilter: 'All' | 'Practice' | 'Olympiad' = 'All';
+
+  get filteredHistoryItems(): LearningHistoryItem[] {
+    if (this.selectedFilter === 'All') {
+      return this.historyItems;
+    }
+
+    return this.historyItems.filter((item) => item.type === this.selectedFilter);
+  }
+
+  get totalAttempts(): number {
+    return this.historyItems.length;
+  }
+
+  get averageAccuracy(): number {
+    if (this.historyItems.length === 0) {
+      return 0;
+    }
+
+    const totalAccuracy = this.historyItems.reduce((sum, item) => sum + item.accuracyPercentage, 0);
+
+    return Math.round(totalAccuracy / this.historyItems.length);
+  }
+
+  get practiceCount(): number {
+    return this.historyItems.filter((item) => item.type === 'Practice').length;
+  }
+
+  get olympiadCount(): number {
+    return this.historyItems.filter((item) => item.type === 'Olympiad').length;
+  }
+
+  setFilter(filter: 'All' | 'Practice' | 'Olympiad'): void {
+    this.selectedFilter = filter;
+  }
 }

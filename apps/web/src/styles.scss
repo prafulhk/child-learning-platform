@@ -38,3 +38,325 @@
     max-width: 88rem;
   }
 }
+
+@import 'tailwindcss';
+
+/* Achievement Entrance */
+
+@keyframes achievement-enter {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-achievement-enter {
+  animation: achievement-enter 0.7s ease-out both;
+}
+
+/* Sparkles */
+
+@keyframes achievement-sparkle {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8) rotate(0deg);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.3) rotate(180deg);
+  }
+}
+
+.animate-achievement-sparkle {
+  animation: achievement-sparkle 1.5s ease-in-out infinite;
+}
+
+/* Level 60: Sprout */
+
+@keyframes sprout-grow {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(-20deg);
+  }
+
+  70% {
+    transform: scale(1.15) rotate(8deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.animate-sprout-grow {
+  animation: sprout-grow 1s ease-out both;
+}
+
+@keyframes sprout-bounce {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(-5px);
+  }
+}
+
+.animate-sprout-bounce {
+  animation: sprout-bounce 1.5s ease-in-out infinite;
+}
+
+/* Level 70: Rocket */
+
+@keyframes rocket-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+
+  50% {
+    transform: translateY(-12px) rotate(3deg);
+  }
+}
+
+.animate-rocket-float {
+  animation: rocket-float 2s ease-in-out infinite;
+}
+
+@keyframes rocket-fire {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: translateX(-50%) scale(0.8);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.2);
+  }
+}
+
+.animate-rocket-fire {
+  animation: rocket-fire 0.4s ease-in-out infinite;
+}
+
+/* Number Orbits */
+
+@keyframes number-orbit {
+  from {
+    transform: rotate(0deg) translateX(65px) rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg) translateX(65px) rotate(-360deg);
+  }
+}
+
+.animate-number-orbit {
+  animation: number-orbit 4s linear infinite;
+}
+
+@keyframes number-orbit-reverse {
+  from {
+    transform: rotate(360deg) translateX(80px) rotate(-360deg);
+  }
+
+  to {
+    transform: rotate(0deg) translateX(80px) rotate(0deg);
+  }
+}
+
+.animate-number-orbit-reverse {
+  animation: number-orbit-reverse 5s linear infinite;
+}
+
+@keyframes number-orbit-slow {
+  from {
+    transform: rotate(0deg) translateX(95px) rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg) translateX(95px) rotate(-360deg);
+  }
+}
+
+.animate-number-orbit-slow {
+  animation: number-orbit-slow 7s linear infinite;
+}
+
+/* Level 80: Magic Portal */
+
+@keyframes portal-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-portal-spin {
+  animation: portal-spin 4s linear infinite;
+}
+
+@keyframes portal-pulse {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+.animate-portal-pulse {
+  animation: portal-pulse 2s ease-in-out infinite;
+}
+
+@keyframes portal-object {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+.animate-portal-object {
+  animation: portal-object 2s ease-in-out infinite;
+}
+
+/* Level 90: Galaxy */
+
+@keyframes galaxy-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-galaxy-orbit {
+  animation: galaxy-orbit 8s linear infinite;
+}
+
+@keyframes galaxy-orbit-reverse {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+.animate-galaxy-orbit-reverse {
+  animation: galaxy-orbit-reverse 6s linear infinite;
+}
+
+@keyframes galaxy-glow {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.9);
+  }
+
+  50% {
+    opacity: 0.9;
+    transform: scale(1.2);
+  }
+}
+
+.animate-galaxy-glow {
+  animation: galaxy-glow 2s ease-in-out infinite;
+}
+
+@keyframes galaxy-object {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+
+  50% {
+    transform: scale(1.1) rotate(5deg);
+  }
+}
+
+.animate-galaxy-object {
+  animation: galaxy-object 3s ease-in-out infinite;
+}
+
+/* Level 100: Champion */
+
+@keyframes champion-rays {
+  0%,
+  100% {
+    transform: scale(0.9) rotate(0deg);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: scale(1.1) rotate(180deg);
+    opacity: 1;
+  }
+}
+
+.animate-champion-rays {
+  animation: champion-rays 4s ease-in-out infinite;
+}
+
+@keyframes champion-ring {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+.animate-champion-ring {
+  animation: champion-ring 6s linear infinite;
+}
+
+@keyframes crown-bounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+
+  50% {
+    transform: translateY(-10px) scale(1.1);
+  }
+}
+
+.animate-crown-bounce {
+  animation: crown-bounce 1.5s ease-in-out infinite;
+}
+
+/* Accessibility */
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-achievement-enter,
+  .animate-achievement-sparkle,
+  .animate-sprout-grow,
+  .animate-sprout-bounce,
+  .animate-rocket-float,
+  .animate-rocket-fire,
+  .animate-number-orbit,
+  .animate-number-orbit-reverse,
+  .animate-number-orbit-slow,
+  .animate-portal-spin,
+  .animate-portal-pulse,
+  .animate-portal-object,
+  .animate-galaxy-orbit,
+  .animate-galaxy-orbit-reverse,
+  .animate-galaxy-glow,
+  .animate-galaxy-object,
+  .animate-champion-rays,
+  .animate-champion-ring,
+  .animate-crown-bounce {
+    animation: none !important;
+  }
+}
