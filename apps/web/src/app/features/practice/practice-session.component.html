@@ -1,81 +1,193 @@
-<section class="app-page-shell app-page-shell--standard">
-    <h1 class="text-center text-2xl font-bold text-slate-900">
-        Single-Digit Addition Practice
-    </h1>
+<section class="min-h-dvh bg-slate-50 px-4 py-4 sm:px-6 sm:py-6">
 
     @if (!completed) {
-    <div class="mt-4 flex justify-center">
-        <div class="rounded-full bg-slate-900 px-4 py-2 text-3xl font-semibold tabular-nums text-white shadow-sm">
-            {{ remainingTimeLabel }}
+
+    <!-- PAGE HEADER -->
+    <header class="mx-auto flex w-full max-w-4xl items-center justify-between gap-3">
+
+        <div class="min-w-0">
+            <p class="text-xs font-bold uppercase tracking-widest text-indigo-600">
+                LearnNest
+            </p>
+
+            <h1 class="mt-1 text-xl font-extrabold text-slate-900 sm:text-2xl">
+                Addition Practice
+            </h1>
+
+            <p class="mt-1 text-xs font-medium text-slate-500 sm:text-sm">
+                Build your math confidence 🚀
+            </p>
         </div>
-    </div>
+
+        <!-- TIMER -->
+        <div
+            class="flex shrink-0 items-center gap-2 rounded-2xl border border-indigo-100 bg-white px-3 py-2 shadow-sm sm:px-4">
+
+            <span class="text-lg" aria-hidden="true">⏱️</span>
+
+            <div>
+                <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                    Time
+                </p>
+
+                <p class="text-base font-extrabold tabular-nums text-indigo-700 sm:text-lg">
+                    {{ remainingTimeLabel }}
+                </p>
+            </div>
+
+        </div>
+
+    </header>
+
 
     @if (session) {
     @if (currentPresentedQuestion; as currentQuestion) {
-    <p class="mt-4 text-center text-sm font-medium text-slate-600">
-        Question {{ currentQuestionIndex + 1 }} of {{ totalQuestions }}
-    </p>
 
-    <div class="mt-5 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-        <app-question-display [question]="currentQuestion.questionSnapshot"></app-question-display>
-    </div>
+    <!-- PROGRESS SECTION -->
+    <div class="mx-auto mt-6 w-full max-w-4xl">
 
-    <div class="mt-5 flex flex-col gap-3" role="radiogroup" aria-label="Answer options">
-        @for (
-        option of currentQuestion.questionSnapshot.options;
-        track option.id
-        ) {
-        <app-answer-option [option]="option"
-            [selected]="session.selectedAnswers[currentQuestion.questionId] === option.id"
-            (optionSelected)="onSelectOption($event)"></app-answer-option>
-        }
-    </div>
+        <div class="flex items-center justify-between text-sm">
 
-    <div class="mt-5">
-        <button type="button"
-            class="min-h-11 w-full rounded-xl border border-slate-300 px-4 py-2 font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
-            [disabled]="currentQuestionIndex === 0" (click)="onPrevious()">
-            Previous
-        </button>
-    </div>
-    }
-    }
-    } @else if (completed) {
-    @if (completedAttempt; as a) {
-    <section aria-labelledby="practice-completed-heading">
-        <header class="text-center">
-            <h2 id="practice-completed-heading" class="text-2xl font-bold text-slate-900">
-                Practice Completed
-            </h2>
-            <p class="mt-4 text-5xl font-extrabold text-blue-700" aria-label="Accuracy percentage">
-                {{ a.result.accuracyPercentage }}%
-            </p>
-        </header>
+            <span class="font-semibold text-slate-700">
+                Question {{ currentQuestionIndex + 1 }}
+                <span class="font-normal text-slate-400">
+                    / {{ totalQuestions }}
+                </span>
+            </span>
 
-        <div class="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <dl class="grid grid-cols-2 gap-y-3 text-base text-slate-800">
-                <dt class="font-medium">Total Questions</dt>
-                <dd class="text-right font-semibold">{{ a.result.totalQuestions }}</dd>
+            <span class="font-medium text-indigo-600">
+                Keep going!
+            </span>
 
-                <dt class="font-medium">Correct</dt>
-                <dd class="text-right font-semibold text-green-700">{{ a.result.correctCount }}</dd>
-
-                <dt class="font-medium">Incorrect</dt>
-                <dd class="text-right font-semibold text-red-700">{{ a.result.incorrectCount }}</dd>
-
-                <dt class="font-medium">Unanswered</dt>
-                <dd class="text-right font-semibold text-amber-700">{{ a.result.unansweredCount }}</dd>
-            </dl>
         </div>
 
-        <div class="mt-6">
+        <div class="mt-3 h-2.5 overflow-hidden rounded-full bg-slate-200" role="progressbar"
+            [attr.aria-valuenow]="currentQuestionIndex + 1" aria-valuemin="1" [attr.aria-valuemax]="totalQuestions"
+            aria-label="Practice progress">
+
+            <div class="h-full rounded-full bg-gradient-to-r from-violet-500 to-indigo-600 transition-all duration-300"
+                [style.width.%]="totalQuestions > 0
+                    ? ((currentQuestionIndex + 1) / totalQuestions) * 100
+                    : 0">
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- QUESTION CARD -->
+    <main class="mx-auto mt-6 w-full max-w-4xl">
+
+        <div class="overflow-hidden rounded-3xl border border-indigo-100 bg-white shadow-sm">
+
+            <!-- CARD TOP -->
+            <div class="bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-5 text-white sm:px-8">
+
+                <div class="flex items-center justify-between gap-3">
+
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-widest text-indigo-100">
+                            Solve the question
+                        </p>
+
+                        <h2 class="mt-1 text-lg font-extrabold sm:text-xl">
+                            Let's do some math! ✨
+                        </h2>
+                    </div>
+
+                    <span class="text-3xl" aria-hidden="true">
+                        🧮
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- QUESTION -->
+            <div class="px-4 py-7 sm:px-8 sm:py-10">
+
+                <div class="rounded-2xl bg-indigo-50 px-3 py-6 ring-1 ring-indigo-100 sm:px-6 sm:py-8">
+
+                    <app-question-display [question]="currentQuestion.questionSnapshot">
+                    </app-question-display>
+
+                </div>
+
+
+                <!-- ANSWER OPTIONS -->
+                <div class="mt-7">
+
+                    <div class="mb-4 flex items-center justify-between gap-2">
+
+                        <h3 class="text-sm font-bold text-slate-800">
+                            Choose your answer
+                        </h3>
+
+                        <span class="text-xs text-slate-400">
+                            Tap one option
+                        </span>
+
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Answer options">
+
+                        @for (
+                        option of currentQuestion.questionSnapshot.options;
+                        track option.id
+                        ) {
+
+                        <app-answer-option [option]="option"
+                            [selected]="session.selectedAnswers[currentQuestion.questionId] === option.id"
+                            (optionSelected)="onSelectOption($event)">
+                        </app-answer-option>
+
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- NAVIGATION -->
+        <div class="mt-5 flex items-center justify-between gap-3">
+
             <button type="button"
-                class="min-h-11 w-full rounded-xl bg-blue-600 px-4 py-3 text-lg font-semibold text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                (click)="restartPractice()">
-                Practice Again
+                class="min-h-12 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+                [disabled]="currentQuestionIndex === 0" (click)="onPrevious()">
+
+                <span aria-hidden="true">←</span>
+                Previous
+
             </button>
+
+            <p class="text-center text-xs font-medium text-slate-400">
+                Select an answer to continue
+            </p>
+
         </div>
-    </section>
+
+    </main>
+
     }
     }
+    }
+
+    @else if (completed) {
+
+    @if (completedAttempt; as a) {
+
+    <app-practice-result [attempt]="completedAttempt" title="Practice Assessment Completed"
+        actionLabel="Back to Dashboard" actionType="backToHome" (backToHome)="onBackToHome()">
+    </app-practice-result>
+
+    }
+
+    }
+
 </section>

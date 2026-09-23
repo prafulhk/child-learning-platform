@@ -1,6 +1,6 @@
 <app-toast-container />
 @if (view === 'PRACTICE') {
-<app-practice-session />
+<app-practice-session (backToHome)="onBackToHome()" />
 } @else if (view === 'HISTORY') {
 <app-learning-history />
 } @else if (view === 'DETAIL' && selectedAttempt) {

@@ -1,4 +1,11 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  OnDestroy,
+  OnInit,
+  Output,
+} from '@angular/core';
 import {
   ActivePracticeSession,
   PracticeAttempt,
@@ -7,14 +14,16 @@ import {
 import { PracticeService } from '../../core/services/practice.service';
 import { AnswerOptionComponent } from '../../shared/components/answer-option/answer-option.component';
 import { QuestionDisplayComponent } from '../../shared/components/question-display/question-display.component';
+import { PracticeResultComponent } from './practice-result.component';
 
 @Component({
   selector: 'app-practice-session',
   standalone: true,
-  imports: [QuestionDisplayComponent, AnswerOptionComponent],
+  imports: [QuestionDisplayComponent, AnswerOptionComponent, PracticeResultComponent],
   templateUrl: './practice-session.component.html',
 })
 export class PracticeSessionComponent implements OnInit, OnDestroy {
+  @Output() backToHome = new EventEmitter<void>();
   readonly topicId = 'single-digit-addition';
   private readonly countdownTickMs = 1000;
 
@@ -209,5 +218,9 @@ export class PracticeSessionComponent implements OnInit, OnDestroy {
     const seconds = safeSeconds % 60;
 
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+
+  onBackToHome(): void {
+    this.backToHome.emit();
   }
 }

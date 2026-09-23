@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import {
   PracticeAttempt,
   PresentedQuestionSnapshot,
@@ -11,7 +12,7 @@ type AttemptQuestionStatus = 'CORRECT' | 'INCORRECT' | 'UNANSWERED';
 @Component({
   selector: 'app-practice-attempt-detail',
   standalone: true,
-  imports: [QuestionDisplayComponent],
+  imports: [CommonModule, QuestionDisplayComponent],
   templateUrl: './practice-attempt-detail.component.html',
 })
 export class PracticeAttemptDetailComponent {
@@ -86,5 +87,12 @@ export class PracticeAttemptDetailComponent {
     }
 
     return 'Unanswered';
+  }
+
+  getAccuracyColor(): string {
+    const accuracy = this.attempt.result.accuracyPercentage;
+    if (accuracy >= 80) return 'from-emerald-600 to-green-600';
+    if (accuracy >= 60) return 'from-amber-600 to-orange-600';
+    return 'from-rose-600 to-red-600';
   }
 }

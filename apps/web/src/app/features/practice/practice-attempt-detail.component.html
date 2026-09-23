@@ -1,127 +1,200 @@
-<section class="app-page-shell app-page-shell--standard">
-  <header>
-    <h1 class="text-center text-3xl font-bold text-slate-900">Practice Attempt</h1>
+<section class="app-page-shell app-page-shell--standard" aria-labelledby="attempt-heading">
+  <!-- Header with gradient based on performance -->
+  <header
+    [class]="'relative overflow-hidden rounded-3xl bg-gradient-to-br ' + getAccuracyColor() + ' px-5 py-8 text-white shadow-xl sm:px-10 sm:py-10'">
+    <!-- Decorative background -->
+    <div class="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-white/10"></div>
+    <div class="pointer-events-none absolute -bottom-24 -left-16 h-48 w-48 rounded-full bg-white/10"></div>
+
+    <div class="relative">
+      <div class="mb-3 text-4xl" aria-hidden="true">
+        @if (attempt.result.accuracyPercentage >= 80) {
+        🎉
+        } @else if (attempt.result.accuracyPercentage >= 60) {
+        👍
+        } @else {
+        💪
+        }
+      </div>
+
+      <h1 id="attempt-heading" class="text-3xl font-bold tracking-tight sm:text-4xl">
+        Practice Review
+      </h1>
+
+      <p class="mt-2 text-white/90 text-base">
+        {{ formatCompletedDateTime(attempt.completedAt) }}
+      </p>
+    </div>
   </header>
 
-  <article class="mt-6 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200" data-testid="attempt-summary">
-    <div class="grid grid-cols-2 gap-3 text-sm">
-      <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200 col-span-2">
-        <p class="font-medium text-slate-600">Topic</p>
-        <p class="mt-1 text-base font-semibold text-slate-900" data-testid="attempt-topic">{{ attempt.topicId }}</p>
-      </div>
-
-      <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200 col-span-2">
-        <p class="font-medium text-slate-600">Completed</p>
-        <p class="mt-1 text-base font-semibold text-slate-900" data-testid="attempt-completed-at">
-          {{ formatCompletedDateTime(attempt.completedAt) }}
+  <!-- Performance Summary Card -->
+  <div class="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-6">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-5">
+      <!-- Accuracy (Large) -->
+      <div class="sm:col-span-2">
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-600">
+          Overall Accuracy
+        </p>
+        <p class="mt-2 text-5xl font-extrabold text-slate-900">
+          {{ attempt.result.accuracyPercentage }}<span class="text-2xl">%</span>
         </p>
       </div>
 
-      <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
-        <p class="font-medium text-slate-600">Total Questions</p>
-        <p class="mt-1 text-lg font-bold text-slate-900" data-testid="attempt-total-questions">
-          {{ attempt.result.totalQuestions }}
-        </p>
+      <!-- Quick Stats -->
+      <div class="rounded-xl bg-emerald-50 p-4 ring-1 ring-emerald-100">
+        <p class="text-xs font-semibold uppercase tracking-wider text-emerald-700">Correct</p>
+        <p class="mt-2 text-3xl font-bold text-emerald-900">{{ attempt.result.correctCount }}</p>
       </div>
 
-      <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
-        <p class="font-medium text-slate-600">Accuracy</p>
-        <p class="mt-1 text-lg font-bold text-slate-900" data-testid="attempt-accuracy">
-          {{ attempt.result.accuracyPercentage }}%
-        </p>
+      <div class="rounded-xl bg-rose-50 p-4 ring-1 ring-rose-100">
+        <p class="text-xs font-semibold uppercase tracking-wider text-rose-700">Incorrect</p>
+        <p class="mt-2 text-3xl font-bold text-rose-900">{{ attempt.result.incorrectCount }}</p>
       </div>
 
-      <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
-        <p class="font-medium text-slate-600">Correct</p>
-        <p class="mt-1 text-lg font-bold text-emerald-700" data-testid="attempt-correct-count">
-          {{ attempt.result.correctCount }}
-        </p>
-      </div>
-
-      <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
-        <p class="font-medium text-slate-600">Incorrect</p>
-        <p class="mt-1 text-lg font-bold text-rose-700" data-testid="attempt-incorrect-count">
-          {{ attempt.result.incorrectCount }}
-        </p>
-      </div>
-
-      <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
-        <p class="font-medium text-slate-600">Unanswered</p>
-        <p class="mt-1 text-lg font-bold text-amber-700" data-testid="attempt-unanswered-count">
-          {{ attempt.result.unansweredCount }}
-        </p>
-      </div>
-
-      <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
-        <p class="font-medium text-slate-600">Duration</p>
-        <p class="mt-1 text-lg font-bold text-slate-900" data-testid="attempt-duration">
-          {{ formatDuration(attempt.startedAt, attempt.completedAt) }}
-        </p>
+      <div class="rounded-xl bg-amber-50 p-4 ring-1 ring-amber-100">
+        <p class="text-xs font-semibold uppercase tracking-wider text-amber-700">Unanswered</p>
+        <p class="mt-2 text-3xl font-bold text-amber-900">{{ attempt.result.unansweredCount }}</p>
       </div>
     </div>
-  </article>
 
-  <div class="mt-6 space-y-4">
-    @for (presented of attempt.presentedQuestions; track presented.questionId; let index = $index) {
-    <article class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200" data-testid="attempt-question"
-      [attr.data-question-id]="presented.questionId">
-      <div class="flex items-center justify-between gap-2">
-        <h2 class="text-lg font-semibold text-slate-900">Question {{ index + 1 }}</h2>
-        <span class="rounded-full px-3 py-1 text-xs font-semibold"
-          [class.bg-emerald-100]="getQuestionStatus(presented) === 'CORRECT'"
-          [class.text-emerald-800]="getQuestionStatus(presented) === 'CORRECT'"
-          [class.bg-rose-100]="getQuestionStatus(presented) === 'INCORRECT'"
-          [class.text-rose-800]="getQuestionStatus(presented) === 'INCORRECT'"
-          [class.bg-amber-100]="getQuestionStatus(presented) === 'UNANSWERED'"
-          [class.text-amber-800]="getQuestionStatus(presented) === 'UNANSWERED'" data-testid="question-status">
-          {{ getQuestionStatusLabel(presented) }}
-        </span>
-      </div>
-
-      <div class="mt-4 rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
-        <app-question-display [question]="presented.questionSnapshot"></app-question-display>
-      </div>
-
-      <div class="mt-4 space-y-2">
-        @for (option of presented.questionSnapshot.options; track option.id) {
-        <div class="flex items-center justify-between gap-2 rounded-xl border p-3"
-          [class.border-blue-400]="isSelectedOption(presented.questionId, option.id)"
-          [class.bg-blue-50]="isSelectedOption(presented.questionId, option.id)"
-          [class.border-emerald-400]="!isSelectedOption(presented.questionId, option.id) && isCorrectOption(presented, option)"
-          [class.bg-emerald-50]="!isSelectedOption(presented.questionId, option.id) && isCorrectOption(presented, option)"
-          [class.border-slate-200]="!isSelectedOption(presented.questionId, option.id) && !isCorrectOption(presented, option)"
-          data-testid="question-option" [attr.data-option-id]="option.id" [attr.data-option-value]="option.value">
-          <div class="flex items-center gap-2 text-slate-900">
-            <span class="text-base"
-              [attr.aria-label]="isSelectedOption(presented.questionId, option.id) ? 'Selected option' : 'Unselected option'">
-              {{ isSelectedOption(presented.questionId, option.id) ? '●' : '○' }}
-            </span>
-            <span class="text-lg font-semibold">{{ option.value }}</span>
-          </div>
-
-          <div class="flex flex-wrap justify-end gap-1 text-xs font-semibold">
-            @if (isSelectedOption(presented.questionId, option.id)) {
-            <span class="rounded-full bg-blue-100 px-2 py-1 text-blue-800" data-testid="marker-selected">Your
-              answer</span>
-            }
-
-            @if (isCorrectOption(presented, option)) {
-            <span class="rounded-full bg-emerald-100 px-2 py-1 text-emerald-800" data-testid="marker-correct">Correct
-              answer</span>
-            }
-          </div>
+    <!-- Progress Bar -->
+    <div class="mt-6">
+      <p class="text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2">
+        Answer Breakdown
+      </p>
+      <div class="flex h-3 overflow-hidden rounded-full bg-slate-200">
+        @if (attempt.result.totalQuestions > 0) {
+        <div class="h-full bg-emerald-500"
+          [style.width.%]="(attempt.result.correctCount / attempt.result.totalQuestions) * 100">
+        </div>
+        <div class="h-full bg-rose-500"
+          [style.width.%]="(attempt.result.incorrectCount / attempt.result.totalQuestions) * 100">
+        </div>
+        <div class="h-full bg-amber-400"
+          [style.width.%]="(attempt.result.unansweredCount / attempt.result.totalQuestions) * 100">
         </div>
         }
       </div>
-    </article>
-    }
+    </div>
+
+    <!-- Metadata -->
+    <div class="mt-6 grid grid-cols-2 gap-4 border-t border-slate-200 pt-6 sm:grid-cols-4">
+      <div>
+        <p class="text-xs font-medium text-slate-600">Topic</p>
+        <p class="mt-1 font-semibold text-slate-900">{{ attempt.topicId }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium text-slate-600">Total Questions</p>
+        <p class="mt-1 font-semibold text-slate-900">{{ attempt.result.totalQuestions }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium text-slate-600">Duration</p>
+        <p class="mt-1 font-semibold text-slate-900">{{ formatDuration(attempt.startedAt, attempt.completedAt) }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium text-slate-600">Completed</p>
+        <p class="mt-1 font-semibold text-slate-900 text-sm">
+          {{ formatCompletedDateTime(attempt.completedAt) | slice: 0: 10 }}
+        </p>
+      </div>
+    </div>
   </div>
 
-  <div class="mt-6">
+  <!-- Questions Review -->
+  <div class="mt-8">
+    <h2 class="mb-4 text-xl font-bold text-slate-900">
+      Question Review
+    </h2>
+
+    <div class="space-y-4">
+      @for (presented of attempt.presentedQuestions; track presented.questionId; let index = $index) {
+      <article class="rounded-2xl border-2 p-4 shadow-sm transition-colors"
+        [class.border-emerald-200]="getQuestionStatus(presented) === 'CORRECT'"
+        [class.bg-emerald-50/50]="getQuestionStatus(presented) === 'CORRECT'"
+        [class.border-rose-200]="getQuestionStatus(presented) === 'INCORRECT'"
+        [class.bg-rose-50/50]="getQuestionStatus(presented) === 'INCORRECT'"
+        [class.border-amber-200]="getQuestionStatus(presented) === 'UNANSWERED'"
+        [class.bg-amber-50/50]="getQuestionStatus(presented) === 'UNANSWERED'"
+        [class.border-slate-200]="getQuestionStatus(presented) === 'UNANSWERED'"
+        [class.bg-white]="getQuestionStatus(presented) === 'UNANSWERED'" data-testid="attempt-question"
+        [attr.data-question-id]="presented.questionId">
+
+        <!-- Question Header -->
+        <div class="flex items-center justify-between gap-3 mb-4">
+          <div class="flex items-center gap-3">
+            <span class="text-sm font-bold text-slate-600">Q{{ index + 1 }}</span>
+            <span class="rounded-full px-3 py-1 text-xs font-semibold"
+              [class.bg-emerald-100]="getQuestionStatus(presented) === 'CORRECT'"
+              [class.text-emerald-800]="getQuestionStatus(presented) === 'CORRECT'"
+              [class.bg-rose-100]="getQuestionStatus(presented) === 'INCORRECT'"
+              [class.text-rose-800]="getQuestionStatus(presented) === 'INCORRECT'"
+              [class.bg-amber-100]="getQuestionStatus(presented) === 'UNANSWERED'"
+              [class.text-amber-800]="getQuestionStatus(presented) === 'UNANSWERED'" data-testid="question-status">
+              {{ getQuestionStatusLabel(presented) }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Question Display -->
+        <div class="mb-4 rounded-xl bg-slate-50 p-4 ring-1 ring-slate-200">
+          <app-question-display [question]="presented.questionSnapshot"></app-question-display>
+        </div>
+
+        <!-- Options -->
+        <div class="space-y-2">
+          @for (option of presented.questionSnapshot.options; track option.id) {
+          <div class="flex items-center gap-3 rounded-lg border-2 p-3 transition-all"
+            [class.border-blue-400]="isSelectedOption(presented.questionId, option.id)"
+            [class.bg-blue-50]="isSelectedOption(presented.questionId, option.id)"
+            [class.border-emerald-400]="!isSelectedOption(presented.questionId, option.id) && isCorrectOption(presented, option)"
+            [class.bg-emerald-50]="!isSelectedOption(presented.questionId, option.id) && isCorrectOption(presented, option)"
+            [class.border-slate-200]="!isSelectedOption(presented.questionId, option.id) && !isCorrectOption(presented, option)"
+            data-testid="question-option" [attr.data-option-id]="option.id">
+
+            <!-- Radio indicator -->
+            <span class="flex h-5 w-5 items-center justify-center rounded-full border-2"
+              [class.border-blue-600]="isSelectedOption(presented.questionId, option.id)"
+              [class.bg-blue-600]="isSelectedOption(presented.questionId, option.id)"
+              [class.border-emerald-600]="!isSelectedOption(presented.questionId, option.id) && isCorrectOption(presented, option)"
+              [class.bg-emerald-100]="!isSelectedOption(presented.questionId, option.id) && isCorrectOption(presented, option)"
+              [class.border-slate-300]="!isSelectedOption(presented.questionId, option.id) && !isCorrectOption(presented, option)">
+              @if (isSelectedOption(presented.questionId, option.id)) {
+              <span class="h-2 w-2 rounded-full bg-white"></span>
+              } @else if (isCorrectOption(presented, option)) {
+              <span class="text-sm font-bold text-emerald-700">✓</span>
+              }
+            </span>
+
+            <!-- Option value -->
+            <span class="flex-1 font-semibold text-slate-900">{{ option.value }}</span>
+
+            <!-- Badges -->
+            <div class="flex flex-wrap justify-end gap-1">
+              @if (isSelectedOption(presented.questionId, option.id)) {
+              <span class="rounded-full bg-blue-200 px-2 py-0.5 text-xs font-semibold text-blue-800">
+                Your answer
+              </span>
+              }
+              @if (isCorrectOption(presented, option)) {
+              <span class="rounded-full bg-emerald-200 px-2 py-0.5 text-xs font-semibold text-emerald-800">
+                Correct
+              </span>
+              }
+            </div>
+          </div>
+          }
+        </div>
+      </article>
+      }
+    </div>
+  </div>
+
+  <!-- Action Button -->
+  <div class="mt-8 sticky bottom-0 bg-slate-50 -mx-6 px-6 py-4 border-t border-slate-200">
     <button type="button"
-      class="min-h-11 w-full rounded-xl bg-slate-800 px-4 py-3 text-base font-semibold text-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+      class="w-full rounded-xl bg-slate-900 px-4 py-3 font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:ring-offset-2"
       (click)="onBackToHistory()">
-      Back to History
+      ← Back to History
     </button>
   </div>
 </section>

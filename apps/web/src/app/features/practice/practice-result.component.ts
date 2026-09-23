@@ -14,9 +14,17 @@ export class PracticeResultComponent {
 
   @Input() actionLabel = 'Practice Again';
 
+  @Input() actionType: 'restart' | 'backToHome' = 'restart';
+
   @Output() restart = new EventEmitter<void>();
+
+  @Output() backToHome = new EventEmitter<void>();
 
   onRestart(): void {
     this.restart.emit();
+  }
+
+  onBackToHome(): void {
+    this.backToHome.emit();
   }
 }
