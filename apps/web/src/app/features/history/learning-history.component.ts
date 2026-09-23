@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, inject, Output } from '@angular/core';
 
 import { LocalStorageService, PracticeAttempt } from '../../core/services/local-storage.service';
 
@@ -32,7 +32,7 @@ export class LearningHistoryComponent {
   private readonly localStorageService = inject(LocalStorageService);
   private readonly attemptsApiService = inject(AttemptsApiService);
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
-
+  @Output() backToHome = new EventEmitter<void>();
   historyItems: LearningHistoryItem[] = [];
 
   isLoading = false;

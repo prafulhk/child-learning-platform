@@ -2,7 +2,7 @@
 @if (view === 'PRACTICE') {
 <app-practice-session (backToHome)="onBackToHome()" />
 } @else if (view === 'HISTORY') {
-<app-learning-history />
+<app-learning-history (backToHome)="onBackToHome()" />
 } @else if (view === 'DETAIL' && selectedAttempt) {
 <app-practice-attempt-detail [attempt]="selectedAttempt" (backToHistory)="onBackToHistory()" />
 } @else if (view === 'PARENT_TOOLS') {
