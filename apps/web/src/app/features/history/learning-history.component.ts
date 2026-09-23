@@ -1,7 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
+
 import { LocalStorageService, PracticeAttempt } from '../../core/services/local-storage.service';
+
 import type { AssessmentAttempt } from '../../core/models/assessment.model';
-import { CommonModule, DatePipe } from '@angular/common';
+import { AttemptsApiService, BackendAttempt } from '../../core/services/attempts-api.service.ts';
+import { finalize } from 'rxjs';
 
 type HistoryActivityType = 'Practice' | 'Olympiad';
 
@@ -26,14 +30,57 @@ interface LearningHistoryItem {
 })
 export class LearningHistoryComponent {
   private readonly localStorageService = inject(LocalStorageService);
+  private readonly attemptsApiService = inject(AttemptsApiService);
+  private readonly changeDetectorRef = inject(ChangeDetectorRef);
 
   historyItems: LearningHistoryItem[] = [];
+
+  isLoading = false;
+  errorMessage = '';
+
+  selectedFilter: 'All' | 'Practice' | 'Olympiad' = 'All';
 
   constructor() {
     this.loadHistory();
   }
 
   private loadHistory(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.attemptsApiService
+      .getAttempts()
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+
+          console.log('Loading completed:', this.isLoading);
+
+          this.changeDetectorRef.detectChanges();
+        }),
+      )
+      .subscribe({
+        next: (response) => {
+          console.log('Backend history response:', response);
+
+          this.historyItems = response.attempts
+            .map((attempt) => this.mapBackendAttempt(attempt))
+            .sort(this.sortByCompletedDate);
+
+          console.log('Mapped history items:', this.historyItems);
+        },
+
+        error: (error) => {
+          console.error('Unable to load backend history:', error);
+
+          this.loadLocalHistory();
+
+          this.errorMessage = 'Unable to load online history. Showing locally saved attempts.';
+        },
+      });
+  }
+
+  private loadLocalHistory(): void {
     const practiceAttempts = this.localStorageService.getCompletedAttempts();
 
     const assessmentAttempts = this.localStorageService.getCompletedAssessmentAttempts();
@@ -44,9 +91,26 @@ export class LearningHistoryComponent {
       this.mapAssessmentAttempt(attempt),
     );
 
-    this.historyItems = [...practiceHistory, ...assessmentHistory].sort(
-      (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime(),
-    );
+    this.historyItems = [...practiceHistory, ...assessmentHistory].sort(this.sortByCompletedDate);
+  }
+
+  private mapBackendAttempt(attempt: BackendAttempt): LearningHistoryItem {
+    const isPractice = attempt.attemptType === 'PRACTICE';
+
+    return {
+      id: attempt._id,
+      type: isPractice ? 'Practice' : 'Olympiad',
+      title: isPractice
+        ? `Practice - ${attempt.topicId ?? 'General'}`
+        : (attempt.title ?? 'Abacus Olympiad Test'),
+      startedAt: attempt.startedAt,
+      completedAt: attempt.completedAt,
+      totalQuestions: attempt.result.totalQuestions,
+      correctCount: attempt.result.correctCount,
+      incorrectCount: attempt.result.incorrectCount,
+      unansweredCount: attempt.result.unansweredCount,
+      accuracyPercentage: attempt.result.accuracyPercentage,
+    };
   }
 
   private mapPracticeAttempt(attempt: PracticeAttempt): LearningHistoryItem {
@@ -79,7 +143,9 @@ export class LearningHistoryComponent {
     };
   }
 
-  selectedFilter: 'All' | 'Practice' | 'Olympiad' = 'All';
+  private sortByCompletedDate(a: LearningHistoryItem, b: LearningHistoryItem): number {
+    return new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime();
+  }
 
   get filteredHistoryItems(): LearningHistoryItem[] {
     if (this.selectedFilter === 'All') {
@@ -98,9 +164,15 @@ export class LearningHistoryComponent {
       return 0;
     }
 
-    const totalAccuracy = this.historyItems.reduce((sum, item) => sum + item.accuracyPercentage, 0);
+    const totalQuestions = this.historyItems.reduce((sum, item) => sum + item.totalQuestions, 0);
 
-    return Math.round(totalAccuracy / this.historyItems.length);
+    const totalCorrectAnswers = this.historyItems.reduce((sum, item) => sum + item.correctCount, 0);
+
+    if (totalQuestions === 0) {
+      return 0;
+    }
+
+    return Math.round((totalCorrectAnswers / totalQuestions) * 100);
   }
 
   get practiceCount(): number {

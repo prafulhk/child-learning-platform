@@ -15,6 +15,7 @@ import { PracticeService } from '../../core/services/practice.service';
 import { AnswerOptionComponent } from '../../shared/components/answer-option/answer-option.component';
 import { QuestionDisplayComponent } from '../../shared/components/question-display/question-display.component';
 import { PracticeResultComponent } from './practice-result.component';
+import { AttemptsApiService } from '../../core/services/attempts-api.service.ts';
 
 @Component({
   selector: 'app-practice-session',
@@ -26,7 +27,6 @@ export class PracticeSessionComponent implements OnInit, OnDestroy {
   @Output() backToHome = new EventEmitter<void>();
   readonly topicId = 'single-digit-addition';
   private readonly countdownTickMs = 1000;
-
   session: ActivePracticeSession | null = null;
   completed = false;
   completedAttempt: PracticeAttempt | null = null;
@@ -37,6 +37,7 @@ export class PracticeSessionComponent implements OnInit, OnDestroy {
   constructor(
     private readonly practiceService: PracticeService,
     private readonly changeDetectorRef: ChangeDetectorRef,
+    private readonly attemptsApiService: AttemptsApiService,
   ) {}
 
   ngOnInit(): void {
@@ -195,11 +196,43 @@ export class PracticeSessionComponent implements OnInit, OnDestroy {
     }
 
     this.stopCountdown();
-    this.completedAttempt = this.practiceService.completePractice();
+
+    const attempt = this.practiceService.completePractice();
+
+    // Keep the completed attempt available for the result screen.
+    this.completedAttempt = attempt;
     this.completed = true;
     this.session = null;
     this.remainingSeconds = 0;
+
+    // Save the completed attempt to MongoDB.
+    this.saveAttemptToBackend(attempt);
+
     this.changeDetectorRef.markForCheck();
+  }
+
+  private saveAttemptToBackend(attempt: PracticeAttempt): void {
+    this.attemptsApiService
+      .saveAttempt({
+        clientAttemptId: attempt.id,
+        attemptType: 'PRACTICE',
+        topicId: attempt.topicId,
+        startedAt: attempt.startedAt,
+        completedAt: attempt.completedAt,
+        presentedQuestions: attempt.presentedQuestions,
+        selectedAnswers: attempt.selectedAnswers,
+        flaggedQuestionIds: [],
+        result: attempt.result,
+      })
+      .subscribe({
+        next: () => {
+          console.log('Practice attempt saved successfully.');
+        },
+        error: (error) => {
+          // The result screen still works if the API is unavailable.
+          console.error('Unable to save practice attempt:', error);
+        },
+      });
   }
 
   restartPractice(): void {
