@@ -1,8 +1,118 @@
 <section class="app-page-shell app-page-shell--standard">
     <header class="text-center">
         <h1 class="text-3xl font-bold text-slate-900">Parent Tools</h1>
+        <p class="mt-2 text-sm text-slate-500">
+            Manage your child's learning profile
+        </p>
     </header>
 
+    <!-- Children Section -->
+    <div class="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold text-slate-900">
+                {{ children().length > 1 ? "Children" : "Child" }}
+            </h2>
+
+            <span class="rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
+                {{ children().length }}
+            </span>
+        </div>
+
+        <!-- Loading State -->
+        @if (isLoading()) {
+        <div class="mt-4 rounded-xl bg-slate-50 p-4 text-center text-slate-500">
+            Loading children...
+        </div>
+        }
+
+        <!-- Error State -->
+        @if (errorMessage()) {
+        <div class="mt-4 rounded-xl bg-red-50 p-4 text-sm text-red-700">
+            {{ errorMessage() }}
+        </div>
+        }
+
+        <!-- Children List -->
+        @if (!isLoading() && !errorMessage()) {
+        @if (children().length > 0) {
+        <div class="mt-4 space-y-3">
+            @for (child of children(); track child._id) {
+            <div class="flex items-center gap-3 rounded-xl border border-slate-200 p-4">
+                <div
+                    class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-lg font-bold text-blue-700">
+                    {{ child.name.charAt(0).toUpperCase() }}
+                </div>
+
+                <div class="min-w-0 flex-1">
+                    <h3 class="font-semibold text-slate-900">
+                        {{ child.name }}
+                    </h3>
+
+                    @if (child.grade) {
+                    <p class="text-sm text-slate-500">
+                        Grade: {{ child.grade }}
+                    </p>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+        } @else {
+        <div class="mt-4 rounded-xl bg-slate-50 p-4 text-center text-slate-500">
+            No children added yet.
+        </div>
+        }
+        }
+    </div>
+
+    <!-- Add Child Section -->
+    <div class="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+        <h2 class="text-xl font-semibold text-slate-900">
+            Add Child
+        </h2>
+
+        <p class="mt-1 text-sm text-slate-500">
+            Create a learning profile for your child.
+        </p>
+
+        <form class="mt-4 space-y-4" (submit)="$event.preventDefault(); onCreateChild()">
+
+            <!-- Child Name -->
+            <div>
+                <label for="childName" class="mb-1 block text-sm font-medium text-slate-700">
+                    Child Name
+                </label>
+
+                <input id="childName" type="text" placeholder="Enter child's name" [value]="childName()"
+                    (input)="onChildNameChange($any($event.target).value)" maxlength="100" required
+                    class="min-h-11 w-full rounded-xl border border-slate-300 px-4 py-3 text-base text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
+            </div>
+
+            <!-- Grade -->
+            <div>
+                <label for="childGrade" class="mb-1 block text-sm font-medium text-slate-700">
+                    Grade (Optional)
+                </label>
+
+                <input id="childGrade" type="text" placeholder="Example: LKG, UKG, Grade 1" [value]="childGrade()"
+                    (input)="onChildGradeChange($any($event.target).value)" maxlength="50"
+                    class="min-h-11 w-full rounded-xl border border-slate-300 px-4 py-3 text-base text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" [disabled]="isCreatingChild()"
+                class="min-h-11 w-full rounded-xl bg-emerald-600 px-4 py-3 text-lg font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60">
+
+                @if (isCreatingChild()) {
+                Adding Child...
+                } @else {
+                Add Child
+                }
+            </button>
+        </form>
+    </div>
+
+    <!-- Parent Actions -->
     <div class="mt-6 space-y-3 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <button type="button"
             class="min-h-11 w-full rounded-xl bg-blue-600 px-4 py-3 text-lg font-semibold text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"

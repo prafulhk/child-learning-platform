@@ -28,3 +28,18 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YWIxZDI0Z
 ### Get current user
 GET http://localhost:3000/api/auth/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YWIxZDI0ZGYwZGEzYzg5NDdhMjk3YWUiLCJyb2xlIjoiUEFSRU5UIiwiaWF0IjoxNzkwMDUwNjI0LCJleHAiOjE3OTAxMzcwMjR9.avmVR9Mldcbn0Nw9sOG_TqQEyvnL4Vu2zvL5u81xUB0
+
+### post child
+POST http://localhost:3000/api/children
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YWIxZDI0ZGYwZGEzYzg5NDdhMjk3YWUiLCJyb2xlIjoiUEFSRU5UIiwiaWF0IjoxNzkwMDUwNjI0LCJleHAiOjE3OTAxMzcwMjR9.avmVR9Mldcbn0Nw9sOG_TqQEyvnL4Vu2zvL5u81xUB0
+Content-Type: application/json
+
+{
+  "name": "YHridhaan",
+  "dateOfBirth": "2021-08-10",
+  "grade": "UKG"
+}
+
+### Get children
+GET http://localhost:3000/api/children
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YWIxZDI0ZGYwZGEzYzg5NDdhMjk3YWUiLCJyb2xlIjoiUEFSRU5UIiwiaWF0IjoxNzkwMDUwNjI0LCJleHAiOjE3OTAxMzcwMjR9.avmVR9Mldcbn0Nw9sOG_TqQEyvnL4Vu2zvL5u81xUB0

@@ -4,5 +4,12 @@
   "private": true,
   "description": "A full-stack learning and progress platform for children, parents, and teachers.",
   "packageManager": "pnpm@12.4.2",
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n API,WEB -c blue,green \"pnpm --dir apps/api start\" \"pnpm --dir apps/web start\"",
+    "typecheck": "concurrently -k \"pnpm --dir apps/api typecheck\" \"pnpm --dir apps/web typecheck\""
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
 }

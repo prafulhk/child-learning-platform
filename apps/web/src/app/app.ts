@@ -28,6 +28,7 @@ import { ParentRegistration } from './features/auth/parent-registration/parent-r
 import { DashboardHome } from './features/dashboard/dashboard-home/dashboard-home';
 import { Login } from './features/auth/login/login';
 import { AuthService, LoginResponse } from './core/services/auth.service';
+import { ToastContainerComponent } from './shared/components/toast-container/toast-container';
 
 type AppView =
   | 'HOME'
@@ -55,6 +56,7 @@ type AppView =
     ParentRegistration,
     DashboardHome,
     Login,
+    ToastContainerComponent,
   ],
   selector: 'app-root',
   styleUrl: './app.scss',
