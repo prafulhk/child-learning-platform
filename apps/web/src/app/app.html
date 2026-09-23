@@ -14,8 +14,10 @@
     [currentQuestionIndex]="activeAssessmentSession.currentQuestionIndex"
     [totalQuestions]="activeAssessmentSession.questions.length" [selectedOptionId]="currentAssessmentSelectedOptionId"
     [flagged]="currentAssessmentFlagged" [timeRemainingLabel]="assessmentRemainingTimeLabel"
-    (optionSelected)="onAssessmentOptionSelected($event)" (previous)="onAssessmentPrevious()"
-    (next)="onAssessmentNext()" (flag)="onAssessmentFlag()" (submitAssessment)="onSubmitAssessment()" />
+    [questionPalette]="assessmentQuestionPalette" (optionSelected)="onAssessmentOptionSelected($event)"
+    (previous)="onAssessmentPrevious()" (next)="onAssessmentNext()" (flag)="onAssessmentFlag()"
+    (clearAnswer)="onAssessmentClear()" (questionNavigate)="onAssessmentQuestionNavigate($event)"
+    (submitAssessment)="onSubmitAssessment()" />
 }
 @else if (view === 'ASSESSMENT_RESULT' && completedAssessmentAttempt) {
 <app-practice-result [attempt]="completedAssessmentAttempt" title="Olympiad Assessment Completed"

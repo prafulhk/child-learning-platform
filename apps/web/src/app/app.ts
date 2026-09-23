@@ -14,7 +14,10 @@ import { AssessmentService } from './core/services/assessment.service';
 import { QuestionService } from './core/services/question.service';
 
 import { AssessmentHomeComponent } from './features/assessment/assessment-home.component';
-import { AssessmentSessionComponent } from './features/assessment/assessment-session.component';
+import {
+  AssessmentSessionComponent,
+  QuestionPaletteItem,
+} from './features/assessment/assessment-session.component';
 
 import { PracticeAttemptDetailComponent } from './features/practice/practice-attempt-detail.component';
 import { PracticeSessionComponent } from './features/practice/practice-session.component';
@@ -608,5 +611,65 @@ export class App implements OnDestroy {
     this.authService.logout();
     this.stopAssessmentCountdown();
     this.view = 'LOGIN';
+  }
+
+  get assessmentQuestionPalette(): QuestionPaletteItem[] {
+    const session = this.activeAssessmentSession;
+
+    if (!session) {
+      return [];
+    }
+
+    return session.questions.map((question, index) => ({
+      number: index + 1,
+
+      answered: Boolean(session.selectedAnswers[question.questionId]),
+
+      flagged: session.flaggedQuestionIds.includes(question.questionId),
+    }));
+  }
+
+  onAssessmentQuestionNavigate(index: number): void {
+    this.syncAssessmentTimer();
+
+    const session = this.activeAssessmentSession;
+
+    if (!session || this.view !== 'ASSESSMENT_SESSION' || this.assessmentRemainingSeconds === 0) {
+      return;
+    }
+
+    if (index < 0 || index >= session.questions.length) {
+      return;
+    }
+
+    session.currentQuestionIndex = index;
+
+    this.changeDetectorRef.markForCheck();
+  }
+
+  onAssessmentClear(): void {
+    this.syncAssessmentTimer();
+
+    const session = this.activeAssessmentSession;
+
+    if (!session || this.view !== 'ASSESSMENT_SESSION' || this.assessmentRemainingSeconds === 0) {
+      return;
+    }
+
+    const currentQuestion = session.questions[session.currentQuestionIndex];
+
+    if (!currentQuestion) {
+      return;
+    }
+
+    const selectedAnswers = {
+      ...session.selectedAnswers,
+    };
+
+    delete selectedAnswers[currentQuestion.questionId];
+
+    session.selectedAnswers = selectedAnswers;
+
+    this.changeDetectorRef.markForCheck();
   }
 }

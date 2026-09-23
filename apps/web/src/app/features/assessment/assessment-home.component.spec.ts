@@ -24,8 +24,10 @@ describe('AssessmentHomeComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('100');
   });
 
-  it('renders 15 minutes', () => {
-    expect(fixture.nativeElement.textContent).toContain('15 Minutes');
+  it('renders 15 minutes duration', () => {
+    const text = fixture.nativeElement.textContent.replace(/\s+/g, ' ').trim();
+
+    expect(text).toMatch(/Duration\s*:?\s*15\s*min/i);
   });
 
   it('emits startAssessment when Start Test is clicked', () => {
