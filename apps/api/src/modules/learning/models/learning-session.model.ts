@@ -1,6 +1,6 @@
 import { Schema, model, Types } from "mongoose";
 
-interface LearningSession {
+export interface LearningSession {
   childId: Types.ObjectId;
   subjectId: Types.ObjectId;
   topicId: Types.ObjectId;
