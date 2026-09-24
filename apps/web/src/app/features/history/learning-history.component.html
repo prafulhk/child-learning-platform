@@ -104,7 +104,13 @@
                 </p>
 
                 <p class="mt-1 text-sm text-slate-500">
+                    @if (selectedFilter === 'All') {
                     Across all attempts
+                    } @else if (selectedFilter === 'Practice') {
+                    Across practice attempts
+                    } @else {
+                    Across Olympiad attempts
+                    }
                 </p>
             </div>
 

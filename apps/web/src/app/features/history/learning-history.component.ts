@@ -160,13 +160,15 @@ export class LearningHistoryComponent {
   }
 
   get averageAccuracy(): number {
-    if (this.historyItems.length === 0) {
+    const items = this.filteredHistoryItems;
+
+    if (items.length === 0) {
       return 0;
     }
 
-    const totalQuestions = this.historyItems.reduce((sum, item) => sum + item.totalQuestions, 0);
+    const totalQuestions = items.reduce((sum, item) => sum + item.totalQuestions, 0);
 
-    const totalCorrectAnswers = this.historyItems.reduce((sum, item) => sum + item.correctCount, 0);
+    const totalCorrectAnswers = items.reduce((sum, item) => sum + item.correctCount, 0);
 
     if (totalQuestions === 0) {
       return 0;
