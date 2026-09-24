@@ -198,5 +198,242 @@ describe("Learning Sessions API", () => {
 
     expect(savedSession).toBeNull();
   });
-  
+
+  it("returns learning history for an authenticated parent, newest first", async () => {
+    const user = await UserModel.create({
+      name: "History Parent",
+      email: "history-parent@example.com",
+      passwordHash: "test-password-hash",
+      role: "PARENT",
+    });
+
+    const child = await ChildModel.create({
+      parentId: user._id,
+      name: "History Child",
+    });
+
+    const subjectId = new Types.ObjectId();
+    const topicId = new Types.ObjectId();
+
+    const olderDate = new Date("2026-09-20T10:00:00.000Z");
+    const newerDate = new Date("2026-09-23T10:00:00.000Z");
+
+    await LearningSessionModel.create([
+      {
+        childId: child._id,
+        subjectId,
+        topicId,
+        learningDate: olderDate,
+        durationMinutes: 20,
+        whatWasTaught: "Older lesson",
+        performance: "GOOD",
+        createdByUserId: user._id,
+        createdByRole: "PARENT",
+      },
+      {
+        childId: child._id,
+        subjectId,
+        topicId,
+        learningDate: newerDate,
+        durationMinutes: 30,
+        whatWasTaught: "Newer lesson",
+        performance: "EXCELLENT",
+        createdByUserId: user._id,
+        createdByRole: "PARENT",
+      },
+    ]);
+
+    const token = jwt.sign(
+      {
+        sub: user._id.toString(),
+        role: "PARENT",
+      },
+      config.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      },
+    );
+
+    const response = await request(app)
+      .get("/api/learning-sessions")
+      .set("Authorization", `Bearer ${token}`)
+      .query({
+        childId: child._id.toString(),
+      });
+
+    expect(response.status).toBe(200);
+
+    expect(response.body.sessions).toHaveLength(2);
+
+    expect(response.body.sessions[0].whatWasTaught).toBe("Newer lesson");
+
+    expect(response.body.sessions[1].whatWasTaught).toBe("Older lesson");
+
+    expect(response.body.pagination).toEqual({
+      page: 1,
+      limit: 20,
+      total: 2,
+      totalPages: 1,
+    });
+  });
+
+  it("filters learning history by date, subject, and topic", async () => {
+    const user = await UserModel.create({
+      name: "Filter Parent",
+      email: "filter-parent@example.com",
+      passwordHash: "test-password-hash",
+      role: "PARENT",
+    });
+
+    const child = await ChildModel.create({
+      parentId: user._id,
+      name: "Filter Child",
+    });
+
+    const matchingSubjectId = new Types.ObjectId();
+    const otherSubjectId = new Types.ObjectId();
+
+    const matchingTopicId = new Types.ObjectId();
+    const otherTopicId = new Types.ObjectId();
+
+    await LearningSessionModel.create([
+      {
+        childId: child._id,
+        subjectId: matchingSubjectId,
+        topicId: matchingTopicId,
+        learningDate: new Date("2026-09-20T10:00:00.000Z"),
+        durationMinutes: 30,
+        whatWasTaught: "Matching lesson",
+        performance: "GOOD",
+        createdByUserId: user._id,
+        createdByRole: "PARENT",
+      },
+      {
+        childId: child._id,
+        subjectId: matchingSubjectId,
+        topicId: otherTopicId,
+        learningDate: new Date("2026-09-21T10:00:00.000Z"),
+        durationMinutes: 30,
+        whatWasTaught: "Wrong topic",
+        performance: "GOOD",
+        createdByUserId: user._id,
+        createdByRole: "PARENT",
+      },
+      {
+        childId: child._id,
+        subjectId: otherSubjectId,
+        topicId: matchingTopicId,
+        learningDate: new Date("2026-09-22T10:00:00.000Z"),
+        durationMinutes: 30,
+        whatWasTaught: "Wrong subject",
+        performance: "GOOD",
+        createdByUserId: user._id,
+        createdByRole: "PARENT",
+      },
+      {
+        childId: child._id,
+        subjectId: matchingSubjectId,
+        topicId: matchingTopicId,
+        learningDate: new Date("2026-09-25T10:00:00.000Z"),
+        durationMinutes: 30,
+        whatWasTaught: "Outside date range",
+        performance: "GOOD",
+        createdByUserId: user._id,
+        createdByRole: "PARENT",
+      },
+    ]);
+
+    const token = jwt.sign(
+      {
+        sub: user._id.toString(),
+        role: "PARENT",
+      },
+      config.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      },
+    );
+
+    const response = await request(app)
+      .get("/api/learning-sessions")
+      .set("Authorization", `Bearer ${token}`)
+      .query({
+        childId: child._id.toString(),
+        fromDate: "2026-09-19",
+        toDate: "2026-09-23",
+        subjectId: matchingSubjectId.toString(),
+        topicId: matchingTopicId.toString(),
+      });
+
+    expect(response.status).toBe(200);
+
+    expect(response.body.sessions).toHaveLength(1);
+
+    expect(response.body.sessions[0].whatWasTaught).toBe("Matching lesson");
+
+    expect(response.body.pagination.total).toBe(1);
+  });
+
+  it("returns 403 when the parent does not own the child", async () => {
+    const parentA = await UserModel.create({
+      name: "History Parent A",
+      email: "history-parent-a@example.com",
+      passwordHash: "test-password-hash",
+      role: "PARENT",
+    });
+
+    const parentB = await UserModel.create({
+      name: "History Parent B",
+      email: "history-parent-b@example.com",
+      passwordHash: "test-password-hash",
+      role: "PARENT",
+    });
+
+    const childOfParentB = await ChildModel.create({
+      parentId: parentB._id,
+      name: "Parent B Child",
+    });
+
+    await LearningSessionModel.create({
+      childId: childOfParentB._id,
+      subjectId: new Types.ObjectId(),
+      topicId: new Types.ObjectId(),
+      learningDate: new Date("2026-09-23T10:00:00.000Z"),
+      durationMinutes: 30,
+      whatWasTaught: "Private lesson",
+      performance: "GOOD",
+      createdByUserId: parentB._id,
+      createdByRole: "PARENT",
+    });
+
+    const token = jwt.sign(
+      {
+        sub: parentA._id.toString(),
+        role: "PARENT",
+      },
+      config.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      },
+    );
+
+    const response = await request(app)
+      .get("/api/learning-sessions")
+      .set("Authorization", `Bearer ${token}`)
+      .query({
+        childId: childOfParentB._id.toString(),
+      });
+
+    expect(response.status).toBe(403);
+
+    expect(response.body.message).toBe(
+      "You are not authorized to view learning history for this child.",
+    );
+
+    const sessions = await LearningSessionModel.find({
+      childId: childOfParentB._id,
+    });
+
+    expect(sessions).toHaveLength(1);
+  });
 });

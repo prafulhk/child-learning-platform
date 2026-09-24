@@ -1,7 +1,11 @@
 import type { Request, Response } from "express";
 
-import { createLearningSession } from "./learning.service.js";
+import {
+  createLearningSession,
+  getLearningSessions,
+} from "./learning.service.js";
 import { createLearningSessionSchema } from "../children/schemas/create-learning-session.schema.js";
+import { getLearningSessionsSchema } from "./schemas/get-learning-sessions.schema.js";
 
 export async function createLearningSessionController(
   req: Request,
@@ -60,6 +64,55 @@ export async function createLearningSessionController(
 
     return res.status(500).json({
       message: "Failed to create learning session.",
+    });
+  }
+}
+
+export async function getLearningSessionsController(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const parsed = getLearningSessionsSchema.safeParse(req.query);
+
+  if (!parsed.success) {
+    res.status(400).json({
+      message: "Invalid learning history query.",
+      errors: parsed.error.flatten(),
+    });
+
+    return;
+  }
+
+  try {
+    const result = await getLearningSessions(
+      res.locals.auth.userId,
+      parsed.data,
+    );
+
+    res.status(200).json(result);
+  } catch (error) {
+    const statusCode =
+      error instanceof Error &&
+      "statusCode" in error &&
+      typeof error.statusCode === "number"
+        ? error.statusCode
+        : 500;
+
+    if (statusCode === 403) {
+      res.status(403).json({
+        message:
+          error instanceof Error
+            ? error.message
+            : "You are not authorized to view learning history for this child.",
+      });
+
+      return;
+    }
+
+    console.error("Get learning sessions error:", error);
+
+    res.status(500).json({
+      message: "Unable to retrieve learning history.",
     });
   }
 }
