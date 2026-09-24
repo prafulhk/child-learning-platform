@@ -32,6 +32,7 @@ import { DashboardHome } from './features/dashboard/dashboard-home/dashboard-hom
 import { Login } from './features/auth/login/login';
 import { AuthService, LoginResponse } from './core/services/auth.service';
 import { ToastContainerComponent } from './shared/components/toast-container/toast-container';
+import { AttemptsApiService } from './core/services/attempts-api.service.ts';
 
 type AppView =
   | 'HOME'
@@ -73,10 +74,12 @@ export class App implements OnDestroy {
   private assessmentCountdownTimerId: ReturnType<typeof window.setInterval> | null = null;
   private readonly assessmentCountdownTickMs = 250;
   private readonly assessmentService = inject(AssessmentService);
+  private readonly attemptsApiService = inject(AttemptsApiService);
   private readonly questionService = inject(QuestionService);
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly localStorageService = inject(LocalStorageService);
   private readonly authService = inject(AuthService);
+
   view: AppView = this.authService.currentUser() ? 'HOME' : 'LOGIN';
 
   completedAssessmentAttempt: AssessmentAttempt | null = null;
@@ -473,6 +476,7 @@ export class App implements OnDestroy {
 
       this.completedAssessmentAttempt = attempt;
       this.localStorageService.saveCompletedAssessmentAttempt(attempt);
+      this.saveAssessmentAttemptToBackend(attempt);
 
       this.activeAssessmentSession = null;
       this.assessmentRemainingSeconds = 0;
@@ -671,5 +675,30 @@ export class App implements OnDestroy {
     session.selectedAnswers = selectedAnswers;
 
     this.changeDetectorRef.markForCheck();
+  }
+
+  private saveAssessmentAttemptToBackend(attempt: AssessmentAttempt): void {
+    this.attemptsApiService
+      .saveAttempt({
+        clientAttemptId: attempt.id,
+        attemptType: 'ASSESSMENT',
+        assessmentId: attempt.assessmentId,
+        title: 'Abacus Olympiad Test',
+        startedAt: attempt.startedAt,
+        completedAt: attempt.completedAt,
+        presentedQuestions: attempt.questions,
+        selectedAnswers: attempt.selectedAnswers,
+        flaggedQuestionIds: attempt.flaggedQuestionIds,
+        result: attempt.result,
+      })
+      .subscribe({
+        next: () => {
+          console.log('Assessment attempt saved successfully.');
+        },
+
+        error: (error) => {
+          console.error('Unable to save assessment attempt:', error);
+        },
+      });
   }
 }
