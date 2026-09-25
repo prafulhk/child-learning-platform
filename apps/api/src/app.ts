@@ -6,6 +6,7 @@ import { authRouter } from "./modules/auth/auth.routes.js";
 import { childrenRouter } from "./modules/children/children.routes.js";
 import { attemptsRouter } from "./modules/attempts/attempts.routes.js";
 import { learningRouter } from "./modules/learning/learning.routes.js";
+import { catalogRouter } from "./modules/catalog/catalog.routes.js";
 
 const app: Express = express();
 
@@ -17,6 +18,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/children", childrenRouter);
 app.use("/api/attempts", attemptsRouter);
 app.use("/api/learning-sessions", learningRouter);
+app.use("/api/subjects", catalogRouter);
 
 app.get("/health", (_req, res) => {
   res.status(200).json({
