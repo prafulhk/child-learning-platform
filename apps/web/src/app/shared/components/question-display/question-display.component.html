@@ -1,12 +1,20 @@
 @if (question; as q) {
 <div class="question-display flex w-full justify-center">
-    <div class="rows inline-flex min-w-[4rem] flex-col items-stretch gap-0" role="group"
-        aria-label="Arithmetic question">
+    <div
+        class="rows inline-flex min-w-[4rem] flex-col items-stretch gap-0"
+        role="group"
+        aria-label="Arithmetic question"
+    >
 
         @for (row of q.rows; track $index; let i = $index) {
 
-        <div class="row flex items-center justify-end gap-0 text-sm  leading-tight sm:text-base">
-            <span class="operator -mr-0.5" [class.invisible]="!showMinus(i, row.operator)">
+        <div
+            class="row flex items-center justify-end gap-0 text-sm font-semibold leading-tight sm:text-base"
+        >
+            <span
+                class="operator -mr-0.5"
+                [class.invisible]="!showMinus(i, row.operator)"
+            >
                 {{ showMinus(i, row.operator) ? '-' : '' }}
             </span>
 
@@ -18,11 +26,16 @@
         }
 
         <!-- ANSWER LINE -->
-        <div class="line mt-1 border-t border-slate-700" aria-hidden="true"></div>
+        <div
+            class="line mt-1 border-t border-slate-700"
+            aria-hidden="true"
+        ></div>
 
         <!-- ANSWER -->
-        <div class="row answer-row grid grid-cols-[0.7rem_1fr] items-center justify-items-end text-sm font-semibold leading-tight sm:text-base"
-            aria-label="Answer row">
+        <div
+            class="row answer-row grid grid-cols-[0.7rem_1fr] items-center justify-items-end text-sm font-semibold leading-tight sm:text-base"
+            aria-label="Answer row"
+        >
             <span class="operator invisible text-center"></span>
 
             <span class="value min-w-[2ch] text-right">
