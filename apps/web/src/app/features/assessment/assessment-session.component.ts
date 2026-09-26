@@ -26,7 +26,9 @@ export interface QuestionPaletteItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssessmentSessionComponent {
-  // ================= INPUTS =================
+  // ============================================================
+  // INPUTS
+  // ============================================================
 
   @Input({ required: true })
   question!: AssessmentQuestionSnapshot;
@@ -49,7 +51,9 @@ export class AssessmentSessionComponent {
   @Input()
   questionPalette: QuestionPaletteItem[] = [];
 
-  // ================= OUTPUTS =================
+  // ============================================================
+  // OUTPUTS
+  // ============================================================
 
   @Output()
   readonly optionSelected = new EventEmitter<string>();
@@ -72,7 +76,9 @@ export class AssessmentSessionComponent {
   @Output()
   readonly clearAnswer = new EventEmitter<void>();
 
-  // ================= GETTERS =================
+  // ============================================================
+  // GETTERS
+  // ============================================================
 
   get questionNumber(): number {
     return this.currentQuestionIndex + 1;
@@ -82,7 +88,9 @@ export class AssessmentSessionComponent {
     return this.question.questionSnapshot.options;
   }
 
-  // ================= EVENT HANDLERS =================
+  // ============================================================
+  // EVENT HANDLERS
+  // ============================================================
 
   onOptionSelected(optionId: string): void {
     this.optionSelected.emit(optionId);
