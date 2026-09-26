@@ -3,6 +3,7 @@ import { Component, EventEmitter, Output, OnInit, inject, signal } from '@angula
 import { Child, ChildService } from '../../core/services/child.service';
 
 import { ToastService } from '../../core/services/toast';
+import { ActiveChildService } from '../../core/services/active-child.service';
 
 @Component({
   selector: 'app-parent-tools',
@@ -12,6 +13,7 @@ import { ToastService } from '../../core/services/toast';
 export class ParentToolsComponent implements OnInit {
   private readonly childService = inject(ChildService);
   private readonly toastService = inject(ToastService);
+  private readonly activeChildService = inject(ActiveChildService);
 
   readonly children = signal<Child[]>([]);
   readonly isLoading = signal(false);
@@ -22,6 +24,7 @@ export class ParentToolsComponent implements OnInit {
 
   @Output() openQuestionBank = new EventEmitter<void>();
   @Output() backToHome = new EventEmitter<void>();
+  @Output() openLogLearning = new EventEmitter<void>();
 
   ngOnInit(): void {
     this.loadChildren();
@@ -94,5 +97,11 @@ export class ParentToolsComponent implements OnInit {
           this.isCreatingChild.set(false);
         },
       });
+  }
+
+  onSelectChild(child: Child): void {
+    this.activeChildService.setActiveChild(child);
+    this.toastService.success(`${child.name} selected.`);
+    this.openLogLearning.emit();
   }
 }

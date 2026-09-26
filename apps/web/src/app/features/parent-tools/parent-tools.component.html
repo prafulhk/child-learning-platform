@@ -37,7 +37,9 @@
         @if (children().length > 0) {
         <div class="mt-4 space-y-3">
             @for (child of children(); track child._id) {
-            <div class="flex items-center gap-3 rounded-xl border border-slate-200 p-4">
+            <button type="button"
+                class="flex w-full items-center gap-3 rounded-xl border border-slate-200 p-4 text-left transition hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                (click)="onSelectChild(child)">
                 <div
                     class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-lg font-bold text-blue-700">
                     {{ child.name.charAt(0).toUpperCase() }}
@@ -54,7 +56,7 @@
                     </p>
                     }
                 </div>
-            </div>
+            </button>
             }
         </div>
         } @else {

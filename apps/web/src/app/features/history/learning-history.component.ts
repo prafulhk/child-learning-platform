@@ -4,7 +4,7 @@ import { ChangeDetectorRef, Component, EventEmitter, inject, Output } from '@ang
 import { LocalStorageService, PracticeAttempt } from '../../core/services/local-storage.service';
 
 import type { AssessmentAttempt } from '../../core/models/assessment.model';
-import { AttemptsApiService, BackendAttempt } from '../../core/services/attempts-api.service.ts';
+import { AttemptsApiService, BackendAttempt } from '../../core/services/attempts-api.service';
 import { finalize } from 'rxjs';
 
 type HistoryActivityType = 'Practice' | 'Olympiad';

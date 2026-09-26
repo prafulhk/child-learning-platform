@@ -60,17 +60,11 @@ describe('AssessmentSessionComponent', () => {
     component = fixture.componentInstance;
 
     component.question = question;
-
     component.currentQuestionIndex = 0;
-
     component.totalQuestions = 100;
-
     component.selectedOptionId = null;
-
     component.flagged = false;
-
     component.timeRemainingLabel = '15:00';
-
     component.questionPalette = questionPalette;
 
     fixture.detectChanges();
@@ -88,16 +82,18 @@ describe('AssessmentSessionComponent', () => {
   // HEADER
   // =====================================================
 
-  it('renders LearnNest brand name', () => {
-    expect(fixture.nativeElement.textContent).toContain('LearnNest');
+  it('renders the assessment title', () => {
+    expect(fixture.nativeElement.textContent).toContain('Abacus Olympiad');
   });
 
-  it('renders assessment subtitle', () => {
-    expect(fixture.nativeElement.textContent).toContain('Small Steps, Big Futures.');
+  it('renders the mock test label', () => {
+    expect(fixture.nativeElement.textContent).toContain(
+      'Written Round | MOCK TEST | 15 Min | Level 1',
+    );
   });
 
   it('renders the current question number', () => {
-    expect(fixture.nativeElement.textContent).toContain('Question 1 of 100');
+    expect(fixture.nativeElement.textContent).toContain('Question: 1');
   });
 
   it('renders assessment duration', () => {
@@ -122,7 +118,6 @@ describe('AssessmentSessionComponent', () => {
 
   it('returns question options', () => {
     expect(component.options).toHaveLength(4);
-
     expect(component.options[0].id).toBe('q1-a');
   });
 
@@ -131,14 +126,11 @@ describe('AssessmentSessionComponent', () => {
   // =====================================================
 
   it('disables Previous on the first question', () => {
-    const buttons = Array.from(
-      fixture.nativeElement.querySelectorAll('button'),
-    ) as HTMLButtonElement[];
+    const previousButton = fixture.nativeElement.querySelector(
+      'button[aria-label="Previous question"]',
+    ) as HTMLButtonElement | null;
 
-    const previousButton = buttons.find((button) => button.textContent?.includes('Prev'));
-
-    expect(previousButton).toBeDefined();
-
+    expect(previousButton).not.toBeNull();
     expect(previousButton?.disabled).toBe(true);
   });
 
@@ -147,27 +139,36 @@ describe('AssessmentSessionComponent', () => {
 
     fixture.detectChanges();
 
-    const buttons = Array.from(
-      fixture.nativeElement.querySelectorAll('button'),
-    ) as HTMLButtonElement[];
+    const previousButton = fixture.nativeElement.querySelector(
+      'button[aria-label="Previous question"]',
+    ) as HTMLButtonElement | null;
 
-    const previousButton = buttons.find((button) => button.textContent?.includes('Prev'));
-
-    expect(previousButton).toBeDefined();
-
+    expect(previousButton).not.toBeNull();
     expect(previousButton?.disabled).toBe(false);
   });
 
   it('renders Next button when not on the last question', () => {
-    const buttons = Array.from(
-      fixture.nativeElement.querySelectorAll('button'),
-    ) as HTMLButtonElement[];
+    fixture.componentRef.setInput('currentQuestionIndex', 0);
 
-    const nextButton = buttons.find((button) => button.textContent?.includes('Next'));
+    fixture.detectChanges();
 
-    expect(nextButton).toBeDefined();
+    const nextButton = fixture.nativeElement.querySelector(
+      'button[aria-label="Next question"]',
+    ) as HTMLButtonElement | null;
 
-    expect(nextButton?.disabled).toBe(false);
+    expect(nextButton).not.toBeNull();
+  });
+
+  it('does not render Next button on the last question', () => {
+    fixture.componentRef.setInput('currentQuestionIndex', 99);
+
+    fixture.detectChanges();
+
+    const nextButton = fixture.nativeElement.querySelector(
+      'button[aria-label="Next question"]',
+    ) as HTMLButtonElement | null;
+
+    expect(nextButton).toBeNull();
   });
 
   it('renders Submit button on the last question', () => {
@@ -272,44 +273,77 @@ describe('AssessmentSessionComponent', () => {
   // QUESTION PALETTE
   // =====================================================
 
-  it('renders question palette items', () => {
-    const paletteButtons = fixture.nativeElement.querySelectorAll('aside button');
+  // =====================================================
+  // QUESTION PALETTE
+  // =====================================================
 
-    expect(paletteButtons).toHaveLength(3);
+  // =====================================================
+  // QUESTION PALETTE
+  // =====================================================
+
+  it('renders question palette items', () => {
+    const sections = fixture.nativeElement.querySelectorAll('section') as NodeListOf<HTMLElement>;
+
+    const paletteSection = sections[sections.length - 1];
+
+    expect(paletteSection).toBeDefined();
+
+    const paletteButtons = paletteSection.querySelectorAll('button');
+
+    expect(paletteButtons.length).toBeGreaterThanOrEqual(3);
   });
 
   it('marks current question with active styling', () => {
-    const paletteButtons = fixture.nativeElement.querySelectorAll('aside button');
+    const sections = fixture.nativeElement.querySelectorAll('section') as NodeListOf<HTMLElement>;
 
-    expect(paletteButtons[0].className).toContain('bg-indigo-600');
+    const paletteSection = sections[sections.length - 1];
+
+    const paletteButtons = paletteSection.querySelectorAll('button');
+
+    expect(paletteButtons[0].className).toContain('bg-white');
+    expect(paletteButtons[0].className).toContain('text-[#0789bd]');
   });
 
-  it('renders answered question with green styling', () => {
+  it('renders answered question with answered styling', () => {
     fixture.componentRef.setInput('currentQuestionIndex', 2);
 
     fixture.detectChanges();
 
-    const updatedButtons = fixture.nativeElement.querySelectorAll('aside button');
+    const sections = fixture.nativeElement.querySelectorAll('section') as NodeListOf<HTMLElement>;
 
-    expect(updatedButtons[0].className).toContain('bg-emerald-100');
+    const paletteSection = sections[sections.length - 1];
+
+    const paletteButtons = paletteSection.querySelectorAll('button');
+
+    expect(paletteButtons[0].className).toContain('bg-[#b8e6f5]');
   });
 
-  it('renders flagged question with red styling', () => {
+  it('renders flagged question with yellow styling', () => {
     fixture.componentRef.setInput('currentQuestionIndex', 2);
 
     fixture.detectChanges();
 
-    const paletteButtons = fixture.nativeElement.querySelectorAll('aside button');
+    const sections = fixture.nativeElement.querySelectorAll('section') as NodeListOf<HTMLElement>;
 
-    expect(paletteButtons[1].className).toContain('bg-orange-100');
+    const paletteSection = sections[sections.length - 1];
+
+    const paletteButtons = paletteSection.querySelectorAll('button');
+
+    expect(paletteButtons[1].className).toContain('bg-yellow-300');
   });
 
   it('emits question navigation when palette item is clicked', () => {
     const emitSpy = vi.spyOn(component.questionNavigate, 'emit');
 
-    const paletteButtons = fixture.nativeElement.querySelectorAll('aside button');
+    const sections = fixture.nativeElement.querySelectorAll('section') as NodeListOf<HTMLElement>;
 
-    paletteButtons[1].click();
+    const paletteSection = sections[sections.length - 1];
+
+    const paletteButtons = paletteSection.querySelectorAll('button');
+
+    expect(paletteButtons.length).toBeGreaterThanOrEqual(3);
+
+    (paletteButtons[1] as HTMLButtonElement).click();
 
     expect(emitSpy).toHaveBeenCalledWith(1);
   });

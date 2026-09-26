@@ -1,0 +1,343 @@
+<section class="min-h-full bg-slate-50 px-4 py-6 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-4xl">
+
+        <!-- Header -->
+        <div class="mb-6">
+            <button type="button"
+                class="mb-5 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm transition hover:border-blue-300 hover:text-blue-600"
+                (click)="backToHome.emit()">
+                <span>←</span>
+                Back
+            </button>
+
+            <div
+                class="overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 p-6 text-white shadow-lg sm:p-8">
+                <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <div class="mb-2 text-sm font-medium text-blue-100">
+                            ✨ Learning Journal
+                        </div>
+
+                        <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">
+                            Log Learning
+                        </h1>
+
+                        <p class="mt-2 max-w-xl text-sm leading-6 text-blue-100 sm:text-base">
+                            Record today's learning session and keep track of your child's progress.
+                        </p>
+                    </div>
+
+                    <div
+                        class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/15 text-3xl shadow-inner ring-1 ring-white/20 backdrop-blur">
+                        📚
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form class="space-y-5" [formGroup]="learningForm">
+
+            <!-- Learning Details -->
+            <div class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-7">
+
+                <div class="mb-6 flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-lg">
+                        📖
+                    </div>
+
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">
+                            Learning Details
+                        </h2>
+
+                        <p class="text-sm text-slate-500">
+                            What did your child learn today?
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Subject + Topic -->
+                <div class="grid gap-5 md:grid-cols-2">
+
+                    <!-- Subject -->
+                    <div>
+                        <label for="subjectId" class="mb-2 block text-sm font-semibold text-slate-700">
+                            Subject
+                        </label>
+
+                        <select id="subjectId" formControlName="subjectId" (change)="onSubjectChange()"
+                            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100">
+                            <option value="">Select subject</option>
+
+                            @for (subject of subjects(); track subject._id) {
+                            <option [value]="subject._id">
+                                {{ subject.name }}
+                            </option>
+                            }
+                        </select>
+
+                        @if (
+                        learningForm.controls.subjectId.touched &&
+                        learningForm.controls.subjectId.invalid
+                        ) {
+                        <p class="mt-2 text-xs font-medium text-red-600">
+                            Please select a subject.
+                        </p>
+                        }
+
+                        @if (isLoadingSubjects()) {
+                        <p class="mt-2 text-xs text-slate-500">
+                            Loading subjects...
+                        </p>
+                        }
+                    </div>
+
+                    <!-- Topic -->
+                    <div>
+                        <label for="topicId" class="mb-2 block text-sm font-semibold text-slate-700">
+                            Topic
+                        </label>
+
+                        <select id="topicId" formControlName="topicId"
+                            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 disabled:bg-slate-100 disabled:text-slate-400">
+                            <option value="">Select topic</option>
+
+                            @for (topic of topics(); track topic._id) {
+                            <option [value]="topic._id">
+                                {{ topic.name }}
+                            </option>
+                            }
+                        </select>
+
+                        @if (
+                        learningForm.controls.topicId.touched &&
+                        learningForm.controls.topicId.invalid
+                        ) {
+                        <p class="mt-2 text-xs font-medium text-red-600">
+                            Please select a topic.
+                        </p>
+                        }
+
+                        @if (isLoadingTopics()) {
+                        <p class="mt-2 text-xs text-slate-500">
+                            Loading topics...
+                        </p>
+                        }
+                    </div>
+
+                </div>
+
+                <!-- Date + Duration -->
+                <div class="mt-5 grid gap-5 md:grid-cols-2">
+
+                    <!-- Learning Date -->
+                    <div>
+                        <label for="learningDate" class="mb-2 block text-sm font-semibold text-slate-700">
+                            Learning Date
+                        </label>
+
+                        <input id="learningDate" type="date" formControlName="learningDate"
+                            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100" />
+
+                        @if (
+                        learningForm.controls.learningDate.touched &&
+                        learningForm.controls.learningDate.invalid
+                        ) {
+                        <p class="mt-2 text-xs font-medium text-red-600">
+                            Please select a learning date.
+                        </p>
+                        }
+                    </div>
+
+                    <!-- Duration -->
+                    <div>
+                        <label for="durationMinutes" class="mb-2 block text-sm font-semibold text-slate-700">
+                            Duration
+                        </label>
+
+                        <div class="relative">
+                            <input id="durationMinutes" type="number" min="1" formControlName="durationMinutes"
+                                class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-20 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100" />
+
+                            <span
+                                class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">
+                                minutes
+                            </span>
+                        </div>
+
+                        @if (
+                        learningForm.controls.durationMinutes.touched &&
+                        learningForm.controls.durationMinutes.invalid
+                        ) {
+                        <p class="mt-2 text-xs font-medium text-red-600">
+                            Duration must be at least 1 minute.
+                        </p>
+                        }
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- What Was Taught -->
+            <div class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-7">
+
+                <div class="mb-5 flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-lg">
+                        ✏️
+                    </div>
+
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">
+                            What Was Taught
+                        </h2>
+
+                        <p class="text-sm text-slate-500">
+                            Capture the main concepts covered during the session.
+                        </p>
+                    </div>
+                </div>
+
+                <textarea id="whatWasTaught" rows="5" formControlName="whatWasTaught"
+                    placeholder="Example: Practiced single digit addition using abacus beads..."
+                    class="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-6 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"></textarea>
+
+                @if (
+                learningForm.controls.whatWasTaught.touched &&
+                learningForm.controls.whatWasTaught.invalid
+                ) {
+                <p class="mt-2 text-xs font-medium text-red-600">
+                    Please describe what was taught.
+                </p>
+                }
+            </div>
+
+            <!-- Performance -->
+            <div class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-7">
+
+                <div class="mb-5 flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-lg">
+                        ⭐
+                    </div>
+
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">
+                            How Did Your Child Do?
+                        </h2>
+
+                        <p class="text-sm text-slate-500">
+                            Choose the overall performance for this session.
+                        </p>
+                    </div>
+                </div>
+
+                <select id="performance" formControlName="performance"
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100">
+                    <option value="">Select performance</option>
+                    <option value="EXCELLENT">
+                        🌟 Excellent
+                    </option>
+                    <option value="GOOD">
+                        👍 Good
+                    </option>
+                    <option value="NEEDS_IMPROVEMENT">
+                        💪 Needs Improvement
+                    </option>
+                </select>
+
+                @if (
+                learningForm.controls.performance.touched &&
+                learningForm.controls.performance.invalid
+                ) {
+                <p class="mt-2 text-xs font-medium text-red-600">
+                    Please select a performance level.
+                </p>
+                }
+
+                <!-- Accuracy -->
+                <div class="mt-5">
+                    <label for="accuracy" class="mb-2 block text-sm font-semibold text-slate-700">
+                        Accuracy
+                        <span class="font-normal text-slate-400">
+                            (optional)
+                        </span>
+                    </label>
+
+                    <div class="relative">
+                        <input id="accuracy" type="number" min="0" max="100" formControlName="accuracy"
+                            placeholder="e.g. 85"
+                            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100" />
+
+                        <span
+                            class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 font-semibold text-slate-400">
+                            %
+                        </span>
+                    </div>
+
+                    @if (
+                    learningForm.controls.accuracy.touched &&
+                    learningForm.controls.accuracy.invalid
+                    ) {
+                    <p class="mt-2 text-xs font-medium text-red-600">
+                        Accuracy must be between 0 and 100.
+                    </p>
+                    }
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-7">
+
+                <div class="mb-5 flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-lg">
+                        📝
+                    </div>
+
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">
+                            Notes
+                        </h2>
+
+                        <p class="text-sm text-slate-500">
+                            Add anything you'd like to remember about today's session.
+                        </p>
+                    </div>
+                </div>
+
+                <textarea id="notes" rows="4" formControlName="notes"
+                    placeholder="Example: Enjoyed the activity and solved most questions independently..."
+                    class="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-6 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"></textarea>
+            </div>
+
+            <!-- Save Area -->
+            <div class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-7">
+
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+                    <div>
+                        <p class="font-semibold text-slate-900">
+                            Ready to save this session?
+                        </p>
+
+                        <p class="mt-1 text-xs text-slate-500">
+                            Your learning record will be added to the child's history.
+                        </p>
+                    </div>
+
+                    <button type="button" (click)="onSave()" [disabled]="isSaving()"
+                        class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-7 py-3.5 text-sm font-bold text-white shadow-md shadow-blue-200 transition hover:-translate-y-0.5 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto">
+                        @if (isSaving()) {
+                        <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
+                        Saving...
+                        } @else {
+                        <span>✓</span>
+                        Save Learning
+                        }
+                    </button>
+
+                </div>
+            </div>
+
+        </form>
+    </div>
+</section>

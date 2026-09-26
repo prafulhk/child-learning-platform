@@ -32,7 +32,8 @@ import { DashboardHome } from './features/dashboard/dashboard-home/dashboard-hom
 import { Login } from './features/auth/login/login';
 import { AuthService, LoginResponse } from './core/services/auth.service';
 import { ToastContainerComponent } from './shared/components/toast-container/toast-container';
-import { AttemptsApiService } from './core/services/attempts-api.service.ts';
+import { AttemptsApiService } from './core/services/attempts-api.service';
+import { LogLearningComponent } from './features/learning/log-learning/log-learning';
 
 type AppView =
   | 'HOME'
@@ -45,7 +46,8 @@ type AppView =
   | 'ASSESSMENT_HOME'
   | 'ASSESSMENT_SESSION'
   | 'ASSESSMENT_RESULT'
-  | 'REGISTER';
+  | 'REGISTER'
+  | 'LOG_LEARNING';
 
 @Component({
   imports: [
@@ -61,6 +63,7 @@ type AppView =
     DashboardHome,
     Login,
     ToastContainerComponent,
+    LogLearningComponent,
   ],
   selector: 'app-root',
   styleUrl: './app.scss',
@@ -173,6 +176,10 @@ export class App implements OnDestroy {
 
     this.selectedAttempt = null;
     this.view = 'QUESTION_BANK';
+  }
+
+  onOpenLogLearning(): void {
+    this.view = 'LOG_LEARNING';
   }
 
   onBackToParentTools(): void {
@@ -700,5 +707,9 @@ export class App implements OnDestroy {
           console.error('Unable to save assessment attempt:', error);
         },
       });
+  }
+
+  onBackFromLogLearning(): void {
+    this.view = 'HOME';
   }
 }

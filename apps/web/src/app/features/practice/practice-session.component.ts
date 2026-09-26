@@ -15,7 +15,7 @@ import { PracticeService } from '../../core/services/practice.service';
 import { AnswerOptionComponent } from '../../shared/components/answer-option/answer-option.component';
 import { QuestionDisplayComponent } from '../../shared/components/question-display/question-display.component';
 import { PracticeResultComponent } from './practice-result.component';
-import { AttemptsApiService } from '../../core/services/attempts-api.service.ts';
+import { AttemptsApiService } from '../../core/services/attempts-api.service';
 
 @Component({
   selector: 'app-practice-session',

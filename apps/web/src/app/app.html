@@ -6,8 +6,13 @@
 } @else if (view === 'DETAIL' && selectedAttempt) {
 <app-practice-attempt-detail [attempt]="selectedAttempt" (backToHistory)="onBackToHistory()" />
 } @else if (view === 'PARENT_TOOLS') {
-<app-parent-tools (openQuestionBank)="onOpenQuestionBank()" (backToHome)="onBackToHome()" />
-} @else if (view === 'QUESTION_BANK') {
+<app-parent-tools (openQuestionBank)="onOpenQuestionBank()" (openLogLearning)="onOpenLogLearning()"
+    (backToHome)="onBackToHome()" />
+}
+@else if (view === 'LOG_LEARNING') {
+<app-log-learning (backToHome)="onBackFromLogLearning()" />
+}
+@else if (view === 'QUESTION_BANK') {
 <app-question-bank (backToParentTools)="onBackToParentTools()" />
 } @else if (view === 'ASSESSMENT_SESSION' && activeAssessmentSession && currentAssessmentQuestion) {
 <app-assessment-session [question]="currentAssessmentQuestion"
