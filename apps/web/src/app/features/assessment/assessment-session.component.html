@@ -1,43 +1,39 @@
-<div class="flex h-dvh flex-col overflow-hidden bg-slate-50">
+<div class="flex h-dvh flex-col overflow-hidden bg-white font-[Arial,Helvetica,sans-serif]">
 
-    <!-- ================= TOP HEADER ================= -->
-    <header
-        class="flex min-h-[64px] shrink-0 items-center justify-between bg-gradient-to-r from-indigo-700 via-indigo-600 to-blue-600 text-white shadow-sm">
+    <!-- ========================================================= -->
+    <!-- TOP HEADER                                                -->
+    <!-- ========================================================= -->
 
-        <!-- BRAND -->
-        <div class="min-w-0 px-3 py-2 sm:px-5">
+    <header class="flex shrink-0 items-center justify-between bg-[#0789bd] text-white">
 
-            <div class="flex items-center gap-2">
+        <!-- TEST INFORMATION -->
+        <div class="min-w-0 px-4 py-2 sm:px-6">
 
-                <span class="text-lg sm:text-xl">🎓</span>
+            <h1 class="truncate text-lg font-bold sm:text-xl">
+                Abacus Olympiad
+            </h1>
 
-                <h1 class="truncate text-base font-bold sm:text-lg">
-                    LearnNest
-                </h1>
-
-            </div>
-
-            <p class="truncate text-[10px] text-indigo-100 sm:text-xs">
-                Small Steps, Big Futures.
+            <p class="truncate text-[10px] sm:text-xs">
+                Written Round | MOCK TEST | 15 Min | Level 1
             </p>
 
         </div>
 
 
         <!-- TIMER -->
-        <div class="flex h-full shrink-0 items-center gap-2 bg-indigo-900/30 px-3 sm:gap-3 sm:px-5">
+        <div class="flex shrink-0 items-center gap-2 bg-[#087cab] px-4 py-2 sm:px-6">
 
-            <span class="text-2xl text-indigo-100 sm:text-3xl">
+            <span class="text-3xl leading-none">
                 ◷
             </span>
 
             <div class="text-right">
 
-                <div class="text-xl font-semibold tabular-nums sm:text-2xl">
+                <div class="text-xl font-bold tabular-nums sm:text-2xl">
                     {{ timeRemainingLabel }}
                 </div>
 
-                <div class="text-[10px] text-indigo-100 sm:text-xs">
+                <div class="text-[9px] sm:text-[10px]">
                     Duration: 15:00
                 </div>
 
@@ -48,264 +44,185 @@
     </header>
 
 
-    <!-- ================= MAIN EXAM CONTENT ================= -->
-    <main class="flex min-h-0 flex-1">
+    <!-- ========================================================= -->
+    <!-- QUESTION INFORMATION                                      -->
+    <!-- ========================================================= -->
+
+    <div
+        class="flex shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 py-2 text-xs sm:px-8 sm:text-sm">
+
+        <span class="text-slate-500">
+            Section:
+            <strong class="text-slate-700">
+                1 Digit X 3 Rows
+            </strong>
+        </span>
+
+        <span class="font-semibold text-slate-700">
+            Question: {{ questionNumber }}
+        </span>
+
+    </div>
 
 
-        <!-- ================= QUESTION PALETTE ================= -->
-        <aside class="hidden w-[112px] shrink-0 border-r border-slate-200 bg-white md:flex md:flex-col">
+    <!-- ========================================================= -->
+    <!-- MAIN QUESTION AREA                                        -->
+    <!-- ========================================================= -->
 
-            <!-- SIDEBAR TITLE -->
-            <div
-                class="shrink-0 border-b border-slate-200 bg-slate-50 px-2 py-3 text-center text-xs font-bold text-slate-600">
+    <main class="min-h-0 flex-1 overflow-y-auto bg-white">
 
-                Questions
+        <div class="mx-auto flex min-h-full w-full max-w-5xl flex-col px-4 py-5 sm:px-8 sm:py-8">
 
-            </div>
+            <!-- QUESTION -->
+            <section class="flex flex-1 flex-col items-center">
+
+                <h2 class="text-base font-bold text-slate-700 sm:text-lg">
+                    Question: {{ questionNumber }}
+                </h2>
 
 
-            <!-- QUESTION LIST -->
-            <div class="min-h-0 flex-1 overflow-y-auto p-2">
+                <!-- QUESTION DISPLAY -->
+                <div class="mt-5 flex justify-center">
 
-                @for (item of questionPalette; track item.number) {
+                    <app-question-display [question]="question.questionSnapshot" />
 
+                </div>
+
+
+                <!-- ANSWER OPTIONS -->
+                <div class="mt-8 w-full max-w-xl space-y-2 sm:mt-10 sm:space-y-3">
+
+                    @for (
+                    option of options;
+                    track option.id;
+                    let index = $index
+                    ) {
+
+                    <app-answer-option [option]="option" [selected]="option.id === selectedOptionId"
+                        [optionNumber]="index" (optionSelected)="onOptionSelected($event)" />
+
+                    }
+
+                </div>
+
+            </section>
+
+
+            <!-- ================================================= -->
+            <!-- PREVIOUS / NEXT                                    -->
+            <!-- ================================================= -->
+
+            <div class="mt-5 flex items-center justify-between">
+
+                <!-- PREVIOUS -->
                 <button type="button"
-                    class="mb-1 flex h-8 w-full items-center gap-2 rounded-md px-2 text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    [ngClass]="{
-
-                        'bg-indigo-600 text-white shadow-sm':
-                            item.number === questionNumber,
-
-                        'bg-emerald-100 text-emerald-800 hover:bg-emerald-200':
-                            item.answered &&
-                            item.number !== questionNumber,
-
-                        'bg-orange-100 text-orange-800 hover:bg-orange-200':
-                            item.flagged &&
-                            !item.answered &&
-                            item.number !== questionNumber,
-
-                        'bg-slate-100 text-slate-600 hover:bg-slate-200':
-                            !item.answered &&
-                            !item.flagged &&
-                            item.number !== questionNumber
-
-                    }" [attr.aria-current]="item.number === questionNumber ? 'step' : null"
-                    (click)="onQuestionNavigate(item.number - 1)">
-
-
-                    <!-- STATUS DOT -->
-                    <span class="h-2 w-2 shrink-0 rounded-full" [ngClass]="{
-
-                            'bg-white':
-                                item.number === questionNumber,
-
-                            'bg-emerald-600':
-                                item.answered &&
-                                item.number !== questionNumber,
-
-                            'bg-orange-500':
-                                item.flagged &&
-                                !item.answered &&
-                                item.number !== questionNumber,
-
-                            'bg-slate-300':
-                                !item.answered &&
-                                !item.flagged &&
-                                item.number !== questionNumber
-
-                        }">
-                    </span>
-
-
-                    <!-- QUESTION NUMBER -->
-                    <span>
-                        {{ item.number }}
-                    </span>
-
-
+                    class="flex h-9 w-9 items-center justify-center rounded border border-slate-300 bg-white text-lg text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 sm:h-10 sm:w-10"
+                    [disabled]="currentQuestionIndex === 0" aria-label="Previous question" (click)="onPrevious()">
+                    ◀
                 </button>
 
-                }
 
-            </div>
-
-
-            <!-- SIDEBAR LEGEND -->
-            <div class="hidden shrink-0 border-t border-slate-200 p-2 lg:block">
-
-                <div class="mb-2 text-[10px] font-semibold text-slate-500">
-                    STATUS
-                </div>
-
-                <div class="mb-1 flex items-center gap-1 text-[10px] text-slate-500">
-                    <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-                    Answered
-                </div>
-
-                <div class="mb-1 flex items-center gap-1 text-[10px] text-slate-500">
-                    <span class="h-2 w-2 rounded-full bg-orange-500"></span>
-                    Flagged
-                </div>
-
-                <div class="flex items-center gap-1 text-[10px] text-slate-500">
-                    <span class="h-2 w-2 rounded-full bg-slate-300"></span>
-                    Unanswered
-                </div>
-
-            </div>
-
-        </aside>
-
-
-        <!-- ================= QUESTION AREA ================= -->
-        <section class="flex min-w-0 flex-1 flex-col bg-white">
-
-
-            <!-- QUESTION TOOLBAR -->
-            <div
-                class="flex shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
-
-                <div class="flex items-center gap-2">
-
-                    <span class="text-xs font-semibold text-indigo-600 sm:text-sm">
-                        Question {{ questionNumber }} of {{ totalQuestions }}
-                    </span>
-
-                </div>
-
-
-                <span class="text-xs font-medium text-slate-500">
-                    Section: Default
+                <!-- QUESTION COUNTER -->
+                <span class="text-xs text-slate-400">
+                    {{ questionNumber }} / {{ totalQuestions }}
                 </span>
 
-            </div>
 
+                <!-- NEXT / SUBMIT -->
+                @if (currentQuestionIndex < totalQuestions - 1) { <button type="button"
+                    class="flex h-9 w-9 items-center justify-center rounded border border-slate-300 bg-white text-lg text-slate-700 shadow-sm transition hover:bg-slate-50 sm:h-10 sm:w-10"
+                    aria-label="Next question" (click)="onNext()">
+                    ▶
+                    </button>
 
-            <!-- QUESTION CONTENT -->
-            <div class="min-h-0 flex-1 overflow-y-auto bg-slate-50 px-4 py-5 sm:px-8 sm:py-8">
+                    } @else {
 
-                <div class="mx-auto w-full max-w-5xl">
+                    <button type="button"
+                        class="rounded bg-[#0789bd] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#067ba9]"
+                        (click)="onSubmitAssessment()">
+                        Submit
+                    </button>
 
-
-                    <!-- QUESTION CARD -->
-                    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-7">
-
-
-                        <!-- QUESTION -->
-                        <div class="flex justify-center">
-
-                            <app-question-display [question]="question.questionSnapshot" />
-
-                        </div>
-
-
-                        <!-- ANSWER OPTIONS -->
-                        <div class="mt-7 grid gap-3">
-
-                            @for (option of options; track option.id) {
-
-                            <app-answer-option [option]="option" [selected]="option.id === selectedOptionId"
-                                (optionSelected)="onOptionSelected($event)" />
-
-                            }
-
-                        </div>
-
-
-                    </div>
-
-                </div>
+                    }
 
             </div>
 
-        </section>
+        </div>
 
     </main>
 
 
-    <!-- ================= BOTTOM NAVIGATION ================= -->
-    <footer
-        class="flex shrink-0 flex-wrap items-center justify-between gap-2 bg-gradient-to-r from-indigo-700 to-blue-600 p-2.5 sm:p-3">
+    <!-- ========================================================= -->
+    <!-- QUESTION PALETTE                                          -->
+    <!-- ========================================================= -->
 
+    <section class="shrink-0 bg-[#0789bd] px-3 py-2 sm:px-5">
 
-        <!-- MOBILE QUESTION INDICATOR -->
-        <div class="flex items-center gap-2 md:hidden">
+        <div class="mx-auto max-w-6xl">
 
-            <span class="rounded-lg bg-white/95 px-3 py-2 text-xs font-semibold text-indigo-700 shadow-sm">
+            <!-- QUESTION NUMBERS -->
+            <div class="flex max-h-[82px] flex-wrap content-start justify-center gap-1 overflow-y-auto sm:max-h-[96px]">
 
-                {{ questionNumber }}/{{ totalQuestions }}
-
-            </span>
-
-        </div>
-
-
-        <!-- PREVIOUS / NEXT -->
-        <div class="flex min-w-0 flex-1 gap-2 sm:flex-none">
-
-
-            <!-- PREVIOUS -->
-            <button type="button"
-                class="min-h-10 flex-1 rounded-xl border border-indigo-100 bg-white px-3 py-2 text-xs font-semibold text-indigo-700 shadow-sm transition hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-40 sm:min-w-[115px] sm:flex-none"
-                [disabled]="currentQuestionIndex === 0" (click)="onPrevious()">
-
-                ◀ Prev
-
-            </button>
-
-
-            <!-- NEXT / SUBMIT -->
-            @if (currentQuestionIndex < totalQuestions - 1) { <button type="button"
-                class="min-h-10 flex-1 rounded-xl border border-indigo-100 bg-white px-3 py-2 text-xs font-semibold text-indigo-700 shadow-sm transition hover:bg-indigo-50 sm:min-w-[115px] sm:flex-none"
-                (click)="onNext()">
-
-                Next ▶
-
-                </button>
-
-                } @else {
+                @for (item of questionPalette; track item.number) {
 
                 <button type="button"
-                    class="min-h-10 flex-1 rounded-xl bg-emerald-500 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-600 sm:min-w-[115px] sm:flex-none"
-                    (click)="onSubmitAssessment()">
+                    class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[9px] font-semibold transition sm:h-7 sm:w-7 sm:text-[10px]"
+                    [ngClass]="{
 
-                    Submit
+                            'border-white bg-white text-[#0789bd]':
+                                item.number === questionNumber,
+
+                            'border-white/70 bg-[#b8e6f5] text-slate-700':
+                                item.answered &&
+                                item.number !== questionNumber,
+
+                            'border-yellow-300 bg-yellow-300 text-slate-800':
+                                item.flagged &&
+                                !item.answered &&
+                                item.number !== questionNumber,
+
+                            'border-white/50 bg-transparent text-white':
+                                !item.answered &&
+                                !item.flagged &&
+                                item.number !== questionNumber
+
+                        }" [attr.aria-current]="
+                            item.number === questionNumber
+                                ? 'step'
+                                : null
+                        " (click)="onQuestionNavigate(item.number - 1)">
+
+                    {{ item.number }}
 
                 </button>
 
                 }
 
-        </div>
+            </div>
 
 
-        <!-- CLEAR / FLAG -->
-        <div class="flex gap-2">
+            <!-- ACTION BUTTONS -->
+            <div class="mt-2 flex items-center justify-center gap-1">
+
+                <!-- CLEAR -->
+                <button type="button"
+                    class="min-w-[80px] border border-white/70 bg-white px-4 py-1.5 text-[10px] font-semibold text-slate-700 transition hover:bg-slate-50"
+                    (click)="onClear()">
+                    Clear
+                </button>
 
 
-            <!-- CLEAR -->
-            <button type="button"
-                class="min-h-10 rounded-xl border border-indigo-100 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-indigo-50"
-                (click)="onClear()">
+                <!-- FLAG -->
+                <button type="button"
+                    class="min-w-[80px] border border-white/70 bg-white px-4 py-1.5 text-[10px] font-semibold text-slate-700 transition hover:bg-slate-50"
+                    [attr.aria-pressed]="flagged" (click)="onFlag()">
+                    {{ flagged ? 'Unflag' : 'Flag' }}
+                </button>
 
-                Clear
-
-            </button>
-
-
-            <!-- FLAG -->
-            <button type="button"
-                class="min-h-10 rounded-xl border border-indigo-100 bg-white px-3 py-2 text-xs font-semibold text-indigo-700 shadow-sm transition hover:bg-indigo-50"
-                [attr.aria-pressed]="flagged" (click)="onFlag()">
-
-                {{ flagged ? 'Unflag' : 'Flag' }}
-
-            </button>
-
+            </div>
 
         </div>
 
-
-    </footer>
+    </section>
 
 </div>
