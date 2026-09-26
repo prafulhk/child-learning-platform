@@ -1,14 +1,25 @@
 <button type="button"
-    class="answer-option flex min-h-11 w-full items-center gap-3 rounded-xl border-2 border-slate-300 bg-white px-4 py-3 text-left text-lg font-semibold outline-none transition-colors"
+    class="flex min-h-10 w-full items-center gap-3 border-0 bg-transparent px-3 py-2 text-left outline-none transition-colors hover:bg-slate-50 focus:bg-slate-50"
     [ngClass]="{
-        'border-blue-600 bg-blue-50': selected,
-        'border-slate-300 bg-white': !selected
-    }" role="radio" [attr.aria-checked]="selected" [attr.aria-label]="'Option ' + option.value" (click)="onSelect()">
-
-    <span class="indicator h-4 w-4 flex-none rounded-full border-2" [ngClass]="selected
-            ? 'border-blue-600 bg-blue-600'
-            : 'border-slate-500 bg-white'" aria-hidden="true">
+            'text-slate-900': selected,
+            'text-slate-700': !selected
+        }" role="radio" [attr.aria-checked]="selected" [attr.aria-label]="'Option ' + option.value"
+    (click)="onSelect()">
+    <span class="w-6 shrink-0 text-right text-sm font-bold text-slate-700">
+        {{ optionLetter }}.
     </span>
 
-    <span class="value">{{ option.value }}</span>
+    <span class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2" [ngClass]="
+                selected
+                    ? 'border-[#0789bd] bg-[#0789bd]'
+                    : 'border-slate-400 bg-white'
+            " aria-hidden="true">
+        @if (selected) {
+        <span class="h-1.5 w-1.5 rounded-full bg-white"></span>
+        }
+    </span>
+
+    <span class="text-base font-medium sm:text-lg">
+        {{ option.value }}
+    </span>
 </button>
