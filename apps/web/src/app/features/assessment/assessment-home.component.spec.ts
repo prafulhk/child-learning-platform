@@ -43,13 +43,15 @@ describe('AssessmentHomeComponent', () => {
   it('emits back when Back is clicked', () => {
     const emitSpy = vi.spyOn(component.back, 'emit');
 
-    const buttons = fixture.nativeElement.querySelectorAll(
-      'button',
-    ) as NodeListOf<HTMLButtonElement>;
+    const buttons = Array.from(
+      fixture.nativeElement.querySelectorAll('button'),
+    ) as HTMLButtonElement[];
 
-    const backButton = buttons[1];
+    const backButton = buttons.find((button) => button.textContent?.includes('Back to Home'));
 
-    backButton.click();
+    expect(backButton).toBeTruthy();
+
+    backButton?.click();
 
     expect(emitSpy).toHaveBeenCalledTimes(1);
   });

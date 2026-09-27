@@ -15,6 +15,7 @@ export class AssessmentHomeComponent {
   readonly config: AssessmentConfig = OLYMPIAD_ASSESSMENT_CONFIG;
 
   @Output() readonly startAssessment = new EventEmitter<void>();
+  @Output() readonly openHistory = new EventEmitter<void>();
   @Output() readonly back = new EventEmitter<void>();
 
   onStart(): void {
@@ -23,5 +24,9 @@ export class AssessmentHomeComponent {
 
   onBack(): void {
     this.back.emit();
+  }
+
+  onOpenHistory(): void {
+    this.openHistory.emit();
   }
 }

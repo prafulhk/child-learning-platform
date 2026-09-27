@@ -38,6 +38,7 @@ import { ToastContainerComponent } from './shared/components/toast-container/toa
 import { AttemptsApiService } from './core/services/attempts-api.service';
 import { LogLearningComponent } from './features/learning/log-learning/log-learning';
 import { ActiveChildService } from './core/services/active-child.service';
+import { AssessmentHistoryComponent } from './features/assessment/assessment-history.component';
 
 type AppView =
   | 'HOME'
@@ -51,12 +52,14 @@ type AppView =
   | 'ASSESSMENT_SESSION'
   | 'ASSESSMENT_RESULT'
   | 'REGISTER'
-  | 'LOG_LEARNING';
+  | 'LOG_LEARNING'
+  | 'ASSESSMENT_HISTORY';
 
 @Component({
   imports: [
     AssessmentHomeComponent,
     AssessmentSessionComponent,
+    AssessmentHistoryComponent,
     PracticeSessionComponent,
     PracticeAttemptDetailComponent,
     ParentToolsComponent,
@@ -731,5 +734,12 @@ export class App implements OnDestroy {
 
     this.selectedAttempt = null;
     this.view = 'HISTORY';
+  }
+
+  onOpenAssessmentHistory(): void {
+    this.stopAssessmentCountdown();
+    this.selectedAttempt = null;
+    this.completedAssessmentAttempt = null;
+    this.view = 'ASSESSMENT_HISTORY';
   }
 }

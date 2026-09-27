@@ -3,7 +3,10 @@
 <app-practice-session (backToHome)="onBackToHome()" />
 } @else if (view === 'HISTORY') {
 <app-learning-history (backToHome)="onBackToHome()" />
-} @else if (view === 'DETAIL' && selectedAttempt) {
+}
+@else if (view === 'ASSESSMENT_HISTORY') {
+<app-assessment-history (backToHome)="onBackToHome()" />
+}@else if (view === 'DETAIL' && selectedAttempt) {
 <app-practice-attempt-detail [attempt]="selectedAttempt" (backToHistory)="onBackToHistory()" />
 } @else if (view === 'PARENT_TOOLS') {
 <app-parent-tools [childSelectionDestination]="parentToolsChildSelectionDestination"
@@ -30,7 +33,8 @@
     actionLabel="Back to Assessments" (restart)="onOpenAssessment()" />
 }
 @else if (view === 'ASSESSMENT_HOME') {
-<app-assessment-home (startAssessment)="onStartAssessment()" (back)="onBackToHome()" />
+<app-assessment-home (startAssessment)="onStartAssessment()" (openHistory)="onOpenAssessmentHistory()"
+    (back)="onBackToHome()" />
 @if (assessmentError) {
 <div class="app-page-shell app-page-shell--standard pt-0 pb-6">
     <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
