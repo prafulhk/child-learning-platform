@@ -1,0 +1,121 @@
+import { Types } from "mongoose";
+
+import { ChildModel } from "../children/models/child.model.js";
+import { LessonPlanModel, type LessonPlanStatus } from "./lesson-plan.model.js";
+import type { CreateLessonPlanInput } from "./schemas/create-lesson-plan.schema.js";
+
+export async function createLessonPlan(
+  userId: string,
+  input: CreateLessonPlanInput,
+) {
+  const child = await ChildModel.findOne({
+    _id: input.childId,
+    parentId: userId,
+  });
+
+  if (!child) {
+    const error = new Error(
+      "You are not authorized to create a lesson plan for this child.",
+    );
+
+    (error as Error & { statusCode?: number }).statusCode = 403;
+
+    throw error;
+  }
+
+  const lessonPlanData = {
+    childId: new Types.ObjectId(input.childId),
+    plannedDate: new Date(input.plannedDate),
+    subjectId: new Types.ObjectId(input.subjectId),
+    topicId: new Types.ObjectId(input.topicId),
+    plannedActivity: input.plannedActivity,
+    plannedDurationMinutes: input.plannedDurationMinutes,
+    createdByUserId: new Types.ObjectId(userId),
+    createdByRole: "PARENT" as const,
+
+    ...(input.skillId ? { skillId: new Types.ObjectId(input.skillId) } : {}),
+
+    ...(input.notes ? { notes: input.notes } : {}),
+  };
+
+  return LessonPlanModel.create(lessonPlanData);
+}
+
+interface GetLessonPlansOptions {
+  childId: string;
+  fromDate?: string | undefined;
+  toDate?: string | undefined;
+  status?: LessonPlanStatus | undefined;
+  page?: number;
+  limit?: number;
+}
+
+export async function getLessonPlans(
+  userId: string,
+  options: GetLessonPlansOptions,
+) {
+  const page = Math.max(1, options.page ?? 1);
+  const limit = Math.min(50, Math.max(1, options.limit ?? 20));
+
+  const child = await ChildModel.findOne({
+    _id: options.childId,
+    parentId: userId,
+  }).lean();
+
+  if (!child) {
+    const error = new Error(
+      "You are not authorized to view lesson plans for this child.",
+    );
+
+    (error as Error & { statusCode?: number }).statusCode = 403;
+
+    throw error;
+  }
+
+  const filter: {
+    childId: Types.ObjectId;
+    plannedDate?: {
+      $gte?: Date;
+      $lte?: Date;
+    };
+    status?: LessonPlanStatus;
+  } = {
+    childId: child._id,
+  };
+
+  if (options.fromDate || options.toDate) {
+    filter.plannedDate = {};
+
+    if (options.fromDate) {
+      filter.plannedDate.$gte = new Date(`${options.fromDate}T00:00:00.000Z`);
+    }
+
+    if (options.toDate) {
+      filter.plannedDate.$lte = new Date(`${options.toDate}T23:59:59.999Z`);
+    }
+  }
+
+  if (options.status) {
+    filter.status = options.status;
+  }
+
+  const [plans, total] = await Promise.all([
+    LessonPlanModel.find(filter)
+      .sort({ plannedDate: 1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean(),
+
+    LessonPlanModel.countDocuments(filter),
+  ]);
+
+  return {
+    plans,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+}
