@@ -1,9 +1,10 @@
-import { Component, EventEmitter, Output, OnInit, inject, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject, signal } from '@angular/core';
 
 import { Child, ChildService } from '../../core/services/child.service';
-
 import { ToastService } from '../../core/services/toast';
 import { ActiveChildService } from '../../core/services/active-child.service';
+
+export type ParentToolsChildSelectionDestination = 'LOG_LEARNING' | 'LEARNING_HISTORY';
 
 @Component({
   selector: 'app-parent-tools',
@@ -15,16 +16,20 @@ export class ParentToolsComponent implements OnInit {
   private readonly toastService = inject(ToastService);
   private readonly activeChildService = inject(ActiveChildService);
 
+  @Input()
+  childSelectionDestination: ParentToolsChildSelectionDestination = 'LOG_LEARNING';
+
+  @Output() openQuestionBank = new EventEmitter<void>();
+  @Output() backToHome = new EventEmitter<void>();
+  @Output() openLogLearning = new EventEmitter<void>();
+  @Output() openLearningHistory = new EventEmitter<void>();
+
   readonly children = signal<Child[]>([]);
   readonly isLoading = signal(false);
   readonly errorMessage = signal('');
   readonly childName = signal('');
   readonly childGrade = signal('');
   readonly isCreatingChild = signal(false);
-
-  @Output() openQuestionBank = new EventEmitter<void>();
-  @Output() backToHome = new EventEmitter<void>();
-  @Output() openLogLearning = new EventEmitter<void>();
 
   ngOnInit(): void {
     this.loadChildren();
@@ -101,7 +106,14 @@ export class ParentToolsComponent implements OnInit {
 
   onSelectChild(child: Child): void {
     this.activeChildService.setActiveChild(child);
+
     this.toastService.success(`${child.name} selected.`);
+
+    if (this.childSelectionDestination === 'LEARNING_HISTORY') {
+      this.openLearningHistory.emit();
+      return;
+    }
+
     this.openLogLearning.emit();
   }
 }

@@ -63,6 +63,10 @@ export class LogLearningComponent implements OnInit {
   }
 
   onSave(): void {
+    if (this.isSaving()) {
+      return;
+    }
+
     if (this.learningForm.invalid) {
       this.learningForm.markAllAsTouched();
       return;
@@ -89,6 +93,14 @@ export class LogLearningComponent implements OnInit {
         durationMinutes: formValue.durationMinutes,
         whatWasTaught: formValue.whatWasTaught.trim(),
         performance: formValue.performance,
+        accuracy:
+          formValue.accuracy === null
+            ? undefined
+            : {
+                correct: formValue.accuracy,
+                total: 100,
+                percentage: formValue.accuracy,
+              },
         notes: formValue.notes.trim() || undefined,
       })
       .subscribe({

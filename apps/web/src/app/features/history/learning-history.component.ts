@@ -1,191 +1,165 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, EventEmitter, inject, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  OnInit,
+  Output,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import { forkJoin, finalize } from 'rxjs';
 
-import { LocalStorageService, PracticeAttempt } from '../../core/services/local-storage.service';
-
-import type { AssessmentAttempt } from '../../core/models/assessment.model';
-import { AttemptsApiService, BackendAttempt } from '../../core/services/attempts-api.service';
-import { finalize } from 'rxjs';
-
-type HistoryActivityType = 'Practice' | 'Olympiad';
-
-interface LearningHistoryItem {
-  id: string;
-  type: HistoryActivityType;
-  title: string;
-  startedAt: string;
-  completedAt: string;
-  totalQuestions: number;
-  correctCount: number;
-  incorrectCount: number;
-  unansweredCount: number;
-  accuracyPercentage: number;
-}
+import { ActiveChildService } from '../../core/services/active-child.service';
+import {
+  CatalogApiService,
+  type Subject,
+  type Topic,
+} from '../../core/services/catalog-api.service';
+import {
+  LearningSessionsApiService,
+  type LearningSession,
+} from '../../core/services/learning-sessions-api.service';
 
 @Component({
   selector: 'app-learning-history',
   standalone: true,
-  templateUrl: './learning-history.component.html',
   imports: [CommonModule],
+  templateUrl: './learning-history.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LearningHistoryComponent {
-  private readonly localStorageService = inject(LocalStorageService);
-  private readonly attemptsApiService = inject(AttemptsApiService);
-  private readonly changeDetectorRef = inject(ChangeDetectorRef);
-  @Output() backToHome = new EventEmitter<void>();
-  historyItems: LearningHistoryItem[] = [];
+export class LearningHistoryComponent implements OnInit {
+  private readonly learningSessionsApiService = inject(LearningSessionsApiService);
+  private readonly activeChildService = inject(ActiveChildService);
+  private readonly catalogApiService = inject(CatalogApiService);
 
-  isLoading = false;
-  errorMessage = '';
+  @Output()
+  readonly backToHome = new EventEmitter<void>();
 
-  selectedFilter: 'All' | 'Practice' | 'Olympiad' = 'All';
+  readonly learningSessions = signal<LearningSession[]>([]);
+  readonly subjects = signal<Subject[]>([]);
+  readonly topics = signal<Topic[]>([]);
+  readonly isLoading = signal(false);
+  readonly errorMessage = signal('');
 
-  constructor() {
-    this.loadHistory();
+  readonly subjectNameById = computed(() => {
+    return new Map(this.subjects().map((subject) => [subject._id, subject.name]));
+  });
+
+  readonly topicNameById = computed(() => {
+    return new Map(this.topics().map((topic) => [topic._id, topic.name]));
+  });
+
+  readonly totalSessions = computed(() => this.learningSessions().length);
+
+  readonly totalLearningMinutes = computed(() =>
+    this.learningSessions().reduce((total, session) => total + session.durationMinutes, 0),
+  );
+
+  readonly averageAccuracy = computed(() => {
+    const sessionsWithAccuracy = this.learningSessions().filter(
+      (session) => session.accuracy !== undefined,
+    );
+
+    if (sessionsWithAccuracy.length === 0) {
+      return null;
+    }
+
+    const totalPercentage = sessionsWithAccuracy.reduce(
+      (total, session) => total + (session.accuracy?.percentage ?? 0),
+      0,
+    );
+
+    return Math.round(totalPercentage / sessionsWithAccuracy.length);
+  });
+
+  ngOnInit(): void {
+    this.loadLearningHistory();
   }
 
-  private loadHistory(): void {
-    this.isLoading = true;
-    this.errorMessage = '';
+  private loadLearningHistory(): void {
+    const activeChild = this.activeChildService.activeChild();
 
-    this.attemptsApiService
-      .getAttempts()
-      .pipe(
-        finalize(() => {
-          this.isLoading = false;
+    if (!activeChild) {
+      this.errorMessage.set('Please select a child to view learning history.');
+      return;
+    }
 
-          console.log('Loading completed:', this.isLoading);
+    this.isLoading.set(true);
+    this.errorMessage.set('');
 
-          this.changeDetectorRef.detectChanges();
-        }),
-      )
+    this.learningSessionsApiService
+      .getLearningSessions({
+        childId: activeChild._id,
+        page: 1,
+        limit: 20,
+      })
       .subscribe({
         next: (response) => {
-          console.log('Backend history response:', response);
-
-          this.historyItems = response.attempts
-            .map((attempt) => this.mapBackendAttempt(attempt))
-            .sort(this.sortByCompletedDate);
-
-          console.log('Mapped history items:', this.historyItems);
+          this.learningSessions.set(response.sessions);
+          this.loadCatalogData(response.sessions);
         },
-
-        error: (error) => {
-          console.error('Unable to load backend history:', error);
-
-          this.loadLocalHistory();
-
-          this.errorMessage = 'Unable to load online history. Showing locally saved attempts.';
+        error: () => {
+          this.learningSessions.set([]);
+          this.errorMessage.set('Unable to load learning history. Please try again.');
+          this.isLoading.set(false);
         },
       });
   }
 
-  private loadLocalHistory(): void {
-    const practiceAttempts = this.localStorageService.getCompletedAttempts();
+  private loadCatalogData(sessions: LearningSession[]): void {
+    if (sessions.length === 0) {
+      this.isLoading.set(false);
+      return;
+    }
 
-    const assessmentAttempts = this.localStorageService.getCompletedAssessmentAttempts();
+    this.catalogApiService
+      .getSubjects()
+      .pipe(
+        finalize(() => {
+          this.isLoading.set(false);
+        }),
+      )
+      .subscribe({
+        next: (subjects) => {
+          this.subjects.set(subjects);
+          this.loadTopicsForSessions(sessions, subjects);
+        },
+        error: () => {
+          this.errorMessage.set('Unable to load learning subject information.');
+        },
+      });
+  }
 
-    const practiceHistory = practiceAttempts.map((attempt) => this.mapPracticeAttempt(attempt));
+  private loadTopicsForSessions(sessions: LearningSession[], subjects: Subject[]): void {
+    const subjectIds = [...new Set(sessions.map((session) => session.subjectId))];
 
-    const assessmentHistory = assessmentAttempts.map((attempt) =>
-      this.mapAssessmentAttempt(attempt),
+    const validSubjectIds = subjectIds.filter((subjectId) =>
+      subjects.some((subject) => subject._id === subjectId),
     );
 
-    this.historyItems = [...practiceHistory, ...assessmentHistory].sort(this.sortByCompletedDate);
-  }
-
-  private mapBackendAttempt(attempt: BackendAttempt): LearningHistoryItem {
-    const isPractice = attempt.attemptType === 'PRACTICE';
-
-    return {
-      id: attempt._id,
-      type: isPractice ? 'Practice' : 'Olympiad',
-      title: isPractice
-        ? `Practice - ${attempt.topicId ?? 'General'}`
-        : (attempt.title ?? 'Abacus Olympiad Test'),
-      startedAt: attempt.startedAt,
-      completedAt: attempt.completedAt,
-      totalQuestions: attempt.result.totalQuestions,
-      correctCount: attempt.result.correctCount,
-      incorrectCount: attempt.result.incorrectCount,
-      unansweredCount: attempt.result.unansweredCount,
-      accuracyPercentage: attempt.result.accuracyPercentage,
-    };
-  }
-
-  private mapPracticeAttempt(attempt: PracticeAttempt): LearningHistoryItem {
-    return {
-      id: attempt.id,
-      type: 'Practice',
-      title: `Practice - ${attempt.topicId}`,
-      startedAt: attempt.startedAt,
-      completedAt: attempt.completedAt,
-      totalQuestions: attempt.result.totalQuestions,
-      correctCount: attempt.result.correctCount,
-      incorrectCount: attempt.result.incorrectCount,
-      unansweredCount: attempt.result.unansweredCount,
-      accuracyPercentage: attempt.result.accuracyPercentage,
-    };
-  }
-
-  private mapAssessmentAttempt(attempt: AssessmentAttempt): LearningHistoryItem {
-    return {
-      id: attempt.id,
-      type: 'Olympiad',
-      title: 'Abacus Olympiad Test',
-      startedAt: attempt.startedAt,
-      completedAt: attempt.completedAt,
-      totalQuestions: attempt.result.totalQuestions,
-      correctCount: attempt.result.correctCount,
-      incorrectCount: attempt.result.incorrectCount,
-      unansweredCount: attempt.result.unansweredCount,
-      accuracyPercentage: attempt.result.accuracyPercentage,
-    };
-  }
-
-  private sortByCompletedDate(a: LearningHistoryItem, b: LearningHistoryItem): number {
-    return new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime();
-  }
-
-  get filteredHistoryItems(): LearningHistoryItem[] {
-    if (this.selectedFilter === 'All') {
-      return this.historyItems;
+    if (validSubjectIds.length === 0) {
+      return;
     }
 
-    return this.historyItems.filter((item) => item.type === this.selectedFilter);
+    forkJoin(
+      validSubjectIds.map((subjectId) => this.catalogApiService.getTopics(subjectId)),
+    ).subscribe({
+      next: (topicGroups) => {
+        this.topics.set(topicGroups.flat());
+      },
+      error: () => {
+        this.errorMessage.set('Unable to load learning topic information.');
+      },
+    });
   }
 
-  get totalAttempts(): number {
-    return this.historyItems.length;
+  getSubjectName(subjectId: string): string {
+    return this.subjectNameById().get(subjectId) ?? subjectId;
   }
 
-  get averageAccuracy(): number {
-    const items = this.filteredHistoryItems;
-
-    if (items.length === 0) {
-      return 0;
-    }
-
-    const totalQuestions = items.reduce((sum, item) => sum + item.totalQuestions, 0);
-
-    const totalCorrectAnswers = items.reduce((sum, item) => sum + item.correctCount, 0);
-
-    if (totalQuestions === 0) {
-      return 0;
-    }
-
-    return Math.round((totalCorrectAnswers / totalQuestions) * 100);
-  }
-
-  get practiceCount(): number {
-    return this.historyItems.filter((item) => item.type === 'Practice').length;
-  }
-
-  get olympiadCount(): number {
-    return this.historyItems.filter((item) => item.type === 'Olympiad').length;
-  }
-
-  setFilter(filter: 'All' | 'Practice' | 'Olympiad'): void {
-    this.selectedFilter = filter;
+  getTopicName(topicId: string): string {
+    return this.topicNameById().get(topicId) ?? topicId;
   }
 }

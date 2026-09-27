@@ -22,7 +22,10 @@ import {
 import { PracticeAttemptDetailComponent } from './features/practice/practice-attempt-detail.component';
 import { PracticeSessionComponent } from './features/practice/practice-session.component';
 
-import { ParentToolsComponent } from './features/parent-tools/parent-tools.component';
+import {
+  ParentToolsChildSelectionDestination,
+  ParentToolsComponent,
+} from './features/parent-tools/parent-tools.component';
 import { QuestionBankComponent } from './features/question-bank/question-bank.component';
 import { LocalStorageService } from './core/services/local-storage.service';
 import { PracticeResultComponent } from './features/practice/practice-result.component';
@@ -34,6 +37,7 @@ import { AuthService, LoginResponse } from './core/services/auth.service';
 import { ToastContainerComponent } from './shared/components/toast-container/toast-container';
 import { AttemptsApiService } from './core/services/attempts-api.service';
 import { LogLearningComponent } from './features/learning/log-learning/log-learning';
+import { ActiveChildService } from './core/services/active-child.service';
 
 type AppView =
   | 'HOME'
@@ -82,8 +86,10 @@ export class App implements OnDestroy {
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly localStorageService = inject(LocalStorageService);
   private readonly authService = inject(AuthService);
+  private readonly activeChildService = inject(ActiveChildService);
 
   view: AppView = this.authService.currentUser() ? 'HOME' : 'LOGIN';
+  parentToolsChildSelectionDestination: ParentToolsChildSelectionDestination = 'LOG_LEARNING';
 
   completedAssessmentAttempt: AssessmentAttempt | null = null;
 
@@ -142,9 +148,15 @@ export class App implements OnDestroy {
     }
 
     this.stopAssessmentCountdown();
-
     this.selectedAttempt = null;
-    this.view = 'HISTORY';
+
+    if (this.activeChildService.activeChild()) {
+      this.view = 'HISTORY';
+      return;
+    }
+
+    this.parentToolsChildSelectionDestination = 'LEARNING_HISTORY';
+    this.view = 'PARENT_TOOLS';
   }
 
   onBackToHome(): void {
@@ -168,6 +180,7 @@ export class App implements OnDestroy {
     this.stopAssessmentCountdown();
 
     this.selectedAttempt = null;
+    this.parentToolsChildSelectionDestination = 'LOG_LEARNING';
     this.view = 'PARENT_TOOLS';
   }
 
@@ -711,5 +724,12 @@ export class App implements OnDestroy {
 
   onBackFromLogLearning(): void {
     this.view = 'HOME';
+  }
+
+  onOpenLearningHistory(): void {
+    this.stopAssessmentCountdown();
+
+    this.selectedAttempt = null;
+    this.view = 'HISTORY';
   }
 }

@@ -6,8 +6,9 @@
 } @else if (view === 'DETAIL' && selectedAttempt) {
 <app-practice-attempt-detail [attempt]="selectedAttempt" (backToHistory)="onBackToHistory()" />
 } @else if (view === 'PARENT_TOOLS') {
-<app-parent-tools (openQuestionBank)="onOpenQuestionBank()" (openLogLearning)="onOpenLogLearning()"
-    (backToHome)="onBackToHome()" />
+<app-parent-tools [childSelectionDestination]="parentToolsChildSelectionDestination"
+    (openQuestionBank)="onOpenQuestionBank()" (openLogLearning)="onOpenLogLearning()"
+    (openLearningHistory)="onOpenLearningHistory()" (backToHome)="onBackToHome()" />
 }
 @else if (view === 'LOG_LEARNING') {
 <app-log-learning (backToHome)="onBackFromLogLearning()" />
