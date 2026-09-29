@@ -43,3 +43,18 @@ Content-Type: application/json
 ### Get children
 GET http://localhost:3000/api/children
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YWIxZDI0ZGYwZGEzYzg5NDdhMjk3YWUiLCJyb2xlIjoiUEFSRU5UIiwiaWF0IjoxNzkwMDUwNjI0LCJleHAiOjE3OTAxMzcwMjR9.avmVR9Mldcbn0Nw9sOG_TqQEyvnL4Vu2zvL5u81xUB0
+
+### post lesson plan
+POST http://localhost:3000/api/lesson-plans
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YWIxZDI0ZGYwZGEzYzg5NDdhMjk3YWUiLCJyb2xlIjoiUEFSRU5UIiwiaWF0IjoxNzkwNTU4MTU3LCJleHAiOjE3OTA2NDQ1NTd9.DVvwxTmYTy3UxZZWaxZWIpoAi1ZGUxizqBiVtO1eyKY
+Content-Type: application/json
+
+{
+    "childId": "6ab2b4698fb686b7b35aecfc",
+    "plannedDate": "2026-09-27T18:30:00.000Z",
+    "subjectId": "6ab7d202db3d90b5da9b843f",
+    "topicId": "6ab7d202db3d90b5da9b8443",
+    "plannedActivity": "test",
+    "plannedDurationMinutes": 30,
+    "notes": "test"
+}

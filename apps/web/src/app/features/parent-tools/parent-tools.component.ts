@@ -4,7 +4,8 @@ import { Child, ChildService } from '../../core/services/child.service';
 import { ToastService } from '../../core/services/toast';
 import { ActiveChildService } from '../../core/services/active-child.service';
 
-export type ParentToolsChildSelectionDestination = 'LOG_LEARNING' | 'LEARNING_HISTORY';
+export type ParentToolsChildSelectionDestination =
+  'LOG_LEARNING' | 'LEARNING_HISTORY' | 'CREATE_LESSON_PLAN';
 
 @Component({
   selector: 'app-parent-tools',
@@ -23,6 +24,7 @@ export class ParentToolsComponent implements OnInit {
   @Output() backToHome = new EventEmitter<void>();
   @Output() openLogLearning = new EventEmitter<void>();
   @Output() openLearningHistory = new EventEmitter<void>();
+  @Output() openCreateLessonPlan = new EventEmitter<void>();
 
   readonly children = signal<Child[]>([]);
   readonly isLoading = signal(false);
@@ -111,6 +113,11 @@ export class ParentToolsComponent implements OnInit {
 
     if (this.childSelectionDestination === 'LEARNING_HISTORY') {
       this.openLearningHistory.emit();
+      return;
+    }
+
+    if (this.childSelectionDestination === 'CREATE_LESSON_PLAN') {
+      this.openCreateLessonPlan.emit();
       return;
     }
 

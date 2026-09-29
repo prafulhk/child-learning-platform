@@ -39,6 +39,7 @@ import { AttemptsApiService } from './core/services/attempts-api.service';
 import { LogLearningComponent } from './features/learning/log-learning/log-learning';
 import { ActiveChildService } from './core/services/active-child.service';
 import { AssessmentHistoryComponent } from './features/assessment/assessment-history.component';
+import { CreateLessonPlan } from './features/lesson-plans/create-lesson-plan/create-lesson-plan';
 
 type AppView =
   | 'HOME'
@@ -53,7 +54,8 @@ type AppView =
   | 'ASSESSMENT_RESULT'
   | 'REGISTER'
   | 'LOG_LEARNING'
-  | 'ASSESSMENT_HISTORY';
+  | 'ASSESSMENT_HISTORY'
+  | 'CREATE_LESSON_PLAN';
 
 @Component({
   imports: [
@@ -71,6 +73,7 @@ type AppView =
     Login,
     ToastContainerComponent,
     LogLearningComponent,
+    CreateLessonPlan,
   ],
   selector: 'app-root',
   styleUrl: './app.scss',
@@ -741,5 +744,19 @@ export class App implements OnDestroy {
     this.selectedAttempt = null;
     this.completedAssessmentAttempt = null;
     this.view = 'ASSESSMENT_HISTORY';
+  }
+
+  onOpenCreateLessonPlan(): void {
+    this.stopAssessmentCountdown();
+    this.selectedAttempt = null;
+    this.view = 'CREATE_LESSON_PLAN';
+  }
+
+  onDashboardCreateLessonPlan(): void {
+    this.stopAssessmentCountdown();
+
+    this.selectedAttempt = null;
+    this.parentToolsChildSelectionDestination = 'CREATE_LESSON_PLAN';
+    this.view = 'PARENT_TOOLS';
   }
 }

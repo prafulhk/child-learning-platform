@@ -11,10 +11,14 @@
 } @else if (view === 'PARENT_TOOLS') {
 <app-parent-tools [childSelectionDestination]="parentToolsChildSelectionDestination"
     (openQuestionBank)="onOpenQuestionBank()" (openLogLearning)="onOpenLogLearning()"
-    (openLearningHistory)="onOpenLearningHistory()" (backToHome)="onBackToHome()" />
+    (openLearningHistory)="onOpenLearningHistory()" (backToHome)="onBackToHome()"
+    (openCreateLessonPlan)="onOpenCreateLessonPlan()" />
 }
 @else if (view === 'LOG_LEARNING') {
 <app-log-learning (backToHome)="onBackFromLogLearning()" />
+}
+@else if (view === 'CREATE_LESSON_PLAN') {
+<app-create-lesson-plan (backToHome)="onBackToHome()" (saved)="onBackToHome()" />
 }
 @else if (view === 'QUESTION_BANK') {
 <app-question-bank (backToParentTools)="onBackToParentTools()" />
@@ -51,6 +55,7 @@
 }
 @else {
 <app-dashboard-home (startPractice)="onDashboardStartPractice()" (viewHistory)="onDashboardViewHistory()"
-    (openParentTools)="onDashboardOpenParentTools()" (openAssessment)="onDashboardOpenAssessment()"
-    (openRegistration)="onDashboardOpenRegistration()" (openLogin)="onOpenLogin()" (logout)="onLogout()" />
+    (openParentTools)="onDashboardOpenParentTools()" (openCreateLessonPlan)="onDashboardCreateLessonPlan()"
+    (openAssessment)="onDashboardOpenAssessment()" (openRegistration)="onDashboardOpenRegistration()"
+    (openLogin)="onOpenLogin()" (logout)="onLogout()" />
 }

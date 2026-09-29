@@ -14,6 +14,10 @@ const app: Express = express();
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+app.use((req, _res, next) => {
+  console.log("🔥 REQUEST:", req.method, req.originalUrl);
+  next();
+});
 
 app.use("/api/auth", authRouter);
 app.use("/api/children", childrenRouter);

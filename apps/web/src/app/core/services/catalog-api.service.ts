@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
+import { environment } from '../../../environments/environment.development';
 
 export interface Subject {
   _id: string;
@@ -32,7 +33,7 @@ interface ApiResponse<T> {
 export class CatalogApiService {
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl = '/api/subjects';
+  private readonly apiUrl = `${environment.apiUrl}/subjects`;
 
   getSubjects(): Observable<Subject[]> {
     return this.http

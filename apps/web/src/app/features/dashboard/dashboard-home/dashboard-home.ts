@@ -13,6 +13,7 @@ export class DashboardHome {
   readonly startPractice = output<void>();
   readonly viewHistory = output<void>();
   readonly openParentTools = output<void>();
+  readonly openCreateLessonPlan = output<void>();
   readonly openAssessment = output<void>();
   readonly openRegistration = output<void>();
   readonly openLogin = output<void>();
