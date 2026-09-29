@@ -2,6 +2,7 @@ import { Component, inject, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService, LoginResponse } from '../../../core/services/auth.service';
 import { finalize } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -12,6 +13,7 @@ import { finalize } from 'rxjs';
 export class Login {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
   readonly registerRequested = output<void>();
   readonly loginSuccess = output<LoginResponse>();
   readonly registrationMessage = this.authService.registrationMessage;
@@ -25,6 +27,10 @@ export class Login {
   errorMessage = signal('');
   showPassword = false;
 
+  onRegisterRequested(): void {
+    void this.router.navigate(['/register']);
+  }
+
   onSubmit(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -37,8 +43,7 @@ export class Login {
     this.authService.login(this.loginForm.getRawValue()).subscribe({
       next: (response) => {
         this.isLoading.set(false);
-
-        this.loginSuccess.emit(response);
+        void this.router.navigate(['/dashboard']);
       },
 
       error: (error) => {

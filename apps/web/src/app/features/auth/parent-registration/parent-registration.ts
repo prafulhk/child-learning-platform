@@ -8,6 +8,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
+import { Router } from '@angular/router';
 
 const passwordsMatchValidator: ValidatorFn = (
   control: AbstractControl,
@@ -31,6 +32,7 @@ const passwordsMatchValidator: ValidatorFn = (
 export class ParentRegistration {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
   readonly loginRequested = output<void>();
   readonly registrationCompleted = output<string>();
 
@@ -50,6 +52,10 @@ export class ParentRegistration {
   errorMessage = signal('');
   successMessage = '';
 
+  onLoginRequested(): void {
+    void this.router.navigate(['/login']);
+  }
+
   onSubmit(): void {
     if (this.registrationForm.invalid) {
       this.registrationForm.markAllAsTouched();
@@ -65,8 +71,7 @@ export class ParentRegistration {
         this.isLoading.set(false);
         this.registrationForm.reset();
         this.authService.setRegistrationMessage(response.message);
-        this.registrationCompleted.emit(response.message);
-        this.loginRequested.emit();
+        void this.router.navigate(['/login']);
       },
       error: (error) => {
         this.isLoading.set(false);

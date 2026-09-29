@@ -42,7 +42,7 @@
                 <!-- History -->
                 <button type="button"
                     class="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-white transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/60 sm:text-sm"
-                    (click)="viewHistory.emit()">
+                    (click)="onViewHistory()">
 
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" class="h-4 w-4" aria-hidden="true">
@@ -57,7 +57,7 @@
                 <!-- Parent Tools -->
                 <button type="button"
                     class="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-white transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/60 sm:text-sm"
-                    (click)="openParentTools.emit()">
+                    (click)="onOpenParentTools()">
 
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" class="h-4 w-4" aria-hidden="true">
@@ -111,7 +111,7 @@
                 <!-- Logout -->
                 <button type="button" title="Logout" aria-label="Logout"
                     class="rounded-lg px-2 py-1 text-lg text-white transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/60"
-                    (click)="logout.emit()">
+                    (click)="onLogout()">
 
                     ↪
                 </button>
@@ -121,7 +121,7 @@
                 <!-- Login -->
                 <button type="button"
                     class="rounded-lg bg-white px-3 py-2 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-white/60"
-                    (click)="openLogin.emit()">
+                    (click)="onOpenLogin()">
 
                     Login
                 </button>
@@ -213,7 +213,7 @@
 
                 <button type="button"
                     class="cursor-pointer text-sm font-semibold text-indigo-600 transition hover:text-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    (click)="viewHistory.emit()">
+                    (click)="onViewHistory()">
 
                     View history →
                 </button>
@@ -227,7 +227,7 @@
                 <!-- Daily Practice -->
                 <button type="button"
                     class="group cursor-pointer rounded-2xl border border-indigo-200 bg-white p-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-indigo-400 hover:bg-indigo-50/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20"
-                    (click)="startPractice.emit()">
+                    (click)="onStartPractice()">
 
                     <div class="flex items-center justify-between">
 
@@ -275,7 +275,7 @@
                 <!-- Assessments -->
                 <button type="button"
                     class="group cursor-pointer rounded-2xl border border-orange-200 bg-white p-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-orange-400 hover:bg-orange-50/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-orange-500/20"
-                    (click)="openAssessment.emit()">
+                    (click)="onOpenAssessment()">
 
                     <div class="flex items-center justify-between">
 
@@ -323,7 +323,7 @@
                 <!-- Learning History -->
                 <button type="button"
                     class="group cursor-pointer rounded-2xl border border-emerald-200 bg-white p-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-emerald-400 hover:bg-emerald-50/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-emerald-500/20"
-                    (click)="viewHistory.emit()">
+                    (click)="onViewHistory()">
 
                     <div class="flex items-center justify-between">
 
@@ -392,7 +392,7 @@
                 <!-- Parent Tools -->
                 <button type="button"
                     class="group flex cursor-pointer items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-indigo-500/10"
-                    (click)="openParentTools.emit()">
+                    (click)="onOpenParentTools()">
 
                     <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-xl"
                         aria-hidden="true">
@@ -418,10 +418,12 @@
 
                 </button>
                 <!-- Create Lesson Plan -->
-                <button type="button"
+                <!-- <button type="button"
                     class="group flex cursor-pointer items-center gap-4 rounded-2xl border border-indigo-200 bg-white p-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-400 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-indigo-500/10"
-                    (click)="openCreateLessonPlan.emit()">
+                    (click)="openLessonPlan.emit()"> -->
 
+                <button type="button"
+                    class="group flex cursor-pointer items-center gap-4 rounded-2xl border border-indigo-200 bg-white p-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-400 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-indigo-500/10">
                     <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-xl"
                         aria-hidden="true">
                         📅
@@ -450,7 +452,7 @@
 
                 <button type="button"
                     class="group flex cursor-pointer items-center gap-4 rounded-2xl border border-violet-100 bg-violet-50 p-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-violet-500/10"
-                    (click)="openRegistration.emit()">
+                    (click)="onOpenRegistration()">
 
                     <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-xl"
                         aria-hidden="true">

@@ -9,9 +9,9 @@ import {
 import { signal } from '@angular/core';
 
 import { AuthService } from '../services/auth.service';
-import { authGuard } from './auth-guard';
+import { guestGuard } from './guest-guard';
 
-describe('authGuard', () => {
+describe('guestGuard', () => {
   const currentUser = signal<ReturnType<AuthService['currentUser']>>(null);
 
   const authServiceMock = {
@@ -19,7 +19,7 @@ describe('authGuard', () => {
   };
 
   const executeGuard: CanActivateFn = (...guardParameters) =>
-    TestBed.runInInjectionContext(() => authGuard(...guardParameters));
+    TestBed.runInInjectionContext(() => guestGuard(...guardParameters));
 
   const createRouterState = (url: string): RouterStateSnapshot =>
     ({
@@ -40,7 +40,13 @@ describe('authGuard', () => {
     });
   });
 
-  it('should allow authenticated users to access protected routes', () => {
+  it('should allow unauthenticated users to access guest routes', () => {
+    const result = executeGuard({} as ActivatedRouteSnapshot, createRouterState('/login'));
+
+    expect(result).toBe(true);
+  });
+
+  it('should redirect authenticated users to dashboard', () => {
     currentUser.set({
       id: 'user-1',
       name: 'Test User',
@@ -49,20 +55,12 @@ describe('authGuard', () => {
       createdAt: '2026-09-29T00:00:00.000Z',
     });
 
-    const result = executeGuard({} as ActivatedRouteSnapshot, createRouterState('/dashboard'));
-
-    expect(result).toBe(true);
-  });
-
-  it('should redirect unauthenticated users to login', () => {
-    const result = executeGuard({} as ActivatedRouteSnapshot, createRouterState('/dashboard'));
+    const result = executeGuard({} as ActivatedRouteSnapshot, createRouterState('/login'));
 
     expect(result).not.toBe(true);
 
     const router = TestBed.inject(Router);
 
-    expect(router.serializeUrl(result as ReturnType<Router['createUrlTree']>)).toBe(
-      '/login?returnUrl=%2Fdashboard',
-    );
+    expect(router.serializeUrl(result as ReturnType<Router['createUrlTree']>)).toBe('/dashboard');
   });
 });

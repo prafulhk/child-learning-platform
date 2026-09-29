@@ -1,6 +1,9 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 
 import { App } from './app';
+import { routes } from './app.routes';
 import { AssessmentService } from './core/services/assessment.service';
 import { LocalStorageService } from './core/services/local-storage.service';
 import { QuestionService } from './core/services/question.service';
@@ -28,6 +31,8 @@ describe('App assessment timer', () => {
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
+        provideRouter(routes),
+        provideHttpClient(),
         AssessmentService,
         QuestionService,
         {
@@ -84,6 +89,7 @@ describe('App assessment timer', () => {
     component.onStartAssessment();
 
     vi.advanceTimersByTime(component.olympiadDefinition.config.durationSeconds * 1000 + 1000);
+
     fixture.detectChanges();
 
     expect(component.view).toBe('ASSESSMENT_RESULT');

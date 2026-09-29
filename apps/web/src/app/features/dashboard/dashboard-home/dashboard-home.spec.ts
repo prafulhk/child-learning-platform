@@ -1,18 +1,22 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
 import { DashboardHome } from './dashboard-home';
-import { vi } from 'vitest';
 
 describe('DashboardHome', () => {
   let component: DashboardHome;
   let fixture: ComponentFixture<DashboardHome>;
+  let router: Router;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DashboardHome],
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DashboardHome);
     component = fixture.componentInstance;
+    router = TestBed.inject(Router);
+
     fixture.detectChanges();
   });
 
@@ -20,43 +24,59 @@ describe('DashboardHome', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should emit startPractice event', () => {
-    const emitSpy = vi.spyOn(component.startPractice, 'emit');
+  it('should navigate to learning practice', async () => {
+    const navigateSpy = vi.spyOn(router, 'navigate');
 
-    component.startPractice.emit();
+    component.onStartPractice();
 
-    expect(emitSpy).toHaveBeenCalled();
+    expect(navigateSpy).toHaveBeenCalledWith(['/learning/practice']);
   });
 
-  it('should emit viewHistory event', () => {
-    const emitSpy = vi.spyOn(component.viewHistory, 'emit');
+  it('should navigate to learning history', () => {
+    const navigateSpy = vi.spyOn(router, 'navigate');
 
-    component.viewHistory.emit();
+    component.onViewHistory();
 
-    expect(emitSpy).toHaveBeenCalled();
+    expect(navigateSpy).toHaveBeenCalledWith(['/learning/history']);
   });
 
-  it('should emit openParentTools event', () => {
-    const emitSpy = vi.spyOn(component.openParentTools, 'emit');
+  it('should navigate to parent tools', () => {
+    const navigateSpy = vi.spyOn(router, 'navigate');
 
-    component.openParentTools.emit();
+    component.onOpenParentTools();
 
-    expect(emitSpy).toHaveBeenCalled();
+    expect(navigateSpy).toHaveBeenCalledWith(['/parent-tools']);
   });
 
-  it('should emit openAssessment event', () => {
-    const emitSpy = vi.spyOn(component.openAssessment, 'emit');
+  it('should navigate to assessment', () => {
+    const navigateSpy = vi.spyOn(router, 'navigate');
 
-    component.openAssessment.emit();
+    component.onOpenAssessment();
 
-    expect(emitSpy).toHaveBeenCalled();
+    expect(navigateSpy).toHaveBeenCalledWith(['/assessment']);
   });
 
-  it('should emit openRegistration event', () => {
-    const emitSpy = vi.spyOn(component.openRegistration, 'emit');
+  it('should navigate to registration', () => {
+    const navigateSpy = vi.spyOn(router, 'navigate');
 
-    component.openRegistration.emit();
+    component.onOpenRegistration();
 
-    expect(emitSpy).toHaveBeenCalled();
+    expect(navigateSpy).toHaveBeenCalledWith(['/register']);
+  });
+
+  it('should navigate to login', () => {
+    const navigateSpy = vi.spyOn(router, 'navigate');
+
+    component.onOpenLogin();
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/login']);
+  });
+
+  it('should logout and navigate to login', () => {
+    const navigateSpy = vi.spyOn(router, 'navigate');
+
+    component.onLogout();
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/login']);
   });
 });

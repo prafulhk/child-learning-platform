@@ -1,4 +1,6 @@
-import { Component, inject, output } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
+
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -9,14 +11,35 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class DashboardHome {
   private readonly authService = inject(AuthService);
-
-  readonly startPractice = output<void>();
-  readonly viewHistory = output<void>();
-  readonly openParentTools = output<void>();
-  readonly openCreateLessonPlan = output<void>();
-  readonly openAssessment = output<void>();
-  readonly openRegistration = output<void>();
-  readonly openLogin = output<void>();
-  readonly logout = output<void>();
+  private readonly router = inject(Router);
   readonly currentUser = this.authService.currentUser;
+
+  onOpenLogin(): void {
+    void this.router.navigate(['/login']);
+  }
+
+  onStartPractice(): void {
+    void this.router.navigate(['/learning/practice']);
+  }
+
+  onViewHistory(): void {
+    void this.router.navigate(['/learning/history']);
+  }
+
+  onOpenParentTools(): void {
+    void this.router.navigate(['/parent-tools']);
+  }
+
+  onOpenAssessment(): void {
+    void this.router.navigate(['/assessment']);
+  }
+
+  onLogout(): void {
+    this.authService.logout();
+    void this.router.navigate(['/login']);
+  }
+
+  onOpenRegistration(): void {
+    void this.router.navigate(['/register']);
+  }
 }

@@ -40,6 +40,7 @@ import { LogLearningComponent } from './features/learning/log-learning/log-learn
 import { ActiveChildService } from './core/services/active-child.service';
 import { AssessmentHistoryComponent } from './features/assessment/assessment-history.component';
 import { CreateLessonPlan } from './features/lesson-plans/create-lesson-plan/create-lesson-plan';
+import { Router, RouterOutlet } from '@angular/router';
 
 type AppView =
   | 'HOME'
@@ -59,6 +60,7 @@ type AppView =
 
 @Component({
   imports: [
+    RouterOutlet,
     AssessmentHomeComponent,
     AssessmentSessionComponent,
     AssessmentHistoryComponent,
@@ -86,6 +88,7 @@ export class App implements OnDestroy {
   assessmentRemainingSeconds = 0;
   private assessmentCountdownTimerId: ReturnType<typeof window.setInterval> | null = null;
   private readonly assessmentCountdownTickMs = 250;
+  private readonly router = inject(Router);
   private readonly assessmentService = inject(AssessmentService);
   private readonly attemptsApiService = inject(AttemptsApiService);
   private readonly questionService = inject(QuestionService);
@@ -126,11 +129,13 @@ export class App implements OnDestroy {
   onOpenLogin(): void {
     this.stopAssessmentCountdown();
     this.view = 'LOGIN';
+    void this.router.navigate(['/login']);
   }
 
-  onLoginSuccess(response: LoginResponse): void {
+  onLoginSuccess(_response: LoginResponse): void {
     this.stopAssessmentCountdown();
     this.view = 'HOME';
+    void this.router.navigate(['/dashboard']);
   }
 
   ngOnDestroy(): void {
@@ -180,6 +185,7 @@ export class App implements OnDestroy {
   onOpenRegistration(): void {
     this.stopAssessmentCountdown();
     this.view = 'REGISTER';
+    void this.router.navigate(['/register']);
   }
 
   onOpenParentTools(): void {
@@ -615,32 +621,6 @@ export class App implements OnDestroy {
   @HostListener('window:pageshow')
   onPageShow(): void {
     this.resumeAssessmentCountdown();
-  }
-
-  onDashboardStartPractice(): void {
-    this.onStartPractice();
-  }
-
-  onDashboardViewHistory(): void {
-    this.onViewHistory();
-  }
-
-  onDashboardOpenParentTools(): void {
-    this.onOpenParentTools();
-  }
-
-  onDashboardOpenAssessment(): void {
-    this.onOpenAssessment();
-  }
-
-  onDashboardOpenRegistration(): void {
-    this.onOpenRegistration();
-  }
-
-  onLogout(): void {
-    this.authService.logout();
-    this.stopAssessmentCountdown();
-    this.view = 'LOGIN';
   }
 
   get assessmentQuestionPalette(): QuestionPaletteItem[] {
