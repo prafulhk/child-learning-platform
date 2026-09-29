@@ -36,6 +36,25 @@ export interface CreateLessonPlanResponse {
   lessonPlan: LessonPlan;
 }
 
+export interface GetLessonPlansParams {
+  childId: string;
+  fromDate?: string;
+  toDate?: string;
+  status?: 'PLANNED' | 'COMPLETED' | 'CANCELLED';
+  page?: number;
+  limit?: number;
+}
+
+export interface GetLessonPlansResponse {
+  plans: LessonPlan[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -46,5 +65,18 @@ export class LessonPlanApi {
 
   createLessonPlan(payload: CreateLessonPlanRequest): Observable<CreateLessonPlanResponse> {
     return this.http.post<CreateLessonPlanResponse>(this.apiUrl, payload);
+  }
+
+  getLessonPlans(params: GetLessonPlansParams): Observable<GetLessonPlansResponse> {
+    return this.http.get<GetLessonPlansResponse>(this.apiUrl, {
+      params: {
+        childId: params.childId,
+        ...(params.fromDate ? { fromDate: params.fromDate } : {}),
+        ...(params.toDate ? { toDate: params.toDate } : {}),
+        ...(params.status ? { status: params.status } : {}),
+        ...(params.page !== undefined ? { page: params.page } : {}),
+        ...(params.limit !== undefined ? { limit: params.limit } : {}),
+      },
+    });
   }
 }
