@@ -81,6 +81,16 @@ export class AssessmentSessionComponent implements OnDestroy {
     return session.questions[session.currentQuestionIndex] ?? null;
   }
 
+  get question(): AssessmentQuestionSnapshot {
+    const question = this.currentQuestion;
+
+    if (!question) {
+      throw new Error('Assessment question is unavailable.');
+    }
+
+    return question;
+  }
+
   get questionNumber(): number {
     return (this.activeAssessmentSession?.currentQuestionIndex ?? 0) + 1;
   }
@@ -484,7 +494,6 @@ export class AssessmentSessionComponent implements OnDestroy {
       .subscribe({
         error: () => {
           // Local persistence is the source used by the result route.
-          // The API failure should not block completion navigation.
         },
       });
   }
