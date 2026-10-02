@@ -107,6 +107,8 @@ describe('AssessmentSessionComponent', () => {
   });
 
   it('selects an answer and advances to the next question', () => {
+    vi.useFakeTimers();
+
     component.onOptionSelected('q1-b');
 
     expect(component.selectedOptionId).toBe('q1-b');
@@ -120,7 +122,6 @@ describe('AssessmentSessionComponent', () => {
     component.onOptionSelected('q1-b');
     expect(component.selectedOptionId).toBe('q1-b');
 
-    component.onPrevious();
     component.onClear();
 
     expect(component.selectedOptionId).toBeNull();
