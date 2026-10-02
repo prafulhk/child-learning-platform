@@ -1,7 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  EventEmitter,
   OnInit,
+  Output,
   computed,
   inject,
   signal,
@@ -27,6 +29,8 @@ type AssessmentHistoryFilter = 'ALL' | 'PRACTICE' | 'OLYMPIAD';
 export class AssessmentHistoryComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly attemptsApiService = inject(AttemptsApiService);
+
+  @Output() readonly backToHome = new EventEmitter<void>();
 
   readonly attempts = signal<BackendAttempt[]>([]);
   readonly selectedFilter = signal<AssessmentHistoryFilter>('ALL');
@@ -85,6 +89,7 @@ export class AssessmentHistoryComponent implements OnInit {
   }
 
   onBackToHome(): void {
+    this.backToHome.emit();
     void this.router.navigate(['/dashboard']);
   }
 
