@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter, Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import type { AssessmentAttempt } from '../../core/models/assessment.model';
 import { LocalStorageService } from '../../core/services/local-storage.service';
@@ -9,7 +9,7 @@ import { AssessmentResultComponent } from './assessment-result.component';
 describe('AssessmentResultComponent', () => {
   let fixture: ComponentFixture<AssessmentResultComponent>;
   let component: AssessmentResultComponent;
-  let router: Router;
+  let router: { navigate: ReturnType<typeof vi.fn> };
 
   const attempt: AssessmentAttempt = {
     id: 'client-1',
@@ -36,23 +36,25 @@ describe('AssessmentResultComponent', () => {
     vi.clearAllMocks();
     localStorageServiceMock.getCompletedAssessmentAttemptById.mockReturnValue(attempt);
 
+    router = { navigate: vi.fn().mockResolvedValue(true) };
+
     await TestBed.configureTestingModule({
       imports: [AssessmentResultComponent],
       providers: [
-        provideRouter([
-          {
-            path: 'assessment/result/:attemptId',
-            component: AssessmentResultComponent,
+        { provide: Router, useValue: router },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              paramMap: {
+                get: vi.fn().mockReturnValue('client-1'),
+              },
+            },
           },
-        ]),
+        },
         { provide: LocalStorageService, useValue: localStorageServiceMock },
       ],
     }).compileComponents();
-
-    router = TestBed.inject(Router);
-    vi.spyOn(router, 'navigate').mockResolvedValue(true);
-
-    await router.navigate(['/assessment/result', attempt.id]);
 
     fixture = TestBed.createComponent(AssessmentResultComponent);
     component = fixture.componentInstance;
