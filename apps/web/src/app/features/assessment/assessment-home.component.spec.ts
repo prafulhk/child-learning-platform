@@ -1,18 +1,23 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
 
 import { AssessmentHomeComponent } from './assessment-home.component';
 
 describe('AssessmentHomeComponent', () => {
   let fixture: ComponentFixture<AssessmentHomeComponent>;
   let component: AssessmentHomeComponent;
+  let router: Router;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AssessmentHomeComponent],
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AssessmentHomeComponent);
     component = fixture.componentInstance;
+    router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
     fixture.detectChanges();
   });
 
@@ -30,29 +35,21 @@ describe('AssessmentHomeComponent', () => {
     expect(text).toMatch(/Duration\s*:?\s*15\s*min/i);
   });
 
-  it('emits startAssessment when Start Test is clicked', () => {
-    const emitSpy = vi.spyOn(component.startAssessment, 'emit');
+  it('navigates to the assessment session when Start Assessment is clicked', () => {
+    component.onStart();
 
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-
-    button.click();
-
-    expect(emitSpy).toHaveBeenCalledTimes(1);
+    expect(router.navigate).toHaveBeenCalledWith(['/assessment/session']);
   });
 
-  it('emits back when Back is clicked', () => {
-    const emitSpy = vi.spyOn(component.back, 'emit');
+  it('navigates to the dashboard when Back to Home is clicked', () => {
+    component.onBack();
 
-    const buttons = Array.from(
-      fixture.nativeElement.querySelectorAll('button'),
-    ) as HTMLButtonElement[];
+    expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
+  });
 
-    const backButton = buttons.find((button) => button.textContent?.includes('Back to Home'));
+  it('navigates to assessment history', () => {
+    component.onOpenHistory();
 
-    expect(backButton).toBeTruthy();
-
-    backButton?.click();
-
-    expect(emitSpy).toHaveBeenCalledTimes(1);
+    expect(router.navigate).toHaveBeenCalledWith(['/assessment/history']);
   });
 });
