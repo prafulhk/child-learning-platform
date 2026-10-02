@@ -39,37 +39,10 @@ export const routes: Routes = [
   {
     path: 'assessment',
     canActivate: [authGuard],
-    children: [
-      {
-        path: '',
-        pathMatch: 'full',
-        loadComponent: () =>
-          import('./features/assessment/assessment-home.component').then(
-            ({ AssessmentHomeComponent }) => AssessmentHomeComponent,
-          ),
-      },
-      {
-        path: 'session',
-        loadComponent: () =>
-          import('./features/assessment/assessment-session.component').then(
-            ({ AssessmentSessionComponent }) => AssessmentSessionComponent,
-          ),
-      },
-      {
-        path: 'result/:attemptId',
-        loadComponent: () =>
-          import('./features/assessment/assessment-result.component').then(
-            ({ AssessmentResultComponent }) => AssessmentResultComponent,
-          ),
-      },
-      {
-        path: 'history',
-        loadComponent: () =>
-          import('./features/assessment/assessment-history.component').then(
-            ({ AssessmentHistoryComponent }) => AssessmentHistoryComponent,
-          ),
-      },
-    ],
+    loadComponent: () =>
+      import('./features/assessment/assessment-container.component').then(
+        ({ AssessmentContainerComponent }) => AssessmentContainerComponent,
+      ),
   },
   {
     path: 'login',

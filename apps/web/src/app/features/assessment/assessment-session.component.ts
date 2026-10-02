@@ -2,8 +2,11 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  EventEmitter,
   HostListener,
+  Input,
   OnDestroy,
+  Output,
   inject,
 } from '@angular/core';
 import { NgClass } from '@angular/common';
@@ -55,6 +58,22 @@ export class AssessmentSessionComponent implements OnDestroy {
     config: OLYMPIAD_ASSESSMENT_CONFIG,
   };
 
+  @Output() optionSelected = new EventEmitter<string>();
+  @Output() next = new EventEmitter<void>();
+  @Output() previous = new EventEmitter<void>();
+  @Output() flag = new EventEmitter<void>();
+  @Output() clearAnswer = new EventEmitter<void>();
+  @Output() questionNavigate = new EventEmitter<number>();
+  @Output() submitAssessment = new EventEmitter<void>();
+
+  @Input('question') inputQuestion: AssessmentQuestionSnapshot | null = null;
+  @Input('currentQuestionIndex') inputCurrentQuestionIndex: number | null = null;
+  @Input('totalQuestions') inputTotalQuestions: number | null = null;
+  @Input('selectedOptionId') inputSelectedOptionId: string | null = null;
+  @Input('flagged') inputFlagged: boolean | null = null;
+  @Input('timeRemainingLabel') inputTimeRemainingLabel: string | null = null;
+  @Input('questionPalette') inputQuestionPalette: QuestionPaletteItem[] | null = null;
+
   activeAssessmentSession: ActiveAssessmentSession | null = null;
   assessmentRemainingSeconds = 0;
 
@@ -82,7 +101,7 @@ export class AssessmentSessionComponent implements OnDestroy {
   }
 
   get question(): AssessmentQuestionSnapshot {
-    const question = this.currentQuestion;
+    const question = this.inputQuestion ?? this.currentQuestion;
 
     if (!question) {
       throw new Error('Assessment question is unavailable.');
@@ -91,11 +110,23 @@ export class AssessmentSessionComponent implements OnDestroy {
     return question;
   }
 
+  get currentQuestionIndex(): number {
+    if (this.inputCurrentQuestionIndex !== null) {
+      return this.inputCurrentQuestionIndex;
+    }
+
+    return this.activeAssessmentSession?.currentQuestionIndex ?? 0;
+  }
+
   get questionNumber(): number {
-    return (this.activeAssessmentSession?.currentQuestionIndex ?? 0) + 1;
+    return this.currentQuestionIndex + 1;
   }
 
   get totalQuestions(): number {
+    if (this.inputTotalQuestions !== null) {
+      return this.inputTotalQuestions;
+    }
+
     return this.activeAssessmentSession?.questions.length ?? 0;
   }
 
@@ -104,6 +135,10 @@ export class AssessmentSessionComponent implements OnDestroy {
   }
 
   get selectedOptionId(): string | null {
+    if (this.inputSelectedOptionId !== null) {
+      return this.inputSelectedOptionId;
+    }
+
     const session = this.activeAssessmentSession;
     const question = this.currentQuestion;
 
@@ -115,6 +150,10 @@ export class AssessmentSessionComponent implements OnDestroy {
   }
 
   get flagged(): boolean {
+    if (this.inputFlagged !== null) {
+      return this.inputFlagged;
+    }
+
     const session = this.activeAssessmentSession;
     const question = this.currentQuestion;
 
@@ -126,10 +165,18 @@ export class AssessmentSessionComponent implements OnDestroy {
   }
 
   get timeRemainingLabel(): string {
+    if (this.inputTimeRemainingLabel !== null) {
+      return this.inputTimeRemainingLabel;
+    }
+
     return this.formatRemainingTime(this.assessmentRemainingSeconds);
   }
 
   get questionPalette(): QuestionPaletteItem[] {
+    if (this.inputQuestionPalette) {
+      return this.inputQuestionPalette;
+    }
+
     const session = this.activeAssessmentSession;
 
     if (!session) {
@@ -163,6 +210,8 @@ export class AssessmentSessionComponent implements OnDestroy {
       [question.questionId]: optionId,
     };
 
+    this.optionSelected.emit(optionId);
+
     this.assessmentAnswerTransitioning = true;
 
     setTimeout(() => {
@@ -191,6 +240,7 @@ export class AssessmentSessionComponent implements OnDestroy {
 
     if (session.currentQuestionIndex > 0) {
       session.currentQuestionIndex -= 1;
+      this.previous.emit();
       this.changeDetectorRef.markForCheck();
     }
   }
@@ -206,6 +256,7 @@ export class AssessmentSessionComponent implements OnDestroy {
 
     if (session.currentQuestionIndex < session.questions.length - 1) {
       session.currentQuestionIndex += 1;
+      this.next.emit();
       this.changeDetectorRef.markForCheck();
     }
   }
@@ -225,6 +276,7 @@ export class AssessmentSessionComponent implements OnDestroy {
     }
 
     session.currentQuestionIndex = index;
+    this.questionNavigate.emit(index);
     this.changeDetectorRef.markForCheck();
   }
 
@@ -241,6 +293,7 @@ export class AssessmentSessionComponent implements OnDestroy {
     const selectedAnswers = { ...session.selectedAnswers };
     delete selectedAnswers[question.questionId];
     session.selectedAnswers = selectedAnswers;
+    this.clearAnswer.emit();
     this.changeDetectorRef.markForCheck();
   }
 
@@ -263,6 +316,7 @@ export class AssessmentSessionComponent implements OnDestroy {
     }
 
     session.flaggedQuestionIds = [...flaggedIds];
+    this.flag.emit();
     this.changeDetectorRef.markForCheck();
   }
 
@@ -273,6 +327,7 @@ export class AssessmentSessionComponent implements OnDestroy {
       return;
     }
 
+    this.submitAssessment.emit();
     this.completeAssessment();
   }
 
