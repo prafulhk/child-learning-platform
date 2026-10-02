@@ -1,4 +1,5 @@
-import { Component, EventEmitter, OnDestroy, OnInit, Output, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Question } from '../../core/models/question.model';
 import { LocalStorageService } from '../../core/services/local-storage.service';
@@ -19,6 +20,7 @@ export class QuestionBankComponent implements OnInit, OnDestroy {
   private readonly localStorageService = inject(LocalStorageService);
   private readonly ocrService = inject(OcrService);
   private readonly questionService = inject(QuestionService);
+  private readonly router = inject(Router);
   private ocrSubscription: Subscription | null = null;
 
   readonly importAcceptedMimeTypes = [
@@ -29,8 +31,6 @@ export class QuestionBankComponent implements OnInit, OnDestroy {
   ] as const;
   readonly importAcceptedFileTypes = this.importAcceptedMimeTypes.join(',');
   readonly maxImportFileSizeBytes = 10 * 1024 * 1024;
-
-  @Output() backToParentTools = new EventEmitter<void>();
 
   readonly subjectLabel = 'Abacus';
   readonly topicLabel = 'Single-Digit Addition';
@@ -180,7 +180,7 @@ export class QuestionBankComponent implements OnInit, OnDestroy {
   onBackToParentTools(): void {
     this.resetImportWorkflow();
     this.closeForm();
-    this.backToParentTools.emit();
+    void this.router.navigate(['/parent-tools']);
   }
 
   hasValidImportFile(): boolean {

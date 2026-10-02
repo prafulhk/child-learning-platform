@@ -56,6 +56,22 @@ describe('DashboardHome', () => {
     expect(navigateSpy).toHaveBeenCalledWith(['/assessment']);
   });
 
+  it('should navigate to create lesson plan', () => {
+    const navigateSpy = vi.spyOn(router, 'navigate');
+
+    component.onOpenCreateLessonPlan();
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/lesson-planning/create']);
+  });
+
+  it('should navigate to upcoming lesson plans', () => {
+    const navigateSpy = vi.spyOn(router, 'navigate');
+
+    component.onOpenUpcomingLessonPlans();
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/lesson-planning/upcoming']);
+  });
+
   it('should navigate to registration', () => {
     const navigateSpy = vi.spyOn(router, 'navigate');
 

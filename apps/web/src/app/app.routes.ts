@@ -1,7 +1,13 @@
 import { Routes } from '@angular/router';
-
-import { authGuard } from './core/guards/auth-guard';
-import { guestGuard } from './core/guards/guest-guard';
+import { assessmentRoutes } from './features/assessment/assessment.routes';
+import { authRoutes } from './features/auth/auth.routes';
+import { dashboardRoutes } from './features/dashboard/dashboard.routes';
+import { learningJournalRoutes } from './features/learning-journal/learning-journal.routes';
+import { learningRoutes } from './features/learning/learning.routes';
+import { lessonPlanningRoutes } from './features/lesson-plans/lesson-planning.routes';
+import { parentToolsRoutes } from './features/parent-tools/parent-tools.routes';
+import { progressRoutes } from './features/progress/progress.routes';
+import { rewardsRoutes } from './features/rewards/rewards.routes';
 
 export const routes: Routes = [
   {
@@ -9,60 +15,17 @@ export const routes: Routes = [
     pathMatch: 'full',
     redirectTo: 'dashboard',
   },
+  ...authRoutes,
+  ...dashboardRoutes,
+  ...learningRoutes,
+  ...lessonPlanningRoutes,
+  ...assessmentRoutes,
+  ...parentToolsRoutes,
+  ...progressRoutes,
+  ...rewardsRoutes,
+  ...learningJournalRoutes,
   {
-    path: 'learning',
-    canActivate: [authGuard],
-    children: [
-      {
-        path: 'practice',
-        loadComponent: () =>
-          import('./features/practice/practice-session.component').then(
-            ({ PracticeSessionComponent }) => PracticeSessionComponent,
-          ),
-      },
-      {
-        path: 'log',
-        loadComponent: () =>
-          import('./features/learning/log-learning/log-learning').then(
-            ({ LogLearningComponent }) => LogLearningComponent,
-          ),
-      },
-      {
-        path: 'history',
-        loadComponent: () =>
-          import('./features/history/learning-history.component').then(
-            ({ LearningHistoryComponent }) => LearningHistoryComponent,
-          ),
-      },
-    ],
-  },
-  {
-    path: 'assessment',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/assessment/assessment-container.component').then(
-        ({ AssessmentContainerComponent }) => AssessmentContainerComponent,
-      ),
-  },
-  {
-    path: 'login',
-    canActivate: [guestGuard],
-    loadComponent: () => import('./features/auth/login/login').then(({ Login }) => Login),
-  },
-  {
-    path: 'register',
-    canActivate: [guestGuard],
-    loadComponent: () =>
-      import('./features/auth/parent-registration/parent-registration').then(
-        ({ ParentRegistration }) => ParentRegistration,
-      ),
-  },
-  {
-    path: 'dashboard',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/dashboard/dashboard-home/dashboard-home').then(
-        ({ DashboardHome }) => DashboardHome,
-      ),
+    path: '**',
+    redirectTo: 'dashboard',
   },
 ];

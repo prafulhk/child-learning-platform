@@ -13,7 +13,7 @@ describe('App', () => {
     }).compileComponents();
   });
 
-  it('creates the root application without assessment state management', () => {
+  it('creates the root application as an application shell', () => {
     const fixture = TestBed.createComponent(App);
 
     fixture.detectChanges();

@@ -34,6 +34,14 @@ export class DashboardHome {
     void this.router.navigate(['/assessment']);
   }
 
+  onOpenCreateLessonPlan(): void {
+    void this.router.navigate(['/lesson-planning/create']);
+  }
+
+  onOpenUpcomingLessonPlans(): void {
+    void this.router.navigate(['/lesson-planning/upcoming']);
+  }
+
   onLogout(): void {
     this.authService.logout();
     void this.router.navigate(['/login']);

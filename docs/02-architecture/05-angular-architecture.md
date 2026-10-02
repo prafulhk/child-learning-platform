@@ -454,6 +454,36 @@ Example:
 
 Each major area should have its own route configuration.
 
+Current convention (ARCH-009) for this repository:
+
+```text
+src/app/app.routes.ts
+    → Composes feature route arrays only
+
+src/app/features/<feature>/<feature>.routes.ts
+    → Owns the route entries for that feature
+```
+
+Feature path conventions:
+
+```text
+/dashboard
+/learning/*
+/lesson-planning/*
+/assessment
+/parent-tools/*
+/progress
+/rewards
+/learning-journal
+```
+
+Notes:
+
+- Keep route paths aligned with feature boundaries.
+- Place routed components under the matching `features/<feature>/` area.
+- Keep compatibility redirects explicit when a path is renamed (for example, legacy `/lesson-plans/*` to `/lesson-planning/*`).
+- Avoid adding a global routing abstraction layer beyond feature route files and root composition.
+
 ---
 
 # 16. Route Lazy Loading

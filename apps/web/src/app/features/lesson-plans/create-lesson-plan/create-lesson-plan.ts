@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 
 import { ActiveChildService } from '../../../core/services/active-child.service';
 import { CatalogApiService, Subject, Topic } from '../../../core/services/catalog-api.service';
@@ -26,6 +27,7 @@ import {
 export class CreateLessonPlan implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly catalogService = inject(CatalogApiService);
+  private readonly router = inject(Router);
 
   readonly activeChildService = inject(ActiveChildService);
   private readonly lessonPlanApiService = inject(LessonPlanApi);
@@ -102,6 +104,7 @@ export class CreateLessonPlan implements OnInit {
       next: () => {
         this.isSaving.set(false);
         this.saved.emit();
+        void this.router.navigate(['/lesson-planning/upcoming']);
       },
 
       error: (error) => {
@@ -116,6 +119,7 @@ export class CreateLessonPlan implements OnInit {
 
   onBack(): void {
     this.backToHome.emit();
+    void this.router.navigate(['/lesson-planning/upcoming']);
   }
 
   private loadSubjects(): void {

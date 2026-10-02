@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { provideRouter, Router } from '@angular/router';
 import { Observable, Subject, of, throwError } from 'rxjs';
 import { OcrExtractionUpdate } from '../../core/models/ocr.model';
 import { Question } from '../../core/models/question.model';
@@ -40,6 +41,7 @@ describe('QuestionBankComponent', () => {
   let mockQuestionService: { getQuestionsByTopic: ReturnType<typeof vi.fn> };
   let mockOcrService: { extractText: ReturnType<typeof vi.fn> };
   let localStorageService: LocalStorageService;
+  let router: Router;
 
   beforeEach(async () => {
     localStorage.clear();
@@ -59,13 +61,14 @@ describe('QuestionBankComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [QuestionBankComponent],
-      providers: [
+      providers: [provideRouter([]),
         { provide: QuestionService, useValue: mockQuestionService },
         { provide: OcrService, useValue: mockOcrService },
       ],
     }).compileComponents();
 
     localStorageService = TestBed.inject(LocalStorageService);
+    router = TestBed.inject(Router);
   });
 
   const createFixture = (): ComponentFixture<QuestionBankComponent> => {
@@ -208,6 +211,15 @@ describe('QuestionBankComponent', () => {
     const fixture = createFixture();
 
     expect(fixture.nativeElement.textContent as string).toContain('Back to Parent Tools');
+  });
+
+  it('navigates back to parent tools', () => {
+    const fixture = createFixture();
+    const navigateSpy = vi.spyOn(router, 'navigate');
+
+    clickButton(fixture, 'Back to Parent Tools');
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/parent-tools']);
   });
 
   it('Add Question opens QuestionFormComponent', () => {

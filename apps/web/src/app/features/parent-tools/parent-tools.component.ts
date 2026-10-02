@@ -1,11 +1,9 @@
-import { Component, EventEmitter, Input, OnInit, Output, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { Child, ChildService } from '../../core/services/child.service';
 import { ToastService } from '../../core/services/toast';
 import { ActiveChildService } from '../../core/services/active-child.service';
-
-export type ParentToolsChildSelectionDestination =
-  'LOG_LEARNING' | 'LEARNING_HISTORY' | 'CREATE_LESSON_PLAN';
 
 @Component({
   selector: 'app-parent-tools',
@@ -16,15 +14,7 @@ export class ParentToolsComponent implements OnInit {
   private readonly childService = inject(ChildService);
   private readonly toastService = inject(ToastService);
   private readonly activeChildService = inject(ActiveChildService);
-
-  @Input()
-  childSelectionDestination: ParentToolsChildSelectionDestination = 'LOG_LEARNING';
-
-  @Output() openQuestionBank = new EventEmitter<void>();
-  @Output() backToHome = new EventEmitter<void>();
-  @Output() openLogLearning = new EventEmitter<void>();
-  @Output() openLearningHistory = new EventEmitter<void>();
-  @Output() openCreateLessonPlan = new EventEmitter<void>();
+  private readonly router = inject(Router);
 
   readonly children = signal<Child[]>([]);
   readonly isLoading = signal(false);
@@ -64,11 +54,11 @@ export class ParentToolsComponent implements OnInit {
   }
 
   onOpenQuestionBank(): void {
-    this.openQuestionBank.emit();
+    void this.router.navigate(['/parent-tools/question-bank']);
   }
 
   onBackToHome(): void {
-    this.backToHome.emit();
+    void this.router.navigate(['/dashboard']);
   }
 
   onCreateChild(): void {
@@ -110,17 +100,5 @@ export class ParentToolsComponent implements OnInit {
     this.activeChildService.setActiveChild(child);
 
     this.toastService.success(`${child.name} selected.`);
-
-    if (this.childSelectionDestination === 'LEARNING_HISTORY') {
-      this.openLearningHistory.emit();
-      return;
-    }
-
-    if (this.childSelectionDestination === 'CREATE_LESSON_PLAN') {
-      this.openCreateLessonPlan.emit();
-      return;
-    }
-
-    this.openLogLearning.emit();
   }
 }
