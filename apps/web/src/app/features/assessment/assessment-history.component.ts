@@ -1,14 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
   OnInit,
-  Output,
   computed,
   inject,
   signal,
 } from '@angular/core';
 
+import { Router } from '@angular/router';
 import {
   AttemptsApiService,
   type AttemptType,
@@ -26,9 +25,8 @@ type AssessmentHistoryFilter = 'ALL' | 'PRACTICE' | 'OLYMPIAD';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssessmentHistoryComponent implements OnInit {
+  private readonly router = inject(Router);
   private readonly attemptsApiService = inject(AttemptsApiService);
-
-  @Output() readonly backToHome = new EventEmitter<void>();
 
   readonly attempts = signal<BackendAttempt[]>([]);
   readonly selectedFilter = signal<AssessmentHistoryFilter>('ALL');
@@ -84,6 +82,18 @@ export class AssessmentHistoryComponent implements OnInit {
 
   setFilter(filter: AssessmentHistoryFilter): void {
     this.selectedFilter.set(filter);
+  }
+
+  onBackToHome(): void {
+    void this.router.navigate(['/dashboard']);
+  }
+
+  onViewAssessmentResult(attempt: BackendAttempt): void {
+    if (attempt.attemptType !== 'ASSESSMENT') {
+      return;
+    }
+
+    void this.router.navigate(['/assessment/result', attempt.clientAttemptId]);
   }
 
   private loadAttempts(): void {
