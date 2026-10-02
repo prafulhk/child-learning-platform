@@ -61,7 +61,8 @@ describe('QuestionBankComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [QuestionBankComponent],
-      providers: [provideRouter([]),
+      providers: [
+        provideRouter([]),
         { provide: QuestionService, useValue: mockQuestionService },
         { provide: OcrService, useValue: mockOcrService },
       ],

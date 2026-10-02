@@ -101,7 +101,9 @@ describe('UpcomingLessonPlansComponent', () => {
 
     fixture.detectChanges();
 
-    expect(component.errorMessage()).toBe('Please select a child first to view upcoming lesson plans.');
+    expect(component.errorMessage()).toBe(
+      'Please select a child first to view upcoming lesson plans.',
+    );
     expect(lessonPlanApiMock.getLessonPlans).not.toHaveBeenCalled();
   });
 

@@ -6,6 +6,9 @@ export const progressRoutes: Routes = [
   {
     path: 'progress',
     canActivate: [authGuard],
-    loadComponent: () => import('./progress-home.component').then(({ ProgressHomeComponent }) => ProgressHomeComponent),
+    loadComponent: () =>
+      import('./progress-home.component').then(
+        ({ ProgressHomeComponent }) => ProgressHomeComponent,
+      ),
   },
 ];

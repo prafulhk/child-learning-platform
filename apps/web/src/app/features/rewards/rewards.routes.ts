@@ -6,6 +6,7 @@ export const rewardsRoutes: Routes = [
   {
     path: 'rewards',
     canActivate: [authGuard],
-    loadComponent: () => import('./rewards-home.component').then(({ RewardsHomeComponent }) => RewardsHomeComponent),
+    loadComponent: () =>
+      import('./rewards-home.component').then(({ RewardsHomeComponent }) => RewardsHomeComponent),
   },
 ];

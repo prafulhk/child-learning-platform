@@ -18,12 +18,14 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
         <div class="mt-6 flex flex-wrap gap-3">
           <a
             routerLink="/lesson-planning/upcoming"
-            class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+            class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+          >
             Back to Upcoming Plans
           </a>
           <a
             routerLink="/lesson-planning/create"
-            class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500">
+            class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500"
+          >
             Create New Plan
           </a>
         </div>

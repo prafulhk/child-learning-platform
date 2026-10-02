@@ -10,7 +10,9 @@ export const parentToolsRoutes: Routes = [
       {
         path: '',
         loadComponent: () =>
-          import('./parent-tools.component').then(({ ParentToolsComponent }) => ParentToolsComponent),
+          import('./parent-tools.component').then(
+            ({ ParentToolsComponent }) => ParentToolsComponent,
+          ),
       },
       {
         path: 'question-bank',

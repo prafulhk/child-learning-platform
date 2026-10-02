@@ -61,8 +61,7 @@ describe('app routes', () => {
     expect(
       lessonPlanningRoutes.some(
         (route) =>
-          route.path === 'lesson-plans/upcoming' &&
-          route.redirectTo === 'lesson-planning/upcoming',
+          route.path === 'lesson-plans/upcoming' && route.redirectTo === 'lesson-planning/upcoming',
       ),
     ).toBe(true);
   });

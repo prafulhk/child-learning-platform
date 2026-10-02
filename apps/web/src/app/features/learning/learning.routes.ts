@@ -17,7 +17,9 @@ export const learningRoutes: Routes = [
       {
         path: 'log',
         loadComponent: () =>
-          import('./log-learning/log-learning').then(({ LogLearningComponent }) => LogLearningComponent),
+          import('./log-learning/log-learning').then(
+            ({ LogLearningComponent }) => LogLearningComponent,
+          ),
       },
       {
         path: 'history',
