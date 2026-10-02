@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 
 import {
   OLYMPIAD_ASSESSMENT_CONFIG,
@@ -14,19 +15,17 @@ export class AssessmentHomeComponent {
   readonly assessmentTitle = 'Abacus Olympiad Test';
   readonly config: AssessmentConfig = OLYMPIAD_ASSESSMENT_CONFIG;
 
-  @Output() readonly startAssessment = new EventEmitter<void>();
-  @Output() readonly openHistory = new EventEmitter<void>();
-  @Output() readonly back = new EventEmitter<void>();
+  private readonly router = inject(Router);
 
   onStart(): void {
-    this.startAssessment.emit();
+    void this.router.navigate(['/assessment/session']);
   }
 
   onBack(): void {
-    this.back.emit();
+    void this.router.navigate(['/dashboard']);
   }
 
   onOpenHistory(): void {
-    this.openHistory.emit();
+    void this.router.navigate(['/assessment/history']);
   }
 }
