@@ -8,45 +8,21 @@ import {
   type AssessmentQuestionSnapshot,
 } from './core/models/assessment.model';
 
-import type { PracticeAttempt } from './core/services/local-storage.service';
-
 import { AssessmentService } from './core/services/assessment.service';
 import { QuestionService } from './core/services/question.service';
 
-import { AssessmentHomeComponent } from './features/assessment/assessment-home.component';
-import {
-  AssessmentSessionComponent,
-  QuestionPaletteItem,
-} from './features/assessment/assessment-session.component';
+import { QuestionPaletteItem } from './features/assessment/assessment-session.component';
 
-import { PracticeAttemptDetailComponent } from './features/practice/practice-attempt-detail.component';
-import { PracticeSessionComponent } from './features/practice/practice-session.component';
-
-import {
-  ParentToolsChildSelectionDestination,
-  ParentToolsComponent,
-} from './features/parent-tools/parent-tools.component';
-import { QuestionBankComponent } from './features/question-bank/question-bank.component';
+import { ParentToolsChildSelectionDestination } from './features/parent-tools/parent-tools.component';
 import { LocalStorageService } from './core/services/local-storage.service';
-import { PracticeResultComponent } from './features/practice/practice-result.component';
-import { LearningHistoryComponent } from './features/history/learning-history.component';
-import { ParentRegistration } from './features/auth/parent-registration/parent-registration';
-import { DashboardHome } from './features/dashboard/dashboard-home/dashboard-home';
-import { Login } from './features/auth/login/login';
 import { AuthService, LoginResponse } from './core/services/auth.service';
 import { ToastContainerComponent } from './shared/components/toast-container/toast-container';
 import { AttemptsApiService } from './core/services/attempts-api.service';
-import { LogLearningComponent } from './features/learning/log-learning/log-learning';
-import { ActiveChildService } from './core/services/active-child.service';
-import { AssessmentHistoryComponent } from './features/assessment/assessment-history.component';
-import { CreateLessonPlan } from './features/lesson-plans/create-lesson-plan/create-lesson-plan';
 import { Router, RouterOutlet } from '@angular/router';
 
 type AppView =
   | 'HOME'
   | 'LOGIN'
-  | 'PRACTICE'
-  | 'HISTORY'
   | 'DETAIL'
   | 'PARENT_TOOLS'
   | 'QUESTION_BANK'
@@ -54,35 +30,16 @@ type AppView =
   | 'ASSESSMENT_SESSION'
   | 'ASSESSMENT_RESULT'
   | 'REGISTER'
-  | 'LOG_LEARNING'
   | 'ASSESSMENT_HISTORY'
   | 'CREATE_LESSON_PLAN';
 
 @Component({
-  imports: [
-    RouterOutlet,
-    AssessmentHomeComponent,
-    AssessmentSessionComponent,
-    AssessmentHistoryComponent,
-    PracticeSessionComponent,
-    PracticeAttemptDetailComponent,
-    ParentToolsComponent,
-    QuestionBankComponent,
-    PracticeResultComponent,
-    LearningHistoryComponent,
-    ParentRegistration,
-    DashboardHome,
-    Login,
-    ToastContainerComponent,
-    LogLearningComponent,
-    CreateLessonPlan,
-  ],
+  imports: [RouterOutlet, ToastContainerComponent],
   selector: 'app-root',
   styleUrl: './app.scss',
   templateUrl: './app.html',
 })
 export class App implements OnDestroy {
-  selectedAttempt: PracticeAttempt | null = null;
   activeAssessmentSession: ActiveAssessmentSession | null = null;
   assessmentError = '';
   assessmentRemainingSeconds = 0;
@@ -95,7 +52,6 @@ export class App implements OnDestroy {
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly localStorageService = inject(LocalStorageService);
   private readonly authService = inject(AuthService);
-  private readonly activeChildService = inject(ActiveChildService);
 
   view: AppView = this.authService.currentUser() ? 'HOME' : 'LOGIN';
   parentToolsChildSelectionDestination: ParentToolsChildSelectionDestination = 'LOG_LEARNING';
@@ -142,38 +98,9 @@ export class App implements OnDestroy {
     this.stopAssessmentCountdown();
   }
 
-  onStartPractice(): void {
-    if (!this.authService.currentUser()) {
-      this.onOpenLogin();
-      return;
-    }
-    this.stopAssessmentCountdown();
-    this.selectedAttempt = null;
-    this.view = 'PRACTICE';
-  }
-
-  onViewHistory(): void {
-    if (!this.authService.currentUser()) {
-      this.onOpenLogin();
-      return;
-    }
-
-    this.stopAssessmentCountdown();
-    this.selectedAttempt = null;
-
-    if (this.activeChildService.activeChild()) {
-      this.view = 'HISTORY';
-      return;
-    }
-
-    this.parentToolsChildSelectionDestination = 'LEARNING_HISTORY';
-    this.view = 'PARENT_TOOLS';
-  }
-
   onBackToHome(): void {
     this.stopAssessmentCountdown();
 
-    this.selectedAttempt = null;
     this.activeAssessmentSession = null;
     this.completedAssessmentAttempt = null;
     this.assessmentCompletionLocked = false;
@@ -191,7 +118,6 @@ export class App implements OnDestroy {
   onOpenParentTools(): void {
     this.stopAssessmentCountdown();
 
-    this.selectedAttempt = null;
     this.parentToolsChildSelectionDestination = 'LOG_LEARNING';
     this.view = 'PARENT_TOOLS';
   }
@@ -199,18 +125,12 @@ export class App implements OnDestroy {
   onOpenQuestionBank(): void {
     this.stopAssessmentCountdown();
 
-    this.selectedAttempt = null;
     this.view = 'QUESTION_BANK';
-  }
-
-  onOpenLogLearning(): void {
-    this.view = 'LOG_LEARNING';
   }
 
   onBackToParentTools(): void {
     this.stopAssessmentCountdown();
 
-    this.selectedAttempt = null;
     this.view = 'PARENT_TOOLS';
   }
 
@@ -221,7 +141,6 @@ export class App implements OnDestroy {
     }
     this.stopAssessmentCountdown();
 
-    this.selectedAttempt = null;
     this.activeAssessmentSession = null;
     this.completedAssessmentAttempt = null;
     this.assessmentCompletionLocked = false;
@@ -381,19 +300,6 @@ export class App implements OnDestroy {
 
   get assessmentRemainingTimeLabel(): string {
     return this.formatRemainingTime(this.assessmentRemainingSeconds);
-  }
-
-  onViewAttempt(attempt: PracticeAttempt): void {
-    this.stopAssessmentCountdown();
-
-    this.selectedAttempt = attempt;
-    this.view = 'DETAIL';
-  }
-
-  onBackToHistory(): void {
-    this.stopAssessmentCountdown();
-
-    this.view = 'HISTORY';
   }
 
   private startAssessmentCountdown(): void {
@@ -708,34 +614,20 @@ export class App implements OnDestroy {
       });
   }
 
-  onBackFromLogLearning(): void {
-    this.view = 'HOME';
-  }
-
-  onOpenLearningHistory(): void {
-    this.stopAssessmentCountdown();
-
-    this.selectedAttempt = null;
-    this.view = 'HISTORY';
-  }
-
   onOpenAssessmentHistory(): void {
     this.stopAssessmentCountdown();
-    this.selectedAttempt = null;
     this.completedAssessmentAttempt = null;
     this.view = 'ASSESSMENT_HISTORY';
   }
 
   onOpenCreateLessonPlan(): void {
     this.stopAssessmentCountdown();
-    this.selectedAttempt = null;
     this.view = 'CREATE_LESSON_PLAN';
   }
 
   onDashboardCreateLessonPlan(): void {
     this.stopAssessmentCountdown();
 
-    this.selectedAttempt = null;
     this.parentToolsChildSelectionDestination = 'CREATE_LESSON_PLAN';
     this.view = 'PARENT_TOOLS';
   }
