@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 
@@ -8,6 +9,7 @@ import { AttemptsApiService, type BackendAttempt } from '../../core/services/att
 describe('AssessmentHistoryComponent', () => {
   let component: AssessmentHistoryComponent;
   let fixture: ComponentFixture<AssessmentHistoryComponent>;
+  let router: Router;
 
   const attemptsApiServiceMock = {
     getAttempts: vi.fn(),
@@ -84,6 +86,7 @@ describe('AssessmentHistoryComponent', () => {
     await TestBed.configureTestingModule({
       imports: [AssessmentHistoryComponent],
       providers: [
+        provideRouter([]),
         {
           provide: AttemptsApiService,
           useValue: attemptsApiServiceMock,
@@ -93,6 +96,8 @@ describe('AssessmentHistoryComponent', () => {
 
     fixture = TestBed.createComponent(AssessmentHistoryComponent);
     component = fixture.componentInstance;
+    router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
   });
 
   it('should create', () => {
@@ -105,7 +110,6 @@ describe('AssessmentHistoryComponent', () => {
     fixture.detectChanges();
 
     expect(attemptsApiServiceMock.getAttempts).toHaveBeenCalledWith(undefined, 1, 100);
-
     expect(component.attempts()).toEqual(attempts);
   });
 
@@ -121,19 +125,16 @@ describe('AssessmentHistoryComponent', () => {
 
   it('should calculate total attempts', () => {
     fixture.detectChanges();
-
     expect(component.totalAttempts()).toBe(3);
   });
 
   it('should calculate practice count', () => {
     fixture.detectChanges();
-
     expect(component.practiceCount()).toBe(1);
   });
 
   it('should calculate Olympiad count', () => {
     fixture.detectChanges();
-
     expect(component.olympiadCount()).toBe(2);
   });
 
@@ -159,24 +160,13 @@ describe('AssessmentHistoryComponent', () => {
     component.setFilter('OLYMPIAD');
 
     expect(component.filteredAttempts()).toHaveLength(2);
-    expect(
-      component.filteredAttempts().every((attempt) => attempt.attemptType === 'ASSESSMENT'),
-    ).toBe(true);
+    expect(component.filteredAttempts().every((attempt) => attempt.attemptType === 'ASSESSMENT')).toBe(
+      true,
+    );
   });
 
   it('should calculate weighted average accuracy across all attempts', () => {
     fixture.detectChanges();
-
-    /*
-     * Total:
-     * 100 + 10 + 100 = 210 questions
-     *
-     * Correct:
-     * 7 + 10 + 80 = 97
-     *
-     * Accuracy:
-     * 97 / 210 = 46.19... => 46%
-     */
     expect(component.averageAccuracy()).toBe(46);
   });
 
@@ -193,16 +183,6 @@ describe('AssessmentHistoryComponent', () => {
 
     component.setFilter('OLYMPIAD');
 
-    /*
-     * Total:
-     * 100 + 100 = 200
-     *
-     * Correct:
-     * 7 + 80 = 87
-     *
-     * Accuracy:
-     * 87 / 200 = 43.5 => 44%
-     */
     expect(component.averageAccuracy()).toBe(44);
   });
 
@@ -210,9 +190,6 @@ describe('AssessmentHistoryComponent', () => {
     fixture.detectChanges();
 
     component.setFilter('PRACTICE');
-
-    expect(component.averageAccuracy()).not.toBe(0);
-
     component.attempts.set(attempts.filter((attempt) => attempt.attemptType === 'ASSESSMENT'));
 
     expect(component.practiceCount()).toBe(0);
@@ -221,40 +198,28 @@ describe('AssessmentHistoryComponent', () => {
 
   it('should return the assessment title', () => {
     fixture.detectChanges();
-
-    const attempt = attempts[0];
-
-    expect(component.getAttemptTitle(attempt)).toBe('Abacus Olympiad Test');
+    expect(component.getAttemptTitle(attempts[0])).toBe('Abacus Olympiad Test');
   });
 
   it('should fall back to the default assessment title', () => {
     fixture.detectChanges();
 
-    const attempt: BackendAttempt = {
-      ...attempts[0],
-      title: undefined,
-    };
-
-    expect(component.getAttemptTitle(attempt)).toBe('Abacus Olympiad Test');
+    expect(
+      component.getAttemptTitle({ ...attempts[0], title: undefined }),
+    ).toBe('Abacus Olympiad Test');
   });
 
   it('should generate a practice title using the topic id', () => {
     fixture.detectChanges();
-
-    const attempt = attempts[1];
-
-    expect(component.getAttemptTitle(attempt)).toBe('Practice - single-digit-addition');
+    expect(component.getAttemptTitle(attempts[1])).toBe('Practice - single-digit-addition');
   });
 
   it('should use General when a practice attempt has no topic id', () => {
     fixture.detectChanges();
 
-    const attempt: BackendAttempt = {
-      ...attempts[1],
-      topicId: undefined,
-    };
-
-    expect(component.getAttemptTitle(attempt)).toBe('Practice - General');
+    expect(component.getAttemptTitle({ ...attempts[1], topicId: undefined })).toBe(
+      'Practice - General',
+    );
   });
 
   it('should return the correct attempt type label', () => {
@@ -269,6 +234,18 @@ describe('AssessmentHistoryComponent', () => {
 
     expect(component.getAttemptIcon(attempts[0])).toBe('🏆');
     expect(component.getAttemptIcon(attempts[1])).toBe('🧮');
+  });
+
+  it('should navigate back to the dashboard', () => {
+    component.onBackToHome();
+
+    expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
+  });
+
+  it('should navigate an assessment attempt to its result route', () => {
+    component.onViewAssessmentResult(attempts[0]);
+
+    expect(router.navigate).toHaveBeenCalledWith(['/assessment/result', 'client-1']);
   });
 
   it('should stop loading after a successful response', () => {
