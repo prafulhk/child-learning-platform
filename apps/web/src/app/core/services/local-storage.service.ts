@@ -111,6 +111,12 @@ export class LocalStorageService {
     }
   }
 
+  getCompletedAssessmentAttemptById(attemptId: string): AssessmentAttempt | null {
+    const attempts = this.getCompletedAssessmentAttempts();
+
+    return attempts.find((attempt) => attempt.id === attemptId) ?? null;
+  }
+
   saveQuestionBankQuestions(topicId: string, questions: Question[]): void {
     const currentQuestionBank = this.getQuestionBankStorage();
     currentQuestionBank[topicId] = JSON.parse(JSON.stringify(questions)) as Question[];
