@@ -1,11 +1,15 @@
 import type { Request, Response } from "express";
 
 import { createLessonPlanSchema } from "./schemas/create-lesson-plan.schema.js";
-import { createLessonPlan, getLessonPlans } from "./lesson-plan.service.js";
+import {
+  createLessonPlan,
+  getLessonPlanById,
+  getLessonPlans,
+} from "./lesson-plan.service.js";
 import { sendSuccess } from "../../shared/http/api-response.js";
 import { AppError } from "../../shared/errors/app-error.js";
 
-export async function createLessonPlanController(req: Request, res: Response) {
+function getAuth(res: Response) {
   const auth = res.locals.auth as
     | {
         userId: string;
@@ -20,6 +24,12 @@ export async function createLessonPlanController(req: Request, res: Response) {
       message: "Authentication required.",
     });
   }
+
+  return auth;
+}
+
+export async function createLessonPlanController(req: Request, res: Response) {
+  const auth = getAuth(res);
 
   const parsed = createLessonPlanSchema.safeParse(req.body);
 
@@ -51,20 +61,7 @@ export async function getLessonPlansController(
   req: Request,
   res: Response,
 ): Promise<void> {
-  const auth = res.locals.auth as
-    | {
-        userId: string;
-        role: "PARENT" | "TEACHER";
-      }
-    | undefined;
-
-  if (!auth) {
-    throw new AppError({
-      statusCode: 401,
-      code: "AUTHENTICATION_REQUIRED",
-      message: "Authentication required.",
-    });
-  }
+  const auth = getAuth(res);
 
   const childId =
     typeof req.query.childId === "string" ? req.query.childId : undefined;
@@ -134,5 +131,24 @@ export async function getLessonPlansController(
     statusCode: 200,
     data: result,
     legacy: result,
+  });
+}
+
+export async function getLessonPlanByIdController(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const auth = getAuth(res);
+  const planId = req.params.planId;
+
+  const lessonPlan = await getLessonPlanById(auth.userId, planId);
+
+  sendSuccess({
+    res,
+    statusCode: 200,
+    data: lessonPlan,
+    legacy: {
+      lessonPlan,
+    },
   });
 }
