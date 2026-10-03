@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
 import { vi } from 'vitest';
+import { Router } from '@angular/router';
 import { ParentRegistration } from './parent-registration';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -7,15 +9,28 @@ describe('ParentRegistration', () => {
   let component: ParentRegistration;
   let fixture: ComponentFixture<ParentRegistration>;
 
+  const authServiceMock = {
+    register: vi.fn(),
+    setRegistrationMessage: vi.fn(),
+  };
+
+  const routerMock = {
+    navigate: vi.fn(),
+  };
+
   beforeEach(async () => {
+    vi.clearAllMocks();
+
     await TestBed.configureTestingModule({
       imports: [ParentRegistration],
       providers: [
         {
           provide: AuthService,
-          useValue: {
-            register: vi.fn(),
-          },
+          useValue: authServiceMock,
+        },
+        {
+          provide: Router,
+          useValue: routerMock,
         },
       ],
     }).compileComponents();
@@ -78,5 +93,50 @@ describe('ParentRegistration', () => {
     });
 
     expect(component.registrationForm.valid).toBe(true);
+  });
+
+  it('should register the parent, show confirmation, and navigate to login', () => {
+    authServiceMock.register.mockReturnValue(
+      of({
+        success: true,
+        message: 'Parent account created successfully',
+        data: {
+          user: {
+            id: 'user-1',
+            name: 'Praful',
+            email: 'praful@example.com',
+            role: 'PARENT',
+            createdAt: '2026-10-03T00:00:00.000Z',
+          },
+        },
+        user: {
+          id: 'user-1',
+          name: 'Praful',
+          email: 'praful@example.com',
+          role: 'PARENT',
+          createdAt: '2026-10-03T00:00:00.000Z',
+        },
+      }),
+    );
+
+    component.registrationForm.setValue({
+      name: 'Praful',
+      email: 'praful@example.com',
+      password: 'Password123',
+      confirmPassword: 'Password123',
+    });
+
+    component.onSubmit();
+
+    expect(authServiceMock.register).toHaveBeenCalledWith({
+      name: 'Praful',
+      email: 'praful@example.com',
+      password: 'Password123',
+      confirmPassword: 'Password123',
+    });
+    expect(authServiceMock.setRegistrationMessage).toHaveBeenCalledWith(
+      'Parent account created successfully',
+    );
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
   });
 });
