@@ -145,8 +145,4 @@ describe('LessonPlanDetailComponent', () => {
     expect(component.plan()).toBeNull();
     expect(component.errorMessage()).toBe('Lesson plan not found.');
   });
-
-  it('shows an error when the route does not contain a plan id', () => {
-    TestBed.resetTestingModule();
-  });
 });
