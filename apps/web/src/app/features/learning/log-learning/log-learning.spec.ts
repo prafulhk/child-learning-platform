@@ -1,12 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 
 import { LogLearningComponent } from './log-learning';
 import { CatalogApiService } from '../../../core/services/catalog-api.service';
 import { ActiveChildService } from '../../../core/services/active-child.service';
+import { ChildService } from '../../../core/services/child.service';
 import { LearningSessionsApiService } from '../../../core/services/learning-sessions-api.service';
+import { LessonPlanApi } from '../../../core/services/lesson-plan-api.service';
 import { ToastService } from '../../../core/services/toast';
 
 describe('LogLearningComponent', () => {
@@ -25,15 +28,36 @@ describe('LogLearningComponent', () => {
 
   const activeChildServiceMock = {
     activeChild: signal(activeChild),
+    setActiveChild: vi.fn(),
+  };
+
+  const childServiceMock = {
+    getChildren: vi.fn(),
   };
 
   const learningSessionsApiServiceMock = {
     createLearningSession: vi.fn(),
   };
 
+  const lessonPlanApiMock = {
+    getLessonPlanById: vi.fn(),
+  };
+
+  const routerMock = {
+    navigate: vi.fn(),
+  };
+
   const toastServiceMock = {
     success: vi.fn(),
     error: vi.fn(),
+  };
+
+  const activatedRouteMock = {
+    snapshot: {
+      queryParamMap: {
+        get: vi.fn().mockReturnValue(null),
+      },
+    },
   };
 
   beforeEach(async () => {
@@ -58,6 +82,18 @@ describe('LogLearningComponent', () => {
       ]),
     );
 
+    childServiceMock.getChildren.mockReturnValue(
+      of({
+        children: [activeChild],
+      }),
+    );
+
+    lessonPlanApiMock.getLessonPlanById.mockReturnValue(
+      of({
+        data: null,
+      }),
+    );
+
     learningSessionsApiServiceMock.createLearningSession.mockReturnValue(
       of({
         data: {
@@ -78,12 +114,28 @@ describe('LogLearningComponent', () => {
           useValue: activeChildServiceMock,
         },
         {
+          provide: ChildService,
+          useValue: childServiceMock,
+        },
+        {
           provide: LearningSessionsApiService,
           useValue: learningSessionsApiServiceMock,
         },
         {
+          provide: LessonPlanApi,
+          useValue: lessonPlanApiMock,
+        },
+        {
           provide: ToastService,
           useValue: toastServiceMock,
+        },
+        {
+          provide: ActivatedRoute,
+          useValue: activatedRouteMock,
+        },
+        {
+          provide: Router,
+          useValue: routerMock,
         },
       ],
     }).compileComponents();
@@ -153,6 +205,7 @@ describe('LogLearningComponent', () => {
           percentage: 85,
         },
         notes: 'Good progress.',
+        lessonPlanId: undefined,
       }),
     );
   });
@@ -180,6 +233,7 @@ describe('LogLearningComponent', () => {
         whatWasTaught: 'Practised single digit addition.',
         performance: 'Good',
         accuracy: undefined,
+        lessonPlanId: undefined,
       }),
     );
   });
