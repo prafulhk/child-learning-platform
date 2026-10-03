@@ -61,6 +61,38 @@ describe("Auth API", () => {
     await expect(bcrypt.compare(password, user!.passwordHash)).resolves.toBe(true);
   });
 
+  it("creates a teacher account with the TEACHER role", async () => {
+    const password = "TeacherPassword123";
+
+    const response = await request(app)
+      .post("/api/auth/register/teacher")
+      .send({
+        name: "Registration Teacher",
+        email: "registration-teacher@example.com",
+        password,
+        confirmPassword: password,
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body.success).toBe(true);
+    expect(response.body.message).toBe("Teacher account created successfully");
+    expect(response.body.data.user).toMatchObject({
+      name: "Registration Teacher",
+      email: "registration-teacher@example.com",
+      role: "TEACHER",
+    });
+    expect(response.body.data.user.passwordHash).toBeUndefined();
+
+    const user = await UserModel.findOne({
+      email: "registration-teacher@example.com",
+    }).select("+passwordHash");
+
+    expect(user).not.toBeNull();
+    expect(user?.role).toBe("TEACHER");
+    expect(user?.passwordHash).not.toBe(password);
+    await expect(bcrypt.compare(password, user!.passwordHash)).resolves.toBe(true);
+  });
+
   it("returns 409 when the registration email already exists", async () => {
     await UserModel.create({
       name: "Existing Parent",
