@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 
 import type {
@@ -10,6 +9,7 @@ import { AssessmentService } from '../../core/services/assessment.service';
 import { AttemptsApiService } from '../../core/services/attempts-api.service';
 import { LocalStorageService } from '../../core/services/local-storage.service';
 import { QuestionService } from '../../core/services/question.service';
+import { Router } from '@angular/router';
 
 import { AssessmentSessionComponent } from './assessment-session.component';
 
@@ -52,6 +52,10 @@ describe('AssessmentSessionComponent', () => {
     saveAttempt: vi.fn(),
   };
 
+  const routerMock = {
+    navigate: vi.fn(),
+  };
+
   const createSession = (): ActiveAssessmentSession => ({
     assessmentId: 'olympiad-test',
     startedAt: new Date().toISOString(),
@@ -77,7 +81,7 @@ describe('AssessmentSessionComponent', () => {
     await TestBed.configureTestingModule({
       imports: [AssessmentSessionComponent],
       providers: [
-        provideRouter([]),
+        { provide: Router, useValue: routerMock },
         { provide: AssessmentService, useValue: assessmentServiceMock },
         { provide: QuestionService, useValue: questionServiceMock },
         { provide: LocalStorageService, useValue: localStorageServiceMock },
@@ -151,6 +155,10 @@ describe('AssessmentSessionComponent', () => {
 
     expect(localStorageServiceMock.saveCompletedAssessmentAttempt).toHaveBeenCalledTimes(1);
     expect(attemptsApiServiceMock.saveAttempt).toHaveBeenCalledTimes(1);
+    expect(routerMock.navigate).toHaveBeenCalledWith([
+      '/assessment/result',
+      expect.any(String),
+    ]);
     expect(component.activeAssessmentSession).toBeNull();
   });
 
