@@ -66,9 +66,11 @@ import { LessonPlan, LessonPlanApi } from '../../../core/services/lesson-plan-ap
               [value]="selectedChildId()"
               (change)="onChildChange($event)"
             >
-              <option value="">Select a child</option>
+              <option value="" [selected]="!selectedChildId()">Select a child</option>
               @for (child of children(); track child._id) {
-                <option [value]="child._id">{{ child.name }}</option>
+                <option [value]="child._id" [selected]="child._id === selectedChildId()">
+                  {{ child.name }}
+                </option>
               }
             </select>
           </div>
