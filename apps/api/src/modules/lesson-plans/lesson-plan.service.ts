@@ -49,6 +49,14 @@ interface GetLessonPlansOptions {
   limit?: number;
 }
 
+function parseDateBoundary(value: string, endOfDay = false): Date {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return new Date(`${value}T${endOfDay ? "23:59:59.999" : "00:00:00.000"}Z`);
+  }
+
+  return new Date(value);
+}
+
 export async function getLessonPlans(
   userId: string,
   options: GetLessonPlansOptions,
@@ -84,11 +92,11 @@ export async function getLessonPlans(
     filter.plannedDate = {};
 
     if (options.fromDate) {
-      filter.plannedDate.$gte = new Date(`${options.fromDate}T00:00:00.000Z`);
+      filter.plannedDate.$gte = parseDateBoundary(options.fromDate);
     }
 
     if (options.toDate) {
-      filter.plannedDate.$lte = new Date(`${options.toDate}T23:59:59.999Z`);
+      filter.plannedDate.$lte = parseDateBoundary(options.toDate, true);
     }
   }
 
