@@ -16,4 +16,12 @@ export const authRoutes: Routes = [
         ({ ParentRegistration }) => ParentRegistration,
       ),
   },
+  {
+    path: 'register/teacher',
+    canActivate: [guestGuard],
+    loadComponent: () =>
+      import('./teacher-registration/teacher-registration').then(
+        ({ TeacherRegistration }) => TeacherRegistration,
+      ),
+  },
 ];
