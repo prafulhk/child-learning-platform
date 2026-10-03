@@ -1,7 +1,6 @@
 import { Component, inject, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService, LoginResponse } from '../../../core/services/auth.service';
-import { finalize } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Component({
@@ -29,6 +28,10 @@ export class Login {
 
   onRegisterRequested(): void {
     void this.router.navigate(['/register']);
+  }
+
+  onTeacherRegisterRequested(): void {
+    void this.router.navigate(['/register/teacher']);
   }
 
   onSubmit(): void {
