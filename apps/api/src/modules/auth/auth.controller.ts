@@ -2,15 +2,17 @@ import type { Request, Response } from "express";
 
 import { RegisterSchema } from "./schemas/register.schema.js";
 import { loginSchema } from "./schemas/login.schema.js";
-import { registerParent, loginUser, getUserById } from "./auth.service.js";
+import {
+  registerParent,
+  registerTeacher,
+  loginUser,
+  getUserById,
+} from "./auth.service.js";
 import { z } from "zod";
 import { sendSuccess } from "../../shared/http/api-response.js";
 import { AppError } from "../../shared/errors/app-error.js";
 
-export async function registerController(
-  req: Request,
-  res: Response,
-): Promise<void> {
+function validateRegistration(req: Request) {
   const parsed = RegisterSchema.safeParse(req.body);
 
   if (!parsed.success) {
@@ -25,12 +27,38 @@ export async function registerController(
     });
   }
 
-  const user = await registerParent(parsed.data);
+  return parsed.data;
+}
+
+export async function registerController(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const user = await registerParent(validateRegistration(req));
 
   sendSuccess({
     res,
     statusCode: 201,
     message: "Parent account created successfully",
+    data: {
+      user,
+    },
+    legacy: {
+      user,
+    },
+  });
+}
+
+export async function registerTeacherController(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const user = await registerTeacher(validateRegistration(req));
+
+  sendSuccess({
+    res,
+    statusCode: 201,
+    message: "Teacher account created successfully",
     data: {
       user,
     },
