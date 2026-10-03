@@ -29,8 +29,8 @@ export const lessonPlanningRoutes: Routes = [
       {
         path: ':planId',
         loadComponent: () =>
-          import('./lesson-plan-detail-placeholder/lesson-plan-detail-placeholder.component').then(
-            ({ LessonPlanDetailPlaceholderComponent }) => LessonPlanDetailPlaceholderComponent,
+          import('./lesson-plan-detail/lesson-plan-detail.component').then(
+            ({ LessonPlanDetailComponent }) => LessonPlanDetailComponent,
           ),
       },
     ],
