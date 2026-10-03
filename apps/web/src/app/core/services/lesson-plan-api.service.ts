@@ -65,6 +65,11 @@ export type GetLessonPlansResponse = ApiSuccessWithLegacy<
   }
 >;
 
+export type GetLessonPlanResponse = ApiSuccessWithLegacy<
+  LessonPlan,
+  { lessonPlan: LessonPlan }
+>;
+
 @Injectable({
   providedIn: 'root',
 })
@@ -88,5 +93,9 @@ export class LessonPlanApi {
         ...(params.limit !== undefined ? { limit: params.limit } : {}),
       },
     });
+  }
+
+  getLessonPlanById(planId: string): Observable<GetLessonPlanResponse> {
+    return this.http.get<GetLessonPlanResponse>(`${this.apiUrl}/${planId}`);
   }
 }
