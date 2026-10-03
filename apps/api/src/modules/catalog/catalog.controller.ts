@@ -5,30 +5,20 @@ import {
   getActiveTopicsBySubject,
 } from "./catalog.service.js";
 import { getTopicsSchema } from "./schemas/get-topics.schema.js";
-import { sendError, sendSuccess } from "../../shared/http/api-response.js";
+import { sendSuccess } from "../../shared/http/api-response.js";
+import { AppError } from "../../shared/errors/app-error.js";
 
 export async function getSubjectsController(
   _req: Request,
   res: Response,
 ): Promise<void> {
-  try {
-    const subjects = await getActiveSubjects();
+  const subjects = await getActiveSubjects();
 
-    sendSuccess({
-      res,
-      statusCode: 200,
-      data: subjects,
-    });
-  } catch (error) {
-    console.error("Get subjects error:", error);
-
-    sendError({
-      res,
-      statusCode: 500,
-      message: "Unable to retrieve subjects",
-      code: "INTERNAL_SERVER_ERROR",
-    });
-  }
+  sendSuccess({
+    res,
+    statusCode: 200,
+    data: subjects,
+  });
 }
 
 export async function getTopicsBySubjectController(
@@ -40,54 +30,20 @@ export async function getTopicsBySubjectController(
   if (!parsed.success) {
     const errors = parsed.error.flatten();
 
-    sendError({
-      res,
+    throw new AppError({
       statusCode: 400,
-      message: "Invalid subject ID.",
       code: "VALIDATION_ERROR",
+      message: "Invalid subject ID.",
       details: errors,
-      legacy: {
-        errors,
-      },
-    });
-
-    return;
-  }
-
-  try {
-    const topics = await getActiveTopicsBySubject(parsed.data.subjectId);
-
-    sendSuccess({
-      res,
-      statusCode: 200,
-      data: topics,
-    });
-  } catch (error) {
-    const statusCode =
-      error instanceof Error &&
-      "statusCode" in error &&
-      typeof error.statusCode === "number"
-        ? error.statusCode
-        : 500;
-
-    if (statusCode === 404) {
-      sendError({
-        res,
-        statusCode: 404,
-        message: error instanceof Error ? error.message : "Subject not found.",
-        code: "SUBJECT_NOT_FOUND",
-      });
-
-      return;
-    }
-
-    console.error("Get topics error:", error);
-
-    sendError({
-      res,
-      statusCode: 500,
-      message: "Unable to retrieve topics",
-      code: "INTERNAL_SERVER_ERROR",
+      legacy: { errors },
     });
   }
+
+  const topics = await getActiveTopicsBySubject(parsed.data.subjectId);
+
+  sendSuccess({
+    res,
+    statusCode: 200,
+    data: topics,
+  });
 }

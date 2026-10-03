@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 import { ChildModel } from "../children/models/child.model.js";
 import { LessonPlanModel, type LessonPlanStatus } from "./lesson-plan.model.js";
 import type { CreateLessonPlanInput } from "./schemas/create-lesson-plan.schema.js";
+import { AppError } from "../../shared/errors/app-error.js";
 
 export async function createLessonPlan(
   userId: string,
@@ -14,13 +15,11 @@ export async function createLessonPlan(
   });
 
   if (!child) {
-    const error = new Error(
-      "You are not authorized to create a lesson plan for this child.",
-    );
-
-    (error as Error & { statusCode?: number }).statusCode = 403;
-
-    throw error;
+    throw new AppError({
+      statusCode: 403,
+      code: "FORBIDDEN",
+      message: "You are not authorized to create a lesson plan for this child.",
+    });
   }
 
   const lessonPlanData = {
@@ -63,13 +62,11 @@ export async function getLessonPlans(
   }).lean();
 
   if (!child) {
-    const error = new Error(
-      "You are not authorized to view lesson plans for this child.",
-    );
-
-    (error as Error & { statusCode?: number }).statusCode = 403;
-
-    throw error;
+    throw new AppError({
+      statusCode: 403,
+      code: "FORBIDDEN",
+      message: "You are not authorized to view lesson plans for this child.",
+    });
   }
 
   const filter: {

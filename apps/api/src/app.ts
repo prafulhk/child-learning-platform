@@ -8,6 +8,10 @@ import { attemptsRouter } from "./modules/attempts/attempts.routes.js";
 import { learningRouter } from "./modules/learning/learning.routes.js";
 import { catalogRouter } from "./modules/catalog/catalog.routes.js";
 import { lessonPlanRouter } from "./modules/lesson-plans/lesson-plan.routes.js";
+import {
+  errorHandler,
+  notFoundHandler,
+} from "./middleware/error-handler.middleware.js";
 
 const app: Express = express();
 
@@ -37,5 +41,8 @@ app.get("/health", (_req, res) => {
     service: "child-learning-api",
   });
 });
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 export { app };

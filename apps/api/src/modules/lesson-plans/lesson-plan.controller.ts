@@ -2,7 +2,8 @@ import type { Request, Response } from "express";
 
 import { createLessonPlanSchema } from "./schemas/create-lesson-plan.schema.js";
 import { createLessonPlan, getLessonPlans } from "./lesson-plan.service.js";
-import { sendError, sendSuccess } from "../../shared/http/api-response.js";
+import { sendSuccess } from "../../shared/http/api-response.js";
+import { AppError } from "../../shared/errors/app-error.js";
 
 export async function createLessonPlanController(req: Request, res: Response) {
   const auth = res.locals.auth as
@@ -13,14 +14,11 @@ export async function createLessonPlanController(req: Request, res: Response) {
     | undefined;
 
   if (!auth) {
-    sendError({
-      res,
+    throw new AppError({
       statusCode: 401,
-      message: "Authentication required.",
       code: "AUTHENTICATION_REQUIRED",
+      message: "Authentication required.",
     });
-
-    return;
   }
 
   const parsed = createLessonPlanSchema.safeParse(req.body);
@@ -28,66 +26,25 @@ export async function createLessonPlanController(req: Request, res: Response) {
   if (!parsed.success) {
     const errors = parsed.error.flatten();
 
-    sendError({
-      res,
+    throw new AppError({
       statusCode: 400,
-      message: "Invalid lesson plan payload.",
       code: "VALIDATION_ERROR",
+      message: "Invalid lesson plan payload.",
       details: errors,
-      legacy: {
-        errors,
-      },
+      legacy: { errors },
     });
-
-    return;
   }
 
-  try {
-    const lessonPlan = await createLessonPlan(auth.userId, parsed.data);
+  const lessonPlan = await createLessonPlan(auth.userId, parsed.data);
 
-    sendSuccess({
-      res,
-      statusCode: 201,
-      data: lessonPlan,
-      legacy: {
-        lessonPlan,
-      },
-    });
-
-    return;
-  } catch (error) {
-    const statusCode =
-      error instanceof Error &&
-      "statusCode" in error &&
-      typeof error.statusCode === "number"
-        ? error.statusCode
-        : 500;
-
-    if (statusCode === 403) {
-      sendError({
-        res,
-        statusCode: 403,
-        message:
-          error instanceof Error
-            ? error.message
-            : "You are not authorized to create a lesson plan for this child.",
-        code: "FORBIDDEN",
-      });
-
-      return;
-    }
-
-    console.error("Failed to create lesson plan:", error);
-
-    sendError({
-      res,
-      statusCode: 500,
-      message: "Failed to create lesson plan.",
-      code: "INTERNAL_SERVER_ERROR",
-    });
-
-    return;
-  }
+  sendSuccess({
+    res,
+    statusCode: 201,
+    data: lessonPlan,
+    legacy: {
+      lessonPlan,
+    },
+  });
 }
 
 export async function getLessonPlansController(
@@ -102,28 +59,22 @@ export async function getLessonPlansController(
     | undefined;
 
   if (!auth) {
-    sendError({
-      res,
+    throw new AppError({
       statusCode: 401,
-      message: "Authentication required.",
       code: "AUTHENTICATION_REQUIRED",
+      message: "Authentication required.",
     });
-
-    return;
   }
 
   const childId =
     typeof req.query.childId === "string" ? req.query.childId : undefined;
 
   if (!childId) {
-    sendError({
-      res,
+    throw new AppError({
       statusCode: 400,
-      message: "childId is required.",
       code: "VALIDATION_ERROR",
+      message: "childId is required.",
     });
-
-    return;
   }
 
   const fromDate =
@@ -176,44 +127,12 @@ export async function getLessonPlansController(
     options.limit = limit;
   }
 
-  try {
-    const result = await getLessonPlans(auth.userId, options);
+  const result = await getLessonPlans(auth.userId, options);
 
-    sendSuccess({
-      res,
-      statusCode: 200,
-      data: result,
-      legacy: result,
-    });
-  } catch (error) {
-    const statusCode =
-      error instanceof Error &&
-      "statusCode" in error &&
-      typeof error.statusCode === "number"
-        ? error.statusCode
-        : 500;
-
-    if (statusCode === 403) {
-      sendError({
-        res,
-        statusCode: 403,
-        message:
-          error instanceof Error
-            ? error.message
-            : "You are not authorized to view lesson plans for this child.",
-        code: "FORBIDDEN",
-      });
-
-      return;
-    }
-
-    console.error("Get lesson plans error:", error);
-
-    sendError({
-      res,
-      statusCode: 500,
-      message: "Unable to retrieve lesson plans.",
-      code: "INTERNAL_SERVER_ERROR",
-    });
-  }
+  sendSuccess({
+    res,
+    statusCode: 200,
+    data: result,
+    legacy: result,
+  });
 }

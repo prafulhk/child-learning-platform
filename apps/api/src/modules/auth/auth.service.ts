@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 
 import { config } from "../../config/index.js";
 import { UserModel } from "./models/user.model.js";
+import { AppError } from "../../shared/errors/app-error.js";
 
 import type { LoginInput } from "./schemas/login.schema.js";
 import type { RegisterInput } from "./schemas/register.schema.js";
@@ -13,7 +14,11 @@ export async function registerParent(input: RegisterInput) {
   });
 
   if (existingUser) {
-    throw new Error("An account with this email already exists");
+    throw new AppError({
+      statusCode: 409,
+      code: "EMAIL_ALREADY_EXISTS",
+      message: "An account with this email already exists",
+    });
   }
 
   const passwordHash = await bcrypt.hash(input.password, 12);
@@ -40,7 +45,11 @@ export async function loginUser(input: LoginInput) {
   }).select("+passwordHash");
 
   if (!user) {
-    throw new Error("Invalid email or password");
+    throw new AppError({
+      statusCode: 401,
+      code: "INVALID_CREDENTIALS",
+      message: "Invalid email or password",
+    });
   }
 
   const isPasswordValid = await bcrypt.compare(
@@ -49,7 +58,11 @@ export async function loginUser(input: LoginInput) {
   );
 
   if (!isPasswordValid) {
-    throw new Error("Invalid email or password");
+    throw new AppError({
+      statusCode: 401,
+      code: "INVALID_CREDENTIALS",
+      message: "Invalid email or password",
+    });
   }
 
   const token = jwt.sign(
@@ -79,7 +92,11 @@ export async function getUserById(userId: string) {
   const user = await UserModel.findById(userId);
 
   if (!user) {
-    throw new Error("User not found");
+    throw new AppError({
+      statusCode: 404,
+      code: "USER_NOT_FOUND",
+      message: "User not found",
+    });
   }
 
   return {

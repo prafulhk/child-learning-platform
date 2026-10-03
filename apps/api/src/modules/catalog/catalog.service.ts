@@ -2,6 +2,7 @@ import { Types } from "mongoose";
 
 import { SubjectModel } from "./models/subject.model.js";
 import { TopicModel } from "./models/topic.model.js";
+import { AppError } from "../../shared/errors/app-error.js";
 
 export async function getActiveSubjects() {
   return SubjectModel.find({ status: "ACTIVE" })
@@ -15,11 +16,11 @@ export async function getActiveTopicsBySubject(subjectId: string) {
   }).lean();
 
   if (!subject) {
-    const error = new Error("Subject not found.");
-
-    (error as Error & { statusCode?: number }).statusCode = 404;
-
-    throw error;
+    throw new AppError({
+      statusCode: 404,
+      code: "SUBJECT_NOT_FOUND",
+      message: "Subject not found.",
+    });
   }
 
   return TopicModel.find({

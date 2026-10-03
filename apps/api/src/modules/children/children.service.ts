@@ -1,5 +1,6 @@
 import { ChildModel } from "./models/child.model.js";
 import type { CreateChildInput } from "./schemas/create-child.schema.js";
+import { AppError } from "../../shared/errors/app-error.js";
 
 export async function createChild(parentId: string, input: CreateChildInput) {
   const existingChild = await ChildModel.findOne({
@@ -11,11 +12,11 @@ export async function createChild(parentId: string, input: CreateChildInput) {
   });
 
   if (existingChild) {
-    const error = new Error("A child with this name already exists.");
-
-    (error as Error & { statusCode?: number }).statusCode = 409;
-
-    throw error;
+    throw new AppError({
+      statusCode: 409,
+      code: "CHILD_CONFLICT",
+      message: "A child with this name already exists.",
+    });
   }
 
   const childData = {

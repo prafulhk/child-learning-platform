@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 import { ChildModel } from "../children/models/child.model.js";
 import { LearningSessionModel } from "./models/learning-session.model.js";
 import { CreateLearningSessionInput } from "../children/schemas/create-learning-session.schema.js";
+import { AppError } from "../../shared/errors/app-error.js";
 
 interface GetLearningSessionsOptions {
   childId: string;
@@ -25,13 +26,11 @@ export async function createLearningSession(
   });
 
   if (!child) {
-    const error = new Error(
-      "You are not authorized to record learning for this child.",
-    );
-
-    (error as Error & { statusCode?: number }).statusCode = 403;
-
-    throw error;
+    throw new AppError({
+      statusCode: 403,
+      code: "FORBIDDEN",
+      message: "You are not authorized to record learning for this child.",
+    });
   }
 
   const sessionData = {
@@ -72,13 +71,12 @@ export async function getLearningSessions(
   }).lean();
 
   if (!child) {
-    const error = new Error(
-      "You are not authorized to view learning history for this child.",
-    );
-
-    (error as Error & { statusCode?: number }).statusCode = 403;
-
-    throw error;
+    throw new AppError({
+      statusCode: 403,
+      code: "FORBIDDEN",
+      message:
+        "You are not authorized to view learning history for this child.",
+    });
   }
 
   const filter: {
