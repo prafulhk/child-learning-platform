@@ -225,7 +225,7 @@ describe("LessonPlan service", () => {
       );
     });
 
-    it("applies date range filtering", async () => {
+    it("applies date range filtering and preserves ISO instants", async () => {
       vi.spyOn(ChildModel, "findOne").mockReturnValue({
         lean: vi.fn().mockResolvedValue(child),
       } as never);
@@ -241,16 +241,16 @@ describe("LessonPlan service", () => {
 
       await getLessonPlans(userId, {
         childId,
-        fromDate: "2026-09-28",
-        toDate: "2026-09-30",
+        fromDate: "2026-10-02T18:30:00.000Z",
+        toDate: "2026-10-03",
       });
 
       expect(findSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           childId: child._id,
           plannedDate: {
-            $gte: new Date("2026-09-28T00:00:00.000Z"),
-            $lte: new Date("2026-09-30T23:59:59.999Z"),
+            $gte: new Date("2026-10-02T18:30:00.000Z"),
+            $lte: new Date("2026-10-03T23:59:59.999Z"),
           },
         }),
       );
