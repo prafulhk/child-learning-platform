@@ -116,3 +116,38 @@ export async function getLessonPlans(
     },
   };
 }
+
+export async function getLessonPlanById(userId: string, planId: string) {
+  if (!Types.ObjectId.isValid(planId)) {
+    throw new AppError({
+      statusCode: 404,
+      code: "NOT_FOUND",
+      message: "Lesson plan not found.",
+    });
+  }
+
+  const lessonPlan = await LessonPlanModel.findById(planId).lean();
+
+  if (!lessonPlan) {
+    throw new AppError({
+      statusCode: 404,
+      code: "NOT_FOUND",
+      message: "Lesson plan not found.",
+    });
+  }
+
+  const child = await ChildModel.findOne({
+    _id: lessonPlan.childId,
+    parentId: userId,
+  }).lean();
+
+  if (!child) {
+    throw new AppError({
+      statusCode: 404,
+      code: "NOT_FOUND",
+      message: "Lesson plan not found.",
+    });
+  }
+
+  return lessonPlan;
+}
