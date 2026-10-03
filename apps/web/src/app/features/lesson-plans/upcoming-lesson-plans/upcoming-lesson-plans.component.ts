@@ -213,7 +213,7 @@ export class UpcomingLessonPlansComponent implements OnInit {
     this.lessonPlanApi
       .getLessonPlans({
         childId: child._id,
-        fromDate: this.getTodayDate(),
+        fromDate: this.getTodayLocalMidnightIso(),
         status: 'PLANNED',
         page: 1,
         limit: 25,
@@ -236,13 +236,13 @@ export class UpcomingLessonPlansComponent implements OnInit {
       });
   }
 
-  private getTodayDate(): string {
+  private getTodayLocalMidnightIso(): string {
     const today = new Date();
 
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
+    return new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    ).toISOString();
   }
 }
