@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 
 import { ChildModel } from "../children/models/child.model.js";
+import { LessonPlanModel } from "../lesson-plans/lesson-plan.model.js";
 import { LearningSessionModel } from "./models/learning-session.model.js";
 import { CreateLearningSessionInput } from "../children/schemas/create-learning-session.schema.js";
 import { AppError } from "../../shared/errors/app-error.js";
@@ -33,6 +34,43 @@ export async function createLearningSession(
     });
   }
 
+  let lessonPlan = null;
+
+  if (input.lessonPlanId) {
+    if (!Types.ObjectId.isValid(input.lessonPlanId)) {
+      throw new AppError({
+        statusCode: 404,
+        code: "NOT_FOUND",
+        message: "Lesson plan not found.",
+      });
+    }
+
+    lessonPlan = await LessonPlanModel.findOne({
+      _id: input.lessonPlanId,
+      childId: child._id,
+      status: "PLANNED",
+    });
+
+    if (!lessonPlan) {
+      throw new AppError({
+        statusCode: 409,
+        code: "LESSON_PLAN_NOT_COMPLETABLE",
+        message: "This lesson plan cannot be marked completed.",
+      });
+    }
+
+    if (
+      lessonPlan.subjectId.toString() !== input.subjectId ||
+      lessonPlan.topicId.toString() !== input.topicId
+    ) {
+      throw new AppError({
+        statusCode: 400,
+        code: "LESSON_PLAN_MISMATCH",
+        message: "The learning session does not match the lesson plan.",
+      });
+    }
+  }
+
   const sessionData = {
     childId: new Types.ObjectId(input.childId),
     subjectId: new Types.ObjectId(input.subjectId),
@@ -55,7 +93,15 @@ export async function createLearningSession(
     ...(input.notes ? { notes: input.notes } : {}),
   };
 
-  return LearningSessionModel.create(sessionData);
+  const session = await LearningSessionModel.create(sessionData);
+
+  if (lessonPlan) {
+    lessonPlan.status = "COMPLETED";
+    lessonPlan.completedLearningSessionId = session._id;
+    await lessonPlan.save();
+  }
+
+  return session;
 }
 
 export async function getLearningSessions(
