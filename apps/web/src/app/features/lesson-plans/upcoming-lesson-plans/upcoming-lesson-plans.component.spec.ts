@@ -109,11 +109,15 @@ describe('UpcomingLessonPlansComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('loads children and upcoming plans for the active child', () => {
+  it('loads children and upcoming plans for the active child using local midnight', () => {
     fixture.detectChanges();
 
     const today = new Date();
-    const expectedFromDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const expectedFromDate = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    ).toISOString();
 
     expect(childServiceMock.getChildren).toHaveBeenCalled();
     expect(lessonPlanApiMock.getLessonPlans).toHaveBeenCalledWith({
