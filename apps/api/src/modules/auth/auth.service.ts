@@ -8,7 +8,7 @@ import { AppError } from "../../shared/errors/app-error.js";
 import type { LoginInput } from "./schemas/login.schema.js";
 import type { RegisterInput } from "./schemas/register.schema.js";
 
-export async function registerParent(input: RegisterInput) {
+async function registerUser(input: RegisterInput, role: "PARENT" | "TEACHER") {
   const existingUser = await UserModel.findOne({
     email: input.email,
   });
@@ -27,7 +27,7 @@ export async function registerParent(input: RegisterInput) {
     name: input.name,
     email: input.email,
     passwordHash,
-    role: "PARENT",
+    role,
   });
 
   return {
@@ -37,6 +37,14 @@ export async function registerParent(input: RegisterInput) {
     role: user.role,
     createdAt: user.createdAt,
   };
+}
+
+export async function registerParent(input: RegisterInput) {
+  return registerUser(input, "PARENT");
+}
+
+export async function registerTeacher(input: RegisterInput) {
+  return registerUser(input, "TEACHER");
 }
 
 export async function loginUser(input: LoginInput) {
