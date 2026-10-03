@@ -14,6 +14,8 @@ describe("Lesson Plans API", () => {
     const response = await request(app).post("/api/lesson-plans").send({});
 
     expect(response.status).toBe(401);
+    expect(response.body.success).toBe(false);
+    expect(response.body.error.code).toBe("AUTHENTICATION_REQUIRED");
     expect(response.body.message).toBe("Authentication required");
   });
 
@@ -70,6 +72,7 @@ describe("Lesson Plans API", () => {
       });
 
     expect(response.status).toBe(201);
+    expect(response.body.success).toBe(true);
 
     expect(response.body.data).toBeDefined();
     expect(response.body.data.childId.toString()).toBe(child._id.toString());
@@ -132,6 +135,8 @@ describe("Lesson Plans API", () => {
       });
 
     expect(response.status).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.error.code).toBe("VALIDATION_ERROR");
     expect(response.body.message).toBe("Invalid lesson plan payload.");
     expect(response.body.errors).toBeDefined();
   });

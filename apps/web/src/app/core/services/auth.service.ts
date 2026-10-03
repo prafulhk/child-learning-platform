@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment.development';
 import { catchError, EMPTY, Observable, tap } from 'rxjs';
+import { ApiSuccessWithLegacy } from '../types/api-response';
 
 export interface RegisterRequest {
   name: string;
@@ -23,16 +24,17 @@ export interface AuthUser {
   createdAt: string;
 }
 
-export interface RegisterResponse {
-  message: string;
-  user: AuthUser;
-}
+export type RegisterResponse = ApiSuccessWithLegacy<
+  { user: AuthUser },
+  { message: string; user: AuthUser }
+>;
 
-export interface LoginResponse {
-  message: string;
-  token: string;
-  user: AuthUser;
-}
+export type LoginResponse = ApiSuccessWithLegacy<
+  { token: string; user: AuthUser },
+  { message: string; token: string; user: AuthUser }
+>;
+
+type MeResponse = ApiSuccessWithLegacy<{ user: AuthUser }, { user: AuthUser }>;
 
 @Injectable({
   providedIn: 'root',
@@ -51,9 +53,12 @@ export class AuthService {
   login(request: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, request).pipe(
       tap((response) => {
-        sessionStorage.setItem('auth_token', response.token);
-        sessionStorage.setItem('auth_user', JSON.stringify(response.user));
-        this.currentUser.set(response.user);
+        const token = response.token ?? response.data.token;
+        const user = response.user ?? response.data.user;
+
+        sessionStorage.setItem('auth_token', token);
+        sessionStorage.setItem('auth_user', JSON.stringify(user));
+        this.currentUser.set(user);
       }),
     );
   }
@@ -84,8 +89,8 @@ export class AuthService {
     this.registrationMessage.set(message);
   }
 
-  getCurrentUser(): Observable<{ user: AuthUser }> {
-    return this.http.get<{ user: AuthUser }>(`${this.apiUrl}/me`);
+  getCurrentUser(): Observable<MeResponse> {
+    return this.http.get<MeResponse>(`${this.apiUrl}/me`);
   }
 
   restoreSession(): Observable<unknown> {
@@ -97,8 +102,10 @@ export class AuthService {
 
     return this.getCurrentUser().pipe(
       tap((response) => {
-        this.currentUser.set(response.user);
-        sessionStorage.setItem('auth_user', JSON.stringify(response.user));
+        const user = response.user ?? response.data.user;
+
+        this.currentUser.set(user);
+        sessionStorage.setItem('auth_user', JSON.stringify(user));
       }),
       catchError(() => {
         this.logout();

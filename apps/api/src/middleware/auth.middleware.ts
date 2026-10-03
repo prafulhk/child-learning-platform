@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 
 import { config } from "../config/index.js";
+import { sendError } from "../shared/http/api-response.js";
 
 interface AuthTokenPayload extends JwtPayload {
   sub: string;
@@ -12,9 +13,13 @@ export const authMiddleware: RequestHandler = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader?.startsWith("Bearer ")) {
-    res.status(401).json({
+    sendError({
+      res,
+      statusCode: 401,
       message: "Authentication required",
+      code: "AUTHENTICATION_REQUIRED",
     });
+
     return;
   }
 
@@ -30,8 +35,11 @@ export const authMiddleware: RequestHandler = (req, res, next) => {
 
     next();
   } catch {
-    res.status(401).json({
+    sendError({
+      res,
+      statusCode: 401,
       message: "Invalid or expired token",
+      code: "INVALID_AUTH_TOKEN",
     });
   }
 };

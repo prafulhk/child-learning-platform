@@ -14,6 +14,8 @@ describe("Learning Sessions API", () => {
     const response = await request(app).post("/api/learning-sessions").send({});
 
     expect(response.status).toBe(401);
+    expect(response.body.success).toBe(false);
+    expect(response.body.error.code).toBe("AUTHENTICATION_REQUIRED");
     expect(response.body.message).toBe("Authentication required");
   });
 
@@ -76,6 +78,7 @@ describe("Learning Sessions API", () => {
       });
 
     expect(response.status).toBe(201);
+    expect(response.body.success).toBe(true);
 
     expect(response.body.data).toBeDefined();
     expect(response.body.data.childId.toString()).toBe(child._id.toString());
@@ -139,6 +142,8 @@ describe("Learning Sessions API", () => {
       });
 
     expect(response.status).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.error.code).toBe("VALIDATION_ERROR");
     expect(response.body.message).toBe("Invalid learning session payload.");
     expect(response.body.errors).toBeDefined();
   });

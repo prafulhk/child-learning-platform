@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
+import { ApiSuccessWithLegacy } from '../types/api-response';
 
 export type AttemptType = 'PRACTICE' | 'ASSESSMENT';
 
@@ -18,15 +19,26 @@ export interface BackendAttempt {
   result: AttemptResult;
 }
 
-export interface AttemptsResponse {
-  attempts: BackendAttempt[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
+export type AttemptsResponse = ApiSuccessWithLegacy<
+  {
+    attempts: BackendAttempt[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  },
+  {
+    attempts: BackendAttempt[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  }
+>;
 
 export interface AttemptResult {
   totalQuestions: number;
@@ -51,10 +63,10 @@ export interface CreateAttemptPayload {
   result: AttemptResult;
 }
 
-export interface AttemptResponse {
-  message?: string;
-  attempt: unknown;
-}
+export type AttemptResponse = ApiSuccessWithLegacy<
+  { attempt: unknown },
+  { message?: string; attempt: unknown }
+>;
 
 @Injectable({
   providedIn: 'root',

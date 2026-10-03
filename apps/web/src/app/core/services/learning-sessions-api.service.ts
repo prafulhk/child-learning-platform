@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment.development';
+import { ApiSuccessResponse, ApiSuccessWithLegacy } from '../types/api-response';
 
 export interface LearningSessionAccuracy {
   correct: number;
@@ -43,9 +44,7 @@ export interface CreateLearningSessionRequest {
   notes?: string;
 }
 
-export interface CreateLearningSessionResponse {
-  data: LearningSession;
-}
+export type CreateLearningSessionResponse = ApiSuccessResponse<LearningSession>;
 
 export interface Pagination {
   page: number;
@@ -64,10 +63,10 @@ export interface GetLearningSessionsParams {
   limit?: number;
 }
 
-export interface GetLearningSessionsResponse {
-  sessions: LearningSession[];
-  pagination: Pagination;
-}
+export type GetLearningSessionsResponse = ApiSuccessWithLegacy<
+  { sessions: LearningSession[]; pagination: Pagination },
+  { sessions: LearningSession[]; pagination: Pagination }
+>;
 
 @Injectable({
   providedIn: 'root',

@@ -38,6 +38,16 @@ describe('LessonPlanApiService', () => {
     };
 
     const mockResponse = {
+      success: true as const,
+      data: {
+        _id: '507f1f77bcf86cd799439014',
+        ...payload,
+        status: 'PLANNED' as const,
+        createdByUserId: '507f1f77bcf86cd799439015',
+        createdByRole: 'PARENT' as const,
+        createdAt: '2026-09-28T10:00:00.000Z',
+        updatedAt: '2026-09-28T10:00:00.000Z',
+      },
       lessonPlan: {
         _id: '507f1f77bcf86cd799439014',
         ...payload,
@@ -63,6 +73,31 @@ describe('LessonPlanApiService', () => {
 
   it('should get lesson plans', () => {
     const mockResponse = {
+      success: true as const,
+      data: {
+        plans: [
+          {
+            _id: '507f1f77bcf86cd799439014',
+            childId: '507f1f77bcf86cd799439011',
+            plannedDate: '2026-09-28T00:00:00.000Z',
+            subjectId: '507f1f77bcf86cd799439012',
+            topicId: '507f1f77bcf86cd799439013',
+            plannedActivity: 'Practice single digit addition',
+            plannedDurationMinutes: 30,
+            status: 'PLANNED' as const,
+            createdByUserId: '507f1f77bcf86cd799439015',
+            createdByRole: 'PARENT' as const,
+            createdAt: '2026-09-28T10:00:00.000Z',
+            updatedAt: '2026-09-28T10:00:00.000Z',
+          },
+        ],
+        pagination: {
+          page: 1,
+          limit: 20,
+          total: 1,
+          totalPages: 1,
+        },
+      },
       plans: [
         {
           _id: '507f1f77bcf86cd799439014',

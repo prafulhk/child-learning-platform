@@ -55,6 +55,16 @@ describe('LearningSessionsApiService', () => {
   };
 
   const emptyResponse: GetLearningSessionsResponse = {
+    success: true,
+    data: {
+      sessions: [],
+      pagination: {
+        page: 1,
+        limit: 20,
+        total: 0,
+        totalPages: 0,
+      },
+    },
     sessions: [],
     pagination: {
       page: 1,
@@ -90,7 +100,7 @@ describe('LearningSessionsApiService', () => {
       expect(req.request.method).toBe('POST');
       expect(req.request.url).toBe(apiUrl);
 
-      req.flush({ data: learningSession });
+      req.flush({ success: true, data: learningSession });
     });
 
     it('sends the expected request body', () => {
@@ -100,11 +110,14 @@ describe('LearningSessionsApiService', () => {
 
       expect(req.request.body).toEqual(createPayload);
 
-      req.flush({ data: learningSession });
+      req.flush({ success: true, data: learningSession });
     });
 
     it('returns the created learning session response', () => {
-      const response: CreateLearningSessionResponse = { data: learningSession };
+      const response: CreateLearningSessionResponse = {
+        success: true,
+        data: learningSession,
+      };
 
       let actual: CreateLearningSessionResponse | undefined;
       service.createLearningSession(createPayload).subscribe((result) => {
@@ -212,6 +225,16 @@ describe('LearningSessionsApiService', () => {
 
     it('returns the learning sessions response', () => {
       const response: GetLearningSessionsResponse = {
+        success: true,
+        data: {
+          sessions: [learningSession],
+          pagination: {
+            page: 1,
+            limit: 20,
+            total: 1,
+            totalPages: 1,
+          },
+        },
         sessions: [learningSession],
         pagination: {
           page: 1,

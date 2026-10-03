@@ -34,6 +34,8 @@ describe("Subjects and Topics API", () => {
     const response = await request(app).get("/api/subjects");
 
     expect(response.status).toBe(401);
+    expect(response.body.success).toBe(false);
+    expect(response.body.error.code).toBe("AUTHENTICATION_REQUIRED");
     expect(response.body.message).toBe("Authentication required");
   });
 
@@ -54,6 +56,7 @@ describe("Subjects and Topics API", () => {
       .set("Authorization", `Bearer ${token}`);
 
     expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
     expect(response.body.data).toEqual([]);
   });
 
@@ -171,6 +174,8 @@ describe("Subjects and Topics API", () => {
       .set("Authorization", `Bearer ${token}`);
 
     expect(response.status).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.error.code).toBe("VALIDATION_ERROR");
     expect(response.body.message).toBe("Invalid subject ID.");
     expect(response.body.errors).toBeDefined();
   });

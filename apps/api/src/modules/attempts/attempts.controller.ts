@@ -7,6 +7,7 @@ import {
   getAttemptById,
   getAttempts,
 } from "./attempts.service.js";
+import { sendError, sendSuccess } from "../../shared/http/api-response.js";
 
 export async function createAttemptController(
   req: Request,
@@ -15,9 +16,17 @@ export async function createAttemptController(
   const parsed = createAttemptSchema.safeParse(req.body);
 
   if (!parsed.success) {
-    res.status(400).json({
+    const errors = z.flattenError(parsed.error).fieldErrors;
+
+    sendError({
+      res,
+      statusCode: 400,
       message: "Validation failed",
-      errors: z.flattenError(parsed.error).fieldErrors,
+      code: "VALIDATION_ERROR",
+      details: errors,
+      legacy: {
+        errors,
+      },
     });
 
     return;
@@ -26,15 +35,25 @@ export async function createAttemptController(
   try {
     const attempt = await createAttempt(res.locals.auth.userId, parsed.data);
 
-    res.status(201).json({
+    sendSuccess({
+      res,
+      statusCode: 201,
       message: "Attempt saved successfully",
-      attempt,
+      data: {
+        attempt,
+      },
+      legacy: {
+        attempt,
+      },
     });
   } catch (error) {
     console.error("Create attempt error:", error);
 
-    res.status(500).json({
+    sendError({
+      res,
+      statusCode: 500,
       message: "Unable to save attempt",
+      code: "INTERNAL_SERVER_ERROR",
     });
   }
 }
@@ -58,12 +77,20 @@ export async function getAttemptsController(
       limit,
     });
 
-    res.status(200).json(result);
+    sendSuccess({
+      res,
+      statusCode: 200,
+      data: result,
+      legacy: result,
+    });
   } catch (error) {
     console.error("Get attempts error:", error);
 
-    res.status(500).json({
+    sendError({
+      res,
+      statusCode: 500,
       message: "Unable to retrieve attempts",
+      code: "INTERNAL_SERVER_ERROR",
     });
   }
 }
@@ -75,8 +102,11 @@ export async function getAttemptByIdController(
   const { id } = req.params;
 
   if (!id) {
-    res.status(400).json({
+    sendError({
+      res,
+      statusCode: 400,
       message: "Attempt ID is required",
+      code: "VALIDATION_ERROR",
     });
 
     return;
@@ -86,21 +116,34 @@ export async function getAttemptByIdController(
     const attempt = await getAttemptById(res.locals.auth.userId, id);
 
     if (!attempt) {
-      res.status(404).json({
+      sendError({
+        res,
+        statusCode: 404,
         message: "Attempt not found",
+        code: "ATTEMPT_NOT_FOUND",
       });
 
       return;
     }
 
-    res.status(200).json({
-      attempt,
+    sendSuccess({
+      res,
+      statusCode: 200,
+      data: {
+        attempt,
+      },
+      legacy: {
+        attempt,
+      },
     });
   } catch (error) {
     console.error("Get attempt error:", error);
 
-    res.status(500).json({
+    sendError({
+      res,
+      statusCode: 500,
       message: "Unable to retrieve attempt",
+      code: "INTERNAL_SERVER_ERROR",
     });
   }
 }

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment.development';
+import { ApiSuccessWithLegacy } from '../types/api-response';
 
 export interface Child {
   _id: string;
@@ -15,9 +16,7 @@ export interface Child {
   updatedAt: string;
 }
 
-interface ChildrenResponse {
-  children: Child[];
-}
+type ChildrenResponse = ApiSuccessWithLegacy<{ children: Child[] }, { children: Child[] }>;
 
 interface CreateChildRequest {
   name: string;
@@ -26,10 +25,10 @@ interface CreateChildRequest {
   avatar?: string;
 }
 
-interface CreateChildResponse {
-  message: string;
-  child: Child;
-}
+type CreateChildResponse = ApiSuccessWithLegacy<
+  { child: Child },
+  { message: string; child: Child }
+>;
 
 @Injectable({
   providedIn: 'root',

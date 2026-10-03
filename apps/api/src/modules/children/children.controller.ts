@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { createChildSchema } from "./schemas/create-child.schema.js";
 import { createChild, getChildrenByParent } from "./children.service.js";
+import { sendError, sendSuccess } from "../../shared/http/api-response.js";
 
 export async function createChildController(
   req: Request,
@@ -11,19 +12,35 @@ export async function createChildController(
   const parsed = createChildSchema.safeParse(req.body);
 
   if (!parsed.success) {
-    res.status(400).json({
+    const errors = z.flattenError(parsed.error).fieldErrors;
+
+    sendError({
+      res,
+      statusCode: 400,
       message: "Validation failed",
-      errors: z.flattenError(parsed.error).fieldErrors,
+      code: "VALIDATION_ERROR",
+      details: errors,
+      legacy: {
+        errors,
+      },
     });
+
     return;
   }
 
   try {
     const child = await createChild(res.locals.auth.userId, parsed.data);
 
-    res.status(201).json({
+    sendSuccess({
+      res,
+      statusCode: 201,
       message: "Child created successfully",
-      child,
+      data: {
+        child,
+      },
+      legacy: {
+        child,
+      },
     });
   } catch (error) {
     console.error("Create child error:", error);
@@ -40,8 +57,11 @@ export async function createChildController(
         ? error.message
         : "Unable to create child";
 
-    res.status(statusCode).json({
+    sendError({
+      res,
+      statusCode,
       message,
+      code: statusCode === 409 ? "CHILD_CONFLICT" : "INTERNAL_SERVER_ERROR",
     });
   }
 }
@@ -53,14 +73,24 @@ export async function getChildrenController(
   try {
     const children = await getChildrenByParent(res.locals.auth.userId);
 
-    res.status(200).json({
-      children,
+    sendSuccess({
+      res,
+      statusCode: 200,
+      data: {
+        children,
+      },
+      legacy: {
+        children,
+      },
     });
   } catch (error) {
     console.error("Get children error:", error);
 
-    res.status(500).json({
+    sendError({
+      res,
+      statusCode: 500,
       message: "Unable to retrieve children",
+      code: "INTERNAL_SERVER_ERROR",
     });
   }
 }

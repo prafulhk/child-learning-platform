@@ -5,6 +5,7 @@ import {
   getActiveTopicsBySubject,
 } from "./catalog.service.js";
 import { getTopicsSchema } from "./schemas/get-topics.schema.js";
+import { sendError, sendSuccess } from "../../shared/http/api-response.js";
 
 export async function getSubjectsController(
   _req: Request,
@@ -13,14 +14,19 @@ export async function getSubjectsController(
   try {
     const subjects = await getActiveSubjects();
 
-    res.status(200).json({
+    sendSuccess({
+      res,
+      statusCode: 200,
       data: subjects,
     });
   } catch (error) {
     console.error("Get subjects error:", error);
 
-    res.status(500).json({
+    sendError({
+      res,
+      statusCode: 500,
       message: "Unable to retrieve subjects",
+      code: "INTERNAL_SERVER_ERROR",
     });
   }
 }
@@ -32,9 +38,17 @@ export async function getTopicsBySubjectController(
   const parsed = getTopicsSchema.safeParse(req.params);
 
   if (!parsed.success) {
-    res.status(400).json({
+    const errors = parsed.error.flatten();
+
+    sendError({
+      res,
+      statusCode: 400,
       message: "Invalid subject ID.",
-      errors: parsed.error.flatten(),
+      code: "VALIDATION_ERROR",
+      details: errors,
+      legacy: {
+        errors,
+      },
     });
 
     return;
@@ -43,7 +57,9 @@ export async function getTopicsBySubjectController(
   try {
     const topics = await getActiveTopicsBySubject(parsed.data.subjectId);
 
-    res.status(200).json({
+    sendSuccess({
+      res,
+      statusCode: 200,
       data: topics,
     });
   } catch (error) {
@@ -55,9 +71,11 @@ export async function getTopicsBySubjectController(
         : 500;
 
     if (statusCode === 404) {
-      res.status(404).json({
-        message:
-          error instanceof Error ? error.message : "Subject not found.",
+      sendError({
+        res,
+        statusCode: 404,
+        message: error instanceof Error ? error.message : "Subject not found.",
+        code: "SUBJECT_NOT_FOUND",
       });
 
       return;
@@ -65,8 +83,11 @@ export async function getTopicsBySubjectController(
 
     console.error("Get topics error:", error);
 
-    res.status(500).json({
+    sendError({
+      res,
+      statusCode: 500,
       message: "Unable to retrieve topics",
+      code: "INTERNAL_SERVER_ERROR",
     });
   }
 }

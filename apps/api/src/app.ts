@@ -28,6 +28,11 @@ app.use("/api/lesson-plans", lessonPlanRouter);
 
 app.get("/health", (_req, res) => {
   res.status(200).json({
+    success: true,
+    data: {
+      status: "ok",
+      service: "child-learning-api",
+    },
     status: "ok",
     service: "child-learning-api",
   });

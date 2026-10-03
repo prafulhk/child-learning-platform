@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
+import { ApiSuccessResponse } from '../types/api-response';
 
 export interface Subject {
   _id: string;
@@ -23,10 +24,6 @@ export interface Topic {
   status: string;
 }
 
-interface ApiResponse<T> {
-  data: T;
-}
-
 @Injectable({
   providedIn: 'root',
 })
@@ -37,13 +34,13 @@ export class CatalogApiService {
 
   getSubjects(): Observable<Subject[]> {
     return this.http
-      .get<ApiResponse<Subject[]>>(this.apiUrl)
+      .get<ApiSuccessResponse<Subject[]>>(this.apiUrl)
       .pipe(map((response) => response.data));
   }
 
   getTopics(subjectId: string): Observable<Topic[]> {
     return this.http
-      .get<ApiResponse<Topic[]>>(`${this.apiUrl}/${subjectId}/topics`)
+      .get<ApiSuccessResponse<Topic[]>>(`${this.apiUrl}/${subjectId}/topics`)
       .pipe(map((response) => response.data));
   }
 }

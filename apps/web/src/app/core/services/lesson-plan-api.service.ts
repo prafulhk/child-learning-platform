@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
+import { ApiSuccessWithLegacy } from '../types/api-response';
 
 export interface CreateLessonPlanRequest {
   childId: string;
@@ -32,9 +33,7 @@ export interface LessonPlan {
   updatedAt: string;
 }
 
-export interface CreateLessonPlanResponse {
-  lessonPlan: LessonPlan;
-}
+export type CreateLessonPlanResponse = ApiSuccessWithLegacy<LessonPlan, { lessonPlan: LessonPlan }>;
 
 export interface GetLessonPlansParams {
   childId: string;
@@ -45,15 +44,26 @@ export interface GetLessonPlansParams {
   limit?: number;
 }
 
-export interface GetLessonPlansResponse {
-  plans: LessonPlan[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
+export type GetLessonPlansResponse = ApiSuccessWithLegacy<
+  {
+    plans: LessonPlan[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  },
+  {
+    plans: LessonPlan[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  }
+>;
 
 @Injectable({
   providedIn: 'root',

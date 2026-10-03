@@ -11,6 +11,8 @@ describe("Auth API", () => {
     });
 
     expect(response.status).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.error.code).toBe("VALIDATION_ERROR");
     expect(response.body.message).toBe("Validation failed");
   });
 
@@ -23,6 +25,8 @@ describe("Auth API", () => {
     });
 
     expect(response.status).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.error.code).toBe("VALIDATION_ERROR");
     expect(response.body.message).toBe("Validation failed");
   });
 
@@ -30,6 +34,8 @@ describe("Auth API", () => {
     const response = await request(app).get("/health");
 
     expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.status).toBe("ok");
     expect(response.body.status).toBe("ok");
   });
 });

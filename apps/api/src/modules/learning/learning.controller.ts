@@ -6,6 +6,7 @@ import {
 } from "./learning.service.js";
 import { createLearningSessionSchema } from "../children/schemas/create-learning-session.schema.js";
 import { getLearningSessionsSchema } from "./schemas/get-learning-sessions.schema.js";
+import { sendError, sendSuccess } from "../../shared/http/api-response.js";
 
 export async function createLearningSessionController(
   req: Request,
@@ -19,18 +20,33 @@ export async function createLearningSessionController(
     | undefined;
 
   if (!auth) {
-    return res.status(401).json({
+    sendError({
+      res,
+      statusCode: 401,
       message: "Authentication required.",
+      code: "AUTHENTICATION_REQUIRED",
     });
+
+    return;
   }
 
   const parsed = createLearningSessionSchema.safeParse(req.body);
 
   if (!parsed.success) {
-    return res.status(400).json({
+    const errors = parsed.error.flatten();
+
+    sendError({
+      res,
+      statusCode: 400,
       message: "Invalid learning session payload.",
-      errors: parsed.error.flatten(),
+      code: "VALIDATION_ERROR",
+      details: errors,
+      legacy: {
+        errors,
+      },
     });
+
+    return;
   }
 
   try {
@@ -40,9 +56,13 @@ export async function createLearningSessionController(
       parsed.data,
     );
 
-    return res.status(201).json({
+    sendSuccess({
+      res,
+      statusCode: 201,
       data: session,
     });
+
+    return;
   } catch (error) {
     const statusCode =
       error instanceof Error &&
@@ -52,19 +72,29 @@ export async function createLearningSessionController(
         : 500;
 
     if (statusCode === 403) {
-      return res.status(403).json({
+      sendError({
+        res,
+        statusCode: 403,
         message:
           error instanceof Error
             ? error.message
             : "You are not authorized to record learning for this child.",
+        code: "FORBIDDEN",
       });
+
+      return;
     }
 
     console.error("Failed to create learning session:", error);
 
-    return res.status(500).json({
+    sendError({
+      res,
+      statusCode: 500,
       message: "Failed to create learning session.",
+      code: "INTERNAL_SERVER_ERROR",
     });
+
+    return;
   }
 }
 
@@ -75,9 +105,17 @@ export async function getLearningSessionsController(
   const parsed = getLearningSessionsSchema.safeParse(req.query);
 
   if (!parsed.success) {
-    res.status(400).json({
+    const errors = parsed.error.flatten();
+
+    sendError({
+      res,
+      statusCode: 400,
       message: "Invalid learning history query.",
-      errors: parsed.error.flatten(),
+      code: "VALIDATION_ERROR",
+      details: errors,
+      legacy: {
+        errors,
+      },
     });
 
     return;
@@ -89,7 +127,12 @@ export async function getLearningSessionsController(
       parsed.data,
     );
 
-    res.status(200).json(result);
+    sendSuccess({
+      res,
+      statusCode: 200,
+      data: result,
+      legacy: result,
+    });
   } catch (error) {
     const statusCode =
       error instanceof Error &&
@@ -99,11 +142,14 @@ export async function getLearningSessionsController(
         : 500;
 
     if (statusCode === 403) {
-      res.status(403).json({
+      sendError({
+        res,
+        statusCode: 403,
         message:
           error instanceof Error
             ? error.message
             : "You are not authorized to view learning history for this child.",
+        code: "FORBIDDEN",
       });
 
       return;
@@ -111,8 +157,11 @@ export async function getLearningSessionsController(
 
     console.error("Get learning sessions error:", error);
 
-    res.status(500).json({
+    sendError({
+      res,
+      statusCode: 500,
       message: "Unable to retrieve learning history.",
+      code: "INTERNAL_SERVER_ERROR",
     });
   }
 }
