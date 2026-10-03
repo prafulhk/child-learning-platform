@@ -50,6 +50,13 @@ export class AuthService {
     return this.http.post<RegisterResponse>(`${this.apiUrl}/register`, request);
   }
 
+  registerTeacher(request: RegisterRequest): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(
+      `${this.apiUrl}/register/teacher`,
+      request,
+    );
+  }
+
   login(request: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, request).pipe(
       tap((response) => {
