@@ -53,7 +53,11 @@ import { LessonPlan, LessonPlanApi } from '../../../core/services/lesson-plan-ap
               </div>
 
               <span
-                class="inline-flex w-fit rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700"
+                class="inline-flex w-fit rounded-full px-3 py-1.5 text-xs font-semibold"
+                [class.bg-indigo-50]="lessonPlan.status === 'PLANNED'"
+                [class.text-indigo-700]="lessonPlan.status === 'PLANNED'"
+                [class.bg-emerald-50]="lessonPlan.status === 'COMPLETED'"
+                [class.text-emerald-700]="lessonPlan.status === 'COMPLETED'"
               >
                 {{ lessonPlan.status }}
               </span>
@@ -90,6 +94,34 @@ import { LessonPlan, LessonPlanApi } from '../../../core/services/lesson-plan-ap
             <div class="mx-5 mb-5 rounded-2xl border border-slate-200 p-4 sm:mx-7 sm:mb-7">
               <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Notes</p>
               <p class="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">{{ lessonPlan.notes }}</p>
+            </div>
+          }
+
+          @if (lessonPlan.status === 'PLANNED') {
+            <div class="border-t border-slate-100 bg-white px-5 py-5 sm:px-7">
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p class="font-semibold text-slate-900">Completed this lesson?</p>
+                  <p class="mt-1 text-sm text-slate-500">
+                    Record the actual learning session to mark this plan completed.
+                  </p>
+                </div>
+
+                <a
+                  routerLink="/learning/log"
+                  [queryParams]="{ lessonPlanId: lessonPlan._id }"
+                  class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-500"
+                >
+                  Mark as Completed
+                </a>
+              </div>
+            </div>
+          } @else if (lessonPlan.status === 'COMPLETED') {
+            <div class="border-t border-emerald-100 bg-emerald-50 px-5 py-5 sm:px-7">
+              <p class="font-semibold text-emerald-900">Lesson completed</p>
+              <p class="mt-1 text-sm text-emerald-700">
+                This plan is already linked to a completed learning session.
+              </p>
             </div>
           }
         </section>
