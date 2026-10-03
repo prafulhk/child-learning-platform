@@ -19,11 +19,15 @@
                         </div>
 
                         <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">
-                            Log Learning
+                            {{ lessonPlanId() ? 'Complete Lesson Plan' : 'Log Learning' }}
                         </h1>
 
                         <p class="mt-2 max-w-xl text-sm leading-6 text-blue-100 sm:text-base">
+                            @if (lessonPlanId()) {
+                            Record what actually happened during this planned lesson.
+                            } @else {
                             Record today's learning session and keep track of your child's progress.
+                            }
                         </p>
                     </div>
 
@@ -34,6 +38,20 @@
                 </div>
             </div>
         </div>
+
+        @if (lessonPlanId() && lessonPlanActivity()) {
+        <div class="mb-5 rounded-2xl border border-indigo-100 bg-indigo-50 px-5 py-4">
+            <p class="text-xs font-semibold uppercase tracking-wide text-indigo-500">Planned activity</p>
+            <p class="mt-1 font-semibold text-indigo-950">{{ lessonPlanActivity() }}</p>
+            <p class="mt-1 text-sm text-indigo-700">The form below records the actual learning session.</p>
+        </div>
+        }
+
+        @if (errorMessage()) {
+        <div class="mb-5 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
+            {{ errorMessage() }}
+        </div>
+        }
 
         <!-- Form -->
         <form class="space-y-5" [formGroup]="learningForm">
@@ -193,7 +211,7 @@
                         </h2>
 
                         <p class="text-sm text-slate-500">
-                            Capture the main concepts covered during the session.
+                            Capture what was actually covered during the session.
                         </p>
                     </div>
                 </div>
@@ -234,15 +252,9 @@
                 <select id="performance" formControlName="performance"
                     class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100">
                     <option value="">Select performance</option>
-                    <option value="EXCELLENT">
-                        🌟 Excellent
-                    </option>
-                    <option value="GOOD">
-                        👍 Good
-                    </option>
-                    <option value="NEEDS_IMPROVEMENT">
-                        💪 Needs Improvement
-                    </option>
+                    <option value="EXCELLENT">🌟 Excellent</option>
+                    <option value="GOOD">👍 Good</option>
+                    <option value="NEEDS_IMPROVEMENT">💪 Needs Improvement</option>
                 </select>
 
                 @if (
@@ -258,9 +270,7 @@
                 <div class="mt-5">
                     <label for="accuracy" class="mb-2 block text-sm font-semibold text-slate-700">
                         Accuracy
-                        <span class="font-normal text-slate-400">
-                            (optional)
-                        </span>
+                        <span class="font-normal text-slate-400">(optional)</span>
                     </label>
 
                     <div class="relative">
@@ -316,11 +326,11 @@
 
                     <div>
                         <p class="font-semibold text-slate-900">
-                            Ready to save this session?
+                            {{ lessonPlanId() ? 'Ready to mark this lesson completed?' : 'Ready to save this session?' }}
                         </p>
 
                         <p class="mt-1 text-xs text-slate-500">
-                            Your learning record will be added to the child's history.
+                            {{ lessonPlanId() ? 'The actual learning record will be linked to this lesson plan.' : 'Your learning record will be added to the child\'s history.' }}
                         </p>
                     </div>
 
@@ -331,7 +341,7 @@
                         Saving...
                         } @else {
                         <span>✓</span>
-                        Save Learning
+                        {{ lessonPlanId() ? 'Mark as Completed' : 'Save Learning' }}
                         }
                     </button>
 
