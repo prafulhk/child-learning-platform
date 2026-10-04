@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
@@ -8,6 +9,7 @@ import { ToastService } from '../../core/services/toast';
 @Component({
   selector: 'app-parent-tools',
   standalone: true,
+  imports: [DatePipe],
   templateUrl: './parent-tools.component.html',
 })
 export class ParentToolsComponent implements OnInit {
