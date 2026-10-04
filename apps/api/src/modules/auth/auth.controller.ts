@@ -2,11 +2,13 @@ import type { Request, Response } from "express";
 
 import { RegisterSchema } from "./schemas/register.schema.js";
 import { loginSchema } from "./schemas/login.schema.js";
+import { profileUpdateSchema } from "./schemas/profile-update.schema.js";
 import {
   registerParent,
   registerTeacher,
   loginUser,
   getUserById,
+  updateUserProfile,
 } from "./auth.service.js";
 import { z } from "zod";
 import { sendSuccess } from "../../shared/http/api-response.js";
@@ -109,6 +111,39 @@ export async function meController(req: Request, res: Response): Promise<void> {
   sendSuccess({
     res,
     statusCode: 200,
+    data: {
+      user,
+    },
+    legacy: {
+      user,
+    },
+  });
+}
+
+export async function updateMeController(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const parsed = profileUpdateSchema.safeParse(req.body);
+
+  if (!parsed.success) {
+    const errors = z.flattenError(parsed.error).fieldErrors;
+
+    throw new AppError({
+      statusCode: 400,
+      code: "VALIDATION_ERROR",
+      message: "Validation failed",
+      details: errors,
+      legacy: { errors },
+    });
+  }
+
+  const user = await updateUserProfile(res.locals.auth.userId, parsed.data);
+
+  sendSuccess({
+    res,
+    statusCode: 200,
+    message: "Profile updated successfully",
     data: {
       user,
     },
