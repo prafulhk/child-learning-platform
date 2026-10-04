@@ -10,6 +10,7 @@ import { AssessmentService } from '../../core/services/assessment.service';
 import { QuestionService } from '../../core/services/question.service';
 import { LocalStorageService } from '../../core/services/local-storage.service';
 import { AttemptsApiService } from '../../core/services/attempts-api.service';
+import { ActiveChildService } from '../../core/services/active-child.service';
 import { Router } from '@angular/router';
 
 import { AssessmentHomeComponent } from './assessment-home.component';
@@ -70,6 +71,7 @@ export class AssessmentContainerComponent implements OnDestroy {
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly localStorageService = inject(LocalStorageService);
   private readonly attemptsApiService = inject(AttemptsApiService);
+  private readonly activeChildService = inject(ActiveChildService);
   private readonly router = inject(Router);
 
   view: AssessmentView = 'HOME';
@@ -96,8 +98,14 @@ export class AssessmentContainerComponent implements OnDestroy {
   }
 
   onStartAssessment(): void {
-    this.stopAssessmentCountdown();
+    const activeChild = this.activeChildService.activeChild();
 
+    if (!activeChild) {
+      void this.router.navigate(['/parent-tools']);
+      return;
+    }
+
+    this.stopAssessmentCountdown();
     this.activeAssessmentSession = null;
     this.completedAssessmentAttempt = null;
     this.assessmentCompletionLocked = false;
@@ -547,10 +555,17 @@ export class AssessmentContainerComponent implements OnDestroy {
   }
 
   private saveAssessmentAttemptToBackend(attempt: AssessmentAttempt): void {
+    const activeChild = this.activeChildService.activeChild();
+
+    if (!activeChild) {
+      return;
+    }
+
     this.attemptsApiService
       .saveAttempt({
         clientAttemptId: attempt.id,
         attemptType: 'ASSESSMENT',
+        childId: activeChild._id,
         assessmentId: attempt.assessmentId,
         title: 'Abacus Olympiad Test',
         startedAt: attempt.startedAt,
