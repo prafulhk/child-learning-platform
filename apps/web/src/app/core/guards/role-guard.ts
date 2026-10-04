@@ -3,7 +3,7 @@ import { CanActivateFn, Router } from '@angular/router';
 
 import { AuthService } from '../services/auth.service';
 
-type UserRole = 'PARENT' | 'TEACHER';
+type UserRole = 'PARENT' | 'TEACHER' | 'ADMIN';
 
 export const roleGuard = (allowedRoles: UserRole[]): CanActivateFn => {
   return () => {
