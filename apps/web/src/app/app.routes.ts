@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { adminSubjectRoutes } from './features/admin-subjects/admin-subjects.routes';
 import { assessmentRoutes } from './features/assessment/assessment.routes';
 import { authRoutes } from './features/auth/auth.routes';
 import { dashboardRoutes } from './features/dashboard/dashboard.routes';
@@ -21,6 +22,7 @@ export const routes: Routes = [
   ...learningRoutes,
   ...lessonPlanningRoutes,
   ...assessmentRoutes,
+  ...adminSubjectRoutes,
   ...parentToolsRoutes,
   ...profileRoutes,
   ...progressRoutes,
