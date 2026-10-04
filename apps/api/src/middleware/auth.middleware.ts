@@ -2,8 +2,8 @@ import type { RequestHandler } from "express";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 
 import { config } from "../config/index.js";
-import { sendError } from "../shared/http/api-response.js";
 import type { UserRole } from "../modules/auth/models/user.model.js";
+import { sendError } from "../shared/http/api-response.js";
 
 export interface AuthTokenPayload extends JwtPayload {
   sub: string;
@@ -14,6 +14,8 @@ export interface AuthContext {
   userId: string;
   role: UserRole;
 }
+
+const validRoles: UserRole[] = ["PARENT", "TEACHER", "ADMIN"];
 
 export const authMiddleware: RequestHandler = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -34,7 +36,11 @@ export const authMiddleware: RequestHandler = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, config.JWT_SECRET) as AuthTokenPayload;
 
-    if (!decoded.sub || !decoded.role) {
+    if (
+      !decoded.sub ||
+      !decoded.role ||
+      !validRoles.includes(decoded.role)
+    ) {
       sendError({
         res,
         statusCode: 401,
