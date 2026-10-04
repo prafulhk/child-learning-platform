@@ -6,6 +6,7 @@ import { learningJournalRoutes } from './features/learning-journal/learning-jour
 import { learningRoutes } from './features/learning/learning.routes';
 import { lessonPlanningRoutes } from './features/lesson-plans/lesson-planning.routes';
 import { parentToolsRoutes } from './features/parent-tools/parent-tools.routes';
+import { profileRoutes } from './features/profile/profile.routes';
 import { progressRoutes } from './features/progress/progress.routes';
 import { rewardsRoutes } from './features/rewards/rewards.routes';
 
@@ -21,6 +22,7 @@ export const routes: Routes = [
   ...lessonPlanningRoutes,
   ...assessmentRoutes,
   ...parentToolsRoutes,
+  ...profileRoutes,
   ...progressRoutes,
   ...rewardsRoutes,
   ...learningJournalRoutes,
