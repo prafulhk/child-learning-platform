@@ -1,0 +1,149 @@
+<div class="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-6xl space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Admin</p>
+        <h1 class="mt-1 text-3xl font-bold text-slate-900">Manage Subjects</h1>
+        <p class="mt-2 text-sm text-slate-600">
+          Create, edit and control the subjects available to learning flows.
+        </p>
+      </div>
+      <button
+        type="button"
+        (click)="startCreate()"
+        class="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700"
+      >
+        + Add Subject
+      </button>
+    </div>
+
+    <section class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+      <div class="mb-5 flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-semibold text-slate-900">
+            {{ editingSubjectId() ? 'Edit subject' : 'Create subject' }}
+          </h2>
+          <p class="text-sm text-slate-500">Subject code must be unique.</p>
+        </div>
+        @if (editingSubjectId()) {
+          <button type="button" (click)="cancelEdit()" class="text-sm font-medium text-slate-500 hover:text-slate-900">
+            Cancel
+          </button>
+        }
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <label class="block">
+          <span class="text-sm font-medium text-slate-700">Name</span>
+          <input
+            [value]="name()"
+            (input)="name.set($any($event.target).value)"
+            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+            placeholder="Mathematics"
+          />
+        </label>
+
+        <label class="block">
+          <span class="text-sm font-medium text-slate-700">Code</span>
+          <input
+            [value]="code()"
+            (input)="code.set($any($event.target).value)"
+            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 uppercase outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+            placeholder="MATH"
+          />
+        </label>
+
+        <label class="block md:col-span-2">
+          <span class="text-sm font-medium text-slate-700">Description</span>
+          <textarea
+            [value]="description()"
+            (input)="description.set($any($event.target).value)"
+            rows="3"
+            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+            placeholder="Optional description"
+          ></textarea>
+        </label>
+
+        <label class="block">
+          <span class="text-sm font-medium text-slate-700">Sort order</span>
+          <input
+            type="number"
+            min="0"
+            [value]="sortOrder()"
+            (input)="sortOrder.set(+$any($event.target).value)"
+            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+          />
+        </label>
+      </div>
+
+      <div class="mt-5 flex justify-end">
+        <button
+          type="button"
+          [disabled]="isSaving()"
+          (click)="save()"
+          class="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {{ isSaving() ? 'Saving...' : editingSubjectId() ? 'Save Changes' : 'Create Subject' }}
+        </button>
+      </div>
+    </section>
+
+    <section class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+      <div class="border-b border-slate-200 px-5 py-4">
+        <h2 class="text-lg font-semibold text-slate-900">Subjects</h2>
+      </div>
+
+      @if (isLoading()) {
+        <div class="p-8 text-center text-sm text-slate-500">Loading subjects...</div>
+      } @else if (subjects().length === 0) {
+        <div class="p-8 text-center text-sm text-slate-500">No subjects found.</div>
+      } @else {
+        <div class="divide-y divide-slate-100">
+          @for (subject of subjects(); track trackById($index, subject)) {
+            <div class="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <h3 class="font-semibold text-slate-900">{{ subject.name }}</h3>
+                  <span class="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">{{ subject.code }}</span>
+                  <span
+                    class="rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                    [class.bg-emerald-100]="subject.status === 'ACTIVE'"
+                    [class.text-emerald-700]="subject.status === 'ACTIVE'"
+                    [class.bg-slate-200]="subject.status === 'INACTIVE'"
+                    [class.text-slate-600]="subject.status === 'INACTIVE'"
+                  >
+                    {{ subject.status }}
+                  </span>
+                </div>
+                @if (subject.description) {
+                  <p class="mt-1 text-sm text-slate-500">{{ subject.description }}</p>
+                }
+              </div>
+
+              <div class="flex shrink-0 gap-2">
+                <button
+                  type="button"
+                  (click)="startEdit(subject)"
+                  class="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  (click)="toggleStatus(subject)"
+                  class="rounded-lg border px-3 py-2 text-sm font-medium"
+                  [class.border-red-200]="subject.status === 'ACTIVE'"
+                  [class.text-red-600]="subject.status === 'ACTIVE'"
+                  [class.border-emerald-200]="subject.status === 'INACTIVE'"
+                  [class.text-emerald-700]="subject.status === 'INACTIVE'"
+                >
+                  {{ subject.status === 'ACTIVE' ? 'Deactivate' : 'Activate' }}
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  </div>
+</div>
