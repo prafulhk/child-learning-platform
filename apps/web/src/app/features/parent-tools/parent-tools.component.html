@@ -37,26 +37,102 @@
         @if (children().length > 0) {
         <div class="mt-4 space-y-3">
             @for (child of children(); track child._id) {
-            <button type="button"
-                class="flex w-full items-center gap-3 rounded-xl border border-slate-200 p-4 text-left transition hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                (click)="onSelectChild(child)">
-                <div
-                    class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-lg font-bold text-blue-700">
-                    {{ child.name.charAt(0).toUpperCase() }}
+            @if (editingChildId() === child._id) {
+            <div class="rounded-xl border border-blue-200 bg-blue-50/40 p-4">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-100 text-lg font-bold text-blue-700">
+                        {{ child.name.charAt(0).toUpperCase() }}
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-slate-900">Edit Child</h3>
+                        <p class="text-sm text-slate-500">Update the child's profile information.</p>
+                    </div>
                 </div>
 
-                <div class="min-w-0 flex-1">
-                    <h3 class="font-semibold text-slate-900">
-                        {{ child.name }}
-                    </h3>
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label [for]="'editChildName-' + child._id" class="mb-1 block text-sm font-medium text-slate-700">
+                            Child Name
+                        </label>
+                        <input [id]="'editChildName-' + child._id" type="text" [value]="editChildName()"
+                            (input)="onEditChildNameChange($any($event.target).value)" maxlength="100" required
+                            class="min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
+                    </div>
 
-                    @if (child.grade) {
-                    <p class="text-sm text-slate-500">
-                        Grade: {{ child.grade }}
-                    </p>
-                    }
+                    <div>
+                        <label [for]="'editChildDateOfBirth-' + child._id" class="mb-1 block text-sm font-medium text-slate-700">
+                            Date of Birth
+                        </label>
+                        <input [id]="'editChildDateOfBirth-' + child._id" type="date" [value]="editChildDateOfBirth()"
+                            (input)="onEditChildDateOfBirthChange($any($event.target).value)"
+                            class="min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label [for]="'editChildGrade-' + child._id" class="mb-1 block text-sm font-medium text-slate-700">
+                            Grade
+                        </label>
+                        <input [id]="'editChildGrade-' + child._id" type="text" placeholder="Example: LKG, UKG, Grade 1"
+                            [value]="editChildGrade()" (input)="onEditChildGradeChange($any($event.target).value)" maxlength="50"
+                            class="min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
+                    </div>
                 </div>
-            </button>
+
+                <div class="mt-4 flex gap-3">
+                    <button type="button" [disabled]="isUpdatingChild()"
+                        class="min-h-11 flex-1 rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                        (click)="onUpdateChild(child)">
+                        @if (isUpdatingChild()) {
+                        Saving...
+                        } @else {
+                        Save Changes
+                        }
+                    </button>
+
+                    <button type="button" [disabled]="isUpdatingChild()"
+                        class="min-h-11 rounded-xl border border-slate-300 bg-white px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        (click)="onCancelEditChild()">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+            } @else {
+            <div class="flex items-center gap-3 rounded-xl border border-slate-200 p-4">
+                <button type="button"
+                    class="flex min-w-0 flex-1 items-center gap-3 text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    (click)="onSelectChild(child)">
+                    <div
+                        class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-100 text-lg font-bold text-blue-700">
+                        {{ child.name.charAt(0).toUpperCase() }}
+                    </div>
+
+                    <div class="min-w-0 flex-1">
+                        <h3 class="font-semibold text-slate-900">
+                            {{ child.name }}
+                        </h3>
+
+                        @if (child.grade) {
+                        <p class="text-sm text-slate-500">
+                            Grade: {{ child.grade }}
+                        </p>
+                        }
+
+                        @if (child.dateOfBirth) {
+                        <p class="text-xs text-slate-400">
+                            DOB: {{ child.dateOfBirth | date: 'dd MMM yyyy' }}
+                        </p>
+                        }
+                    </div>
+                </button>
+
+                <button type="button"
+                    class="min-h-10 shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-blue-400 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    (click)="onStartEditChild(child)">
+                    Edit
+                </button>
+            </div>
+            }
             }
         </div>
         } @else {
