@@ -23,8 +23,8 @@ function createToken(userId: string): string {
 
 describe("Child Update API", () => {
   it("returns 401 when authentication is missing", async () => {
-    const response = await request(app).patch(
-      `/api/children/${new Types.ObjectId().toString()}`,
+    const response = await request(app).post(
+      `/api/children/${new Types.ObjectId().toString()}/update`,
     );
 
     expect(response.status).toBe(401);
@@ -47,7 +47,7 @@ describe("Child Update API", () => {
     });
 
     const response = await request(app)
-      .patch(`/api/children/${child._id.toString()}`)
+      .post(`/api/children/${child._id.toString()}/update`)
       .set("Authorization", `Bearer ${createToken(user._id.toString())}`)
       .send({
         name: "New Name",
@@ -87,7 +87,7 @@ describe("Child Update API", () => {
     });
 
     const response = await request(app)
-      .patch(`/api/children/${child._id.toString()}`)
+      .post(`/api/children/${child._id.toString()}/update`)
       .set("Authorization", `Bearer ${createToken(otherParent._id.toString())}`)
       .send({ name: "Hacked Name" });
 
@@ -117,7 +117,7 @@ describe("Child Update API", () => {
     });
 
     const response = await request(app)
-      .patch(`/api/children/${childToUpdate._id.toString()}`)
+      .post(`/api/children/${childToUpdate._id.toString()}/update`)
       .set("Authorization", `Bearer ${createToken(user._id.toString())}`)
       .send({ name: "Aarav" });
 
@@ -139,7 +139,7 @@ describe("Child Update API", () => {
     });
 
     const response = await request(app)
-      .patch(`/api/children/${child._id.toString()}`)
+      .post(`/api/children/${child._id.toString()}/update`)
       .set("Authorization", `Bearer ${createToken(user._id.toString())}`)
       .send({});
 
