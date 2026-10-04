@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 
-export type UserRole = "PARENT" | "TEACHER";
+export type UserRole = "PARENT" | "TEACHER" | "ADMIN";
 
 export interface User {
   name: string;
@@ -37,7 +37,7 @@ const userSchema = new Schema<User>(
 
     role: {
       type: String,
-      enum: ["PARENT", "TEACHER"],
+      enum: ["PARENT", "TEACHER", "ADMIN"],
       default: "PARENT",
       required: true,
     },
