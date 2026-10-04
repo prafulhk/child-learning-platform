@@ -15,6 +15,11 @@ authRouter.post("/register", registerController);
 authRouter.post("/register/teacher", registerTeacherController);
 authRouter.post("/login", loginController);
 authRouter.get("/me", authMiddleware, meController);
+
+// Keep profile updates on the same POST-based API pattern used by the working child APIs.
+authRouter.post("/me/update", authMiddleware, updateMeController);
+
+// Retain the REST-style PATCH endpoint for API compatibility.
 authRouter.patch("/me", authMiddleware, updateMeController);
 
 export { authRouter };
