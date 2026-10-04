@@ -9,7 +9,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "admin:promote": "tsx src/scripts/promote-admin.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
