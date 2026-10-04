@@ -1,3 +1,5 @@
+import { Types } from "mongoose";
+
 import { ChildModel } from "./models/child.model.js";
 import type { CreateChildInput } from "./schemas/create-child.schema.js";
 import type { UpdateChildInput } from "./schemas/update-child.schema.js";
@@ -50,6 +52,14 @@ export async function updateChild(
   childId: string,
   input: UpdateChildInput,
 ) {
+  if (!Types.ObjectId.isValid(childId)) {
+    throw new AppError({
+      statusCode: 404,
+      code: "CHILD_NOT_FOUND",
+      message: "Child not found.",
+    });
+  }
+
   const child = await ChildModel.findOne({ _id: childId, parentId });
 
   if (!child) {
