@@ -16,6 +16,7 @@ import { AnswerOptionComponent } from '../../shared/components/answer-option/ans
 import { QuestionDisplayComponent } from '../../shared/components/question-display/question-display.component';
 import { PracticeResultComponent } from './practice-result.component';
 import { AttemptsApiService } from '../../core/services/attempts-api.service';
+import { ActiveChildService } from '../../core/services/active-child.service';
 
 @Component({
   selector: 'app-practice-session',
@@ -38,9 +39,17 @@ export class PracticeSessionComponent implements OnInit, OnDestroy {
     private readonly practiceService: PracticeService,
     private readonly changeDetectorRef: ChangeDetectorRef,
     private readonly attemptsApiService: AttemptsApiService,
+    private readonly activeChildService: ActiveChildService,
   ) {}
 
   ngOnInit(): void {
+    const activeChild = this.activeChildService.activeChild();
+
+    if (!activeChild) {
+      this.backToHome.emit();
+      return;
+    }
+
     const existingSession = this.practiceService.getSession();
 
     if (existingSession) {
@@ -199,23 +208,28 @@ export class PracticeSessionComponent implements OnInit, OnDestroy {
 
     const attempt = this.practiceService.completePractice();
 
-    // Keep the completed attempt available for the result screen.
     this.completedAttempt = attempt;
     this.completed = true;
     this.session = null;
     this.remainingSeconds = 0;
 
-    // Save the completed attempt to MongoDB.
     this.saveAttemptToBackend(attempt);
 
     this.changeDetectorRef.markForCheck();
   }
 
   private saveAttemptToBackend(attempt: PracticeAttempt): void {
+    const activeChild = this.activeChildService.activeChild();
+
+    if (!activeChild) {
+      return;
+    }
+
     this.attemptsApiService
       .saveAttempt({
         clientAttemptId: attempt.id,
         attemptType: 'PRACTICE',
+        childId: activeChild._id,
         topicId: attempt.topicId,
         startedAt: attempt.startedAt,
         completedAt: attempt.completedAt,
@@ -229,13 +243,19 @@ export class PracticeSessionComponent implements OnInit, OnDestroy {
           console.log('Practice attempt saved successfully.');
         },
         error: (error) => {
-          // The result screen still works if the API is unavailable.
           console.error('Unable to save practice attempt:', error);
         },
       });
   }
 
   restartPractice(): void {
+    const activeChild = this.activeChildService.activeChild();
+
+    if (!activeChild) {
+      this.backToHome.emit();
+      return;
+    }
+
     this.stopCountdown();
     this.completed = false;
     this.completedAttempt = null;
