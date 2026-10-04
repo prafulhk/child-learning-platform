@@ -5,6 +5,7 @@ import {
   meController,
   registerController,
   registerTeacherController,
+  updateMeController,
 } from "./auth.controller.js";
 import { authMiddleware } from "../../middleware/auth.middleware.js";
 
@@ -14,5 +15,6 @@ authRouter.post("/register", registerController);
 authRouter.post("/register/teacher", registerTeacherController);
 authRouter.post("/login", loginController);
 authRouter.get("/me", authMiddleware, meController);
+authRouter.patch("/me", authMiddleware, updateMeController);
 
 export { authRouter };
