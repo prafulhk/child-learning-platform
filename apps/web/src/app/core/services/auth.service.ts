@@ -16,6 +16,10 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface UpdateProfileRequest {
+  name: string;
+}
+
 export interface AuthUser {
   id: string;
   name: string;
@@ -66,6 +70,17 @@ export class AuthService {
         sessionStorage.setItem('auth_token', token);
         sessionStorage.setItem('auth_user', JSON.stringify(user));
         this.currentUser.set(user);
+      }),
+    );
+  }
+
+  updateProfile(request: UpdateProfileRequest): Observable<MeResponse> {
+    return this.http.patch<MeResponse>(`${this.apiUrl}/me`, request).pipe(
+      tap((response) => {
+        const user = response.user ?? response.data.user;
+
+        this.currentUser.set(user);
+        sessionStorage.setItem('auth_user', JSON.stringify(user));
       }),
     );
   }
