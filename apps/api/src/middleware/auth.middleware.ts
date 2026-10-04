@@ -3,10 +3,16 @@ import jwt, { type JwtPayload } from "jsonwebtoken";
 
 import { config } from "../config/index.js";
 import { sendError } from "../shared/http/api-response.js";
+import type { UserRole } from "../modules/auth/models/user.model.js";
 
-interface AuthTokenPayload extends JwtPayload {
+export interface AuthTokenPayload extends JwtPayload {
   sub: string;
-  role: "PARENT" | "TEACHER";
+  role: UserRole;
+}
+
+export interface AuthContext {
+  userId: string;
+  role: UserRole;
 }
 
 export const authMiddleware: RequestHandler = (req, res, next) => {
@@ -28,10 +34,21 @@ export const authMiddleware: RequestHandler = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, config.JWT_SECRET) as AuthTokenPayload;
 
+    if (!decoded.sub || !decoded.role) {
+      sendError({
+        res,
+        statusCode: 401,
+        message: "Invalid authentication token",
+        code: "INVALID_AUTH_TOKEN",
+      });
+
+      return;
+    }
+
     res.locals.auth = {
       userId: decoded.sub,
       role: decoded.role,
-    };
+    } satisfies AuthContext;
 
     next();
   } catch {
