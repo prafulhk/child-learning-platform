@@ -75,7 +75,7 @@ export class AuthService {
   }
 
   updateProfile(request: UpdateProfileRequest): Observable<MeResponse> {
-    return this.http.patch<MeResponse>(`${this.apiUrl}/me`, request).pipe(
+    return this.http.post<MeResponse>(`${this.apiUrl}/me/update`, request).pipe(
       tap((response) => {
         const user = response.user ?? response.data.user;
 
