@@ -59,6 +59,6 @@ export class ChildService {
   }
 
   updateChild(childId: string, input: UpdateChildRequest): Observable<UpdateChildResponse> {
-    return this.http.patch<UpdateChildResponse>(`${this.apiUrl}/${childId}`, input);
+    return this.http.post<UpdateChildResponse>(`${this.apiUrl}/${childId}/update`, input);
   }
 }
