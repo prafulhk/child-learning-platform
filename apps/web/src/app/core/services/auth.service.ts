@@ -20,11 +20,13 @@ export interface UpdateProfileRequest {
   name: string;
 }
 
+export type UserRole = 'PARENT' | 'TEACHER' | 'ADMIN';
+
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
-  role: string;
+  role: UserRole;
   createdAt: string;
 }
 
