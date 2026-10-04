@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { ActiveChildService } from '../../../core/services/active-child.service';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -11,14 +12,22 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class DashboardHome {
   private readonly authService = inject(AuthService);
+  private readonly activeChildService = inject(ActiveChildService);
   private readonly router = inject(Router);
+
   readonly currentUser = this.authService.currentUser;
+  readonly activeChild = this.activeChildService.activeChild;
 
   onOpenLogin(): void {
     void this.router.navigate(['/login']);
   }
 
   onStartPractice(): void {
+    if (!this.activeChild()) {
+      void this.router.navigate(['/parent-tools']);
+      return;
+    }
+
     void this.router.navigate(['/learning/practice']);
   }
 
@@ -31,6 +40,11 @@ export class DashboardHome {
   }
 
   onOpenAssessment(): void {
+    if (!this.activeChild()) {
+      void this.router.navigate(['/parent-tools']);
+      return;
+    }
+
     void this.router.navigate(['/assessment']);
   }
 
