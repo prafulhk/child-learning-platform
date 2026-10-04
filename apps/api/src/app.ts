@@ -15,14 +15,15 @@ import {
 
 const app: Express = express();
 
-app.use(
-  cors({
-    origin: "http://localhost:4200",
-    methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    optionsSuccessStatus: 204,
-  }),
-);
+const corsOptions = {
+  origin: true,
+  methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 app.use(helmet());
 app.use(express.json());
 app.use((req, _res, next) => {
