@@ -1,9 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { ActiveChildService } from '../../core/services/active-child.service';
 import { Child, ChildService } from '../../core/services/child.service';
 import { ToastService } from '../../core/services/toast';
-import { ActiveChildService } from '../../core/services/active-child.service';
 
 @Component({
   selector: 'app-parent-tools',
@@ -22,6 +22,12 @@ export class ParentToolsComponent implements OnInit {
   readonly childName = signal('');
   readonly childGrade = signal('');
   readonly isCreatingChild = signal(false);
+
+  readonly editingChildId = signal<string | null>(null);
+  readonly editChildName = signal('');
+  readonly editChildDateOfBirth = signal('');
+  readonly editChildGrade = signal('');
+  readonly isUpdatingChild = signal(false);
 
   ngOnInit(): void {
     this.loadChildren();
@@ -51,6 +57,74 @@ export class ParentToolsComponent implements OnInit {
 
   onChildGradeChange(value: string): void {
     this.childGrade.set(value);
+  }
+
+  onEditChildNameChange(value: string): void {
+    this.editChildName.set(value);
+  }
+
+  onEditChildDateOfBirthChange(value: string): void {
+    this.editChildDateOfBirth.set(value);
+  }
+
+  onEditChildGradeChange(value: string): void {
+    this.editChildGrade.set(value);
+  }
+
+  onStartEditChild(child: Child): void {
+    this.editingChildId.set(child._id);
+    this.editChildName.set(child.name);
+    this.editChildDateOfBirth.set(child.dateOfBirth ? child.dateOfBirth.slice(0, 10) : '');
+    this.editChildGrade.set(child.grade ?? '');
+  }
+
+  onCancelEditChild(): void {
+    this.editingChildId.set(null);
+    this.editChildName.set('');
+    this.editChildDateOfBirth.set('');
+    this.editChildGrade.set('');
+    this.isUpdatingChild.set(false);
+  }
+
+  onUpdateChild(child: Child): void {
+    const name = this.editChildName().trim();
+    const grade = this.editChildGrade().trim();
+    const dateOfBirth = this.editChildDateOfBirth();
+
+    if (name.length < 2) {
+      this.toastService.error('Child name must be at least 2 characters.');
+      return;
+    }
+
+    this.isUpdatingChild.set(true);
+
+    this.childService
+      .updateChild(child._id, {
+        name,
+        ...(dateOfBirth ? { dateOfBirth } : {}),
+        ...(grade ? { grade } : {}),
+      })
+      .subscribe({
+        next: (response) => {
+          this.children.update((currentChildren) =>
+            currentChildren.map((currentChild) =>
+              currentChild._id === response.child._id ? response.child : currentChild,
+            ),
+          );
+
+          const activeChild = this.activeChildService.activeChild();
+          if (activeChild?._id === response.child._id) {
+            this.activeChildService.setActiveChild(response.child);
+          }
+
+          this.toastService.success(`${response.child.name} updated successfully!`);
+          this.onCancelEditChild();
+        },
+        error: (error) => {
+          this.toastService.error(error?.error?.message ?? 'Unable to update child profile.');
+          this.isUpdatingChild.set(false);
+        },
+      });
   }
 
   onOpenQuestionBank(): void {
