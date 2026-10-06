@@ -6,7 +6,7 @@ import { roleGuard } from '../../core/guards/role-guard';
 export const parentToolsRoutes: Routes = [
   {
     path: 'parent-tools',
-    canActivate: [authGuard, roleGuard(['PARENT'])],
+    canActivate: [authGuard, roleGuard(['PARENT', 'ADMIN'])],
     children: [
       {
         path: '',
